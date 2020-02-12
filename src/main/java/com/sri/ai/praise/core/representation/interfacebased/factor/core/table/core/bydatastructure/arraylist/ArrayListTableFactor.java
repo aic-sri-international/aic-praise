@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
 import static com.sri.ai.util.Util.allEqual;
 import static com.sri.ai.util.Util.arrayListFilledWith;
@@ -9,6 +9,7 @@ import static com.sri.ai.util.Util.sum;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -17,10 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.common.primitives.Ints;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
@@ -65,9 +70,12 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	
 	public ArrayListTableFactor(String factorName, Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
 		super(factorName, variables);
-	
 		this.parameters = parameters;
 		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
+	}
+	
+	public ArrayListTableFactor(String factorName, Collection<? extends TableVariable> variables, double[] parameters) {
+		this(factorName, variables, new ArrayList<Double>(Arrays.asList(ArrayUtils.toObject(parameters))));
 	}
 	
 	public ArrayListTableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
@@ -301,6 +309,15 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// GET ENTRIES //////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Override
+	public ArrayList<Double> getEntries() {
+		return this.parameters;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INDEXED ACCESS - SETTERS /////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -355,8 +372,4 @@ public class ArrayListTableFactor extends AbstractTableFactor {
 		this.parameters = arrayListFilledWith(defaultValue, parameters.size());
 	}
 	
-	public ArrayList<Double> getEntries() {
-		return this.parameters;
-	}
-
 }

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
 import com.sri.ai.util.Util;
 
 /**

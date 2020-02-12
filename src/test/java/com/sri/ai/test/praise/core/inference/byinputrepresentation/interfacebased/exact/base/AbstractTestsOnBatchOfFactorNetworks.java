@@ -9,7 +9,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.var
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
@@ -141,8 +141,8 @@ public abstract class AbstractTestsOnBatchOfFactorNetworks {
 			var name2 = getAlgorithms().get(i + 1).first;
 			var resultAndTime1 = resultsAndTimes.get(i);
 			var resultAndTime2 = resultsAndTimes.get(i + 1);
-			var array1 = ((ArrayListTableFactor) resultAndTime1.first).getEntries();
-			var array2 = ((ArrayListTableFactor) resultAndTime2.first).getEntries();
+			var array1 = ((TableFactor) resultAndTime1.first).getEntries();
+			var array2 = ((TableFactor) resultAndTime2.first).getEntries();
 			println("Comparing " + name1 + " and " + name2 + "...");
 			Util.compareNumbersComponentWise(array1, array2, 0.001);
 		}

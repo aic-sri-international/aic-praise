@@ -1,7 +1,8 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -17,6 +18,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty.EmptyTableFactor;
 import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
@@ -40,6 +42,13 @@ public abstract class AbstractTableFactor implements TableFactor {
 	@Override
 	public abstract TableFactor invert();
 
+	/**
+	 * Extending classes must implement this method to sum out variables; <code>variablesNotToSumOut</code> are guaranteed to be in the same order as
+	 * in the original factor.
+	 * @param variablesToSumOut
+	 * @param variablesNotToSumOut
+	 * @return
+	 */
 	protected abstract TableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut);
 
 	protected abstract TableFactor normalizeBy(Double normalizationConstant);
@@ -188,7 +197,11 @@ public abstract class AbstractTableFactor implements TableFactor {
 	
 	@Override
 	public Factor add(Factor another) {
+		
+		myAssert(getVariables().equals(another.getVariables()), () -> "Added factors must agree on variables, but got " + getVariables() + " and " + another.getVariables());
+		
 		Factor result;
+		
 		if (another instanceof ConstantFactor) {
 			result = another.add(this);
 		}		
@@ -241,15 +254,19 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @return reference to normalized self
 	 */
 	@Override
-	public AbstractTableFactor normalize() {
-		
-		// TODO: big problem here, operation is not supposed to be in-place!
-		
+	public TableFactor normalize() {
 		Double normalizationConstant = computeNormalizationConstant();
-		if (normalizationConstant != 0.0 && normalizationConstant != 1.0) {
-			normalizeBy(normalizationConstant);
+		if (normalizationConstant != 0.0) {
+			if (normalizationConstant != 1.0) {
+				return normalizeBy(normalizationConstant);
+			}
+			else {
+				return this;
+			}
 		}
-		return this;
+		else {
+			throw new Error("Normalization requested but normalization constant is 0.");
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -263,20 +280,19 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @return new factor with given variables summed out
 	 */
 	@Override
-	public TableFactor sumOut(List<? extends Variable> variablesToSumOutList) {
-		
-		//TODO: Error check for if variablesToSumOut is of type List<? extends TableVariable>
-		//TODO: Error check for if a variable listed to sum out exists in the factor
+	public TableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+
+		myAssert(getVariables().containsAll(variablesToSumOut), () -> "Not all variables to be summed out occur in factor: " + variablesToSumOut + " not all in " + getVariables());
 		
 		// TODO: to avoid this ugly cast we would have to make TableFactor generic with the
 		// type of variable V it applies to, so the parameter of this method would be
 		// List<? extends V>.
 		@SuppressWarnings("unchecked")
-		LinkedHashSet<TableVariable> variablesToSumOut = new LinkedHashSet<>((List<TableVariable>) variablesToSumOutList);
+		LinkedHashSet<TableVariable> variablesToSumOutSet = new LinkedHashSet<>((List<TableVariable>) variablesToSumOut);
 		
-		var variablesNotToSumOut = setDifference(variables, variablesToSumOut, arrayList());
+		var variablesNotToSumOut = setDifference(variables, variablesToSumOutSet, arrayList());
 		
-		TableFactor result = sumOutEverythingExcept(variablesToSumOutList, variablesNotToSumOut);
+		TableFactor result = sumOutEverythingExcept(variablesToSumOut, variablesNotToSumOut);
 		
 		return result;
 	}
@@ -303,8 +319,6 @@ public abstract class AbstractTableFactor implements TableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private int[] variableValuesInFactorVariableOrder(Map<? extends Variable, ?> assignment) {
-		//TODO: error checking
-		//TODO: there is no mechanism for handling partial variable assignments
 		int numVariables = variables.size();
 		int[] indexOfVariablesValues = new int[numVariables];
 		for(int i = 0; i < numVariables; ++i) {

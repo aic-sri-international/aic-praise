@@ -4,7 +4,7 @@ import static com.sri.ai.util.Util.list;
 
 import java.util.List;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
 import com.sri.ai.praise.learning.parameterlearning.BayesianModel;
 
 public class TableBayesianModel extends TableFactorNetwork implements BayesianModel {

@@ -2,7 +2,8 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 public class SingleTestUAIFile extends ConfigurationForTestsOnUAITableFactorNetworks {
 
-	public SingleTestUAIFile() {
+	public SingleTestUAIFile(String fileResourcePath) {
+		uaiFileResourcePath = fileResourcePath;
 		numberOfTests = 1;
 	}
 }

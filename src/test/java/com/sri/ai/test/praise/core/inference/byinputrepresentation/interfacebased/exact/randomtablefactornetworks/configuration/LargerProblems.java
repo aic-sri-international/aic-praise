@@ -1,8 +1,11 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration;
 
+import java.util.Random;
+
 public class LargerProblems extends AbstractConfigurationForTestsOnRandomTableFactorNetworks {
 
 	public LargerProblems() {
+		random = new Random(0); // fixed seed since we usually want to compare performance between runs
 		numberOfTests = 10;
 		minimumNumberOfVariables = 20;
 		maximumNumberOfVariables = 30;

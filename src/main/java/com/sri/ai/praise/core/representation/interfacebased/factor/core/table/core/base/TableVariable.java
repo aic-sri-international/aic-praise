@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base;
 
 import java.util.ArrayList;
 import java.util.List;

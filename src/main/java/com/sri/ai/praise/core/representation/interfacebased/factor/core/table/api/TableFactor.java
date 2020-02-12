@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 
 public interface TableFactor extends Factor {
 
@@ -19,6 +19,8 @@ public interface TableFactor extends Factor {
 
 	TableFactor slice(List<TableVariable> variables, List<Integer> values);
 
+	ArrayList<Double> getEntries();
+	
 	Double getEntryFor(Map<? extends Variable, ?> assignment);
 
 	Double getEntryFor(ArrayList<Integer> values);

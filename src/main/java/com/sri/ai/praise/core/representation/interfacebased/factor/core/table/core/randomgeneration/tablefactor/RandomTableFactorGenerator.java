@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor;
 
 import static com.sri.ai.util.Util.mapIntegersIntoArrayList;
 import static com.sri.ai.util.Util.product;
@@ -7,19 +7,20 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.google.common.base.Function;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.util.base.BinaryFunction;
 
 public class RandomTableFactorGenerator {
 	
-	public static ArrayListTableFactor makeRandomTableFactor(
+	public static <TableFactor> TableFactor makeRandomTableFactor(
 			ConfigurationForRandomTableFactorGeneration specs, 
-			Function<Integer, String> fromVariableIndexToName, 
+			Function<Integer, String> fromVariableIndexToName,
+			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker,
 			Random random) {
 		
 		ArrayList<TableVariable> variables = makeVariables(specs.cardinalities, fromVariableIndexToName);
 		ArrayList<Double> entries = makeUniformlyDistributedRandomEntries(specs, random);
-		ArrayListTableFactor tableFactor = new ArrayListTableFactor(variables, entries);
+		TableFactor tableFactor = tableFactorMaker.apply(variables, entries);
 		return tableFactor;
 	}
 

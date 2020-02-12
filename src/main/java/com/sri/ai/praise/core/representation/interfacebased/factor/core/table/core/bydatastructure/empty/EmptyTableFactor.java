@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.Enclosing;
 
 /**
@@ -180,6 +182,16 @@ public class EmptyTableFactor extends AbstractTableFactor {
 		return null;
 	}
 	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// GET ENTRIES //////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Override
+	public ArrayList<Double> getEntries() {
+		indicateLackOfData((new Enclosing(){}).methodName());
+		return null;
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INDEXED ACCESS - SETTERS /////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

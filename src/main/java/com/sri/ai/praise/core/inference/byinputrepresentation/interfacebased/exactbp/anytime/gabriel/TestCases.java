@@ -38,9 +38,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.UAIModelToExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 

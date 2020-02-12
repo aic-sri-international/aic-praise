@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor;
 
 import java.util.ArrayList;
 

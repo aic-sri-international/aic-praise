@@ -5,4 +5,10 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 
 public class ConfigurationForTestsOnUAITableFactorNetworks extends AbstractConfigurationForTestsOnBatchOfFactorNetworks implements ConfigurationForTestsOnBatchOfFactorNetworks {
 
+	String uaiFileResourcePath;
+	
+	public String getUAIFileResourcePath() {
+		return uaiFileResourcePath;
+	}
+
 }

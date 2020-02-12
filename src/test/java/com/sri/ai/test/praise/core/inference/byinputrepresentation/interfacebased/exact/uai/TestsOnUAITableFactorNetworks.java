@@ -20,8 +20,12 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.U
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.ndarray.NDArrayTableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.AbstractTestsOnBatchOfFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.uai.configuration.ConfigurationForTestsOnUAITableFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.uai.configuration.SingleTestUAIFile;
 import com.sri.ai.util.base.BinaryFunction;
@@ -30,17 +34,20 @@ import com.sri.ai.util.base.Pair;
 
 class TestsOnUAITableFactorNetworks extends AbstractTestsOnBatchOfFactorNetworks {
 
+	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> 
+	tableFactorMaker = 
+			(v,e) -> new NDArrayTableFactor(v,e);
+//			(v,e) -> new ArrayListTableFactor(v,e);
+	
 	///////////////// USER INTERFACE
 	
-	private static final String UAI_FILE_RESOURCE_PATH = "/UAITests/grid10x10.f10.uai";
-
 	@Test
 	void test() {
-		new TestsOnUAITableFactorNetworks().run(new SingleTestUAIFile());
+		new TestsOnUAITableFactorNetworks().run(new SingleTestUAIFile("/UAITests/grid10x10.f10.uai"));
 	}
 
 	public static void main(String[] args) {
-		new TestsOnUAITableFactorNetworks().run(new SingleTestUAIFile());
+		new TestsOnUAITableFactorNetworks().run(new SingleTestUAIFile("/UAITests/grid10x10.f10.uai"));
 	}
 
 	////////////////// ABSTRACT METHODS IMPLEMENTATION
@@ -48,16 +55,18 @@ class TestsOnUAITableFactorNetworks extends AbstractTestsOnBatchOfFactorNetworks
 	@Override
 	protected ArrayList<Pair<String, BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms() {
 		return arrayList( 
-				pair("VE_MI", new VariableEliminationSolver(new MinFillEliminationOrdering())),
-				// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
-				pair("  EBP", new ExactBPSolver())
+				pair("VE_MI_AL", new ArrayListSolver(new VariableEliminationSolver(new MinFillEliminationOrdering()))),
+				pair("VE_MI_ND", new VariableEliminationSolver(new MinFillEliminationOrdering())),
+				//pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
+				pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver())),
+				pair("  EBP_ND", new ExactBPSolver())
 		);
 	}
 
 	@Override
 	protected NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator() {
 		return () -> {
-			String uaiFileResourcePath = UAI_FILE_RESOURCE_PATH;
+			String uaiFileResourcePath = getConfiguration().getUAIFileResourcePath();
 			TableFactorNetwork factorNetwork = readTableFactorNetwork(uaiFileResourcePath);
 			Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 			return pair(query, factorNetwork);
@@ -77,7 +86,7 @@ class TestsOnUAITableFactorNetworks extends AbstractTestsOnBatchOfFactorNetworks
 			InputStream resourceStream = TestsOnUAITableFactorNetworks.class.getResourceAsStream(uaiFileResourcePath);
 			InputStreamReader resourceReader = new InputStreamReader(resourceStream);
 			UAIModel uaiModel = UAIModelReader.read(resourceReader);
-			factorNetwork = fromUAIModelToTableFactorNetwork(uaiModel);
+			factorNetwork = fromUAIModelToTableFactorNetwork(uaiModel, tableFactorMaker);
 		} catch (IOException e) {
 			throw new Error("Could not read UAI file " + uaiFileResourcePath);
 		}

@@ -1,6 +1,6 @@
 package com.sri.ai.test.praise.performance;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.RandomTableFactorGenerator.makeRandomTableFactor;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor.RandomTableFactorGenerator.makeRandomTableFactor;
 import static com.sri.ai.util.Timer.timeAndGetResult;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.getFirstHalfSubList;
@@ -30,8 +30,8 @@ import com.sri.ai.grinder.theory.differencearithmetic.DifferenceArithmeticTheory
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor.ConfigurationForRandomTableFactorGeneration;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.FromTableToExpressionFactorConverter;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
@@ -396,7 +396,12 @@ public class PerformanceTest {
 
 	private List<Factor> constructEquivalentRandomFactorsRepresentedInDifferentWays(ConfigurationForRandomTableFactorGeneration factorSpecs)
 	{
-		ArrayListTableFactor tableFactor = makeRandomTableFactor(factorSpecs, FROM_VARIABLE_INDEX_TO_NAME, RANDOM);
+		ArrayListTableFactor tableFactor = 
+				makeRandomTableFactor(
+				factorSpecs, 
+				FROM_VARIABLE_INDEX_TO_NAME,
+				(variables, entries) -> new ArrayListTableFactor(variables, entries),
+				RANDOM);
 
 		ArrayList<Factor> factors = new ArrayList<>(NUMBER_OF_TESTED_FACTORS);
 

@@ -1,8 +1,11 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration;
 
+import java.util.Random;
+
 public class SmallProblems extends AbstractConfigurationForTestsOnRandomTableFactorNetworks {
 
 	public SmallProblems() {
+		random = new Random(); // no seed since we usually want to run different tests each time to ensure we catch errors
 		numberOfTests = 100;
 		minimumNumberOfVariables = 2;
 		maximumNumberOfVariables = 3;

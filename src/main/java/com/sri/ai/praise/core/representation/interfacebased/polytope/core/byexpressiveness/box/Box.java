@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor.makeCartesianProductIterator;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor.makeCartesianProductIterator;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.TableBoxVariable.TABLE_BOX_VARIABLE;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.list;
@@ -16,8 +16,8 @@ import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ArrayListTableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;

@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.randomgeneration.tablefactornetwork;
+package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork;
 
 public interface ConfigurationForRandomTableFactorNetworksGeneration {
 

@@ -15,6 +15,7 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.U
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayListTableFactor;
 
 class FromUAIToTableFactorsTest {
 
@@ -22,7 +23,7 @@ class FromUAIToTableFactorsTest {
 	void test() {
 		try {
 			UAIModel uaiModel = UAIModelReader.read(new StringReader(modelString));
-			FactorNetwork network = fromUAIModelToTableFactorNetwork(uaiModel);
+			FactorNetwork network = fromUAIModelToTableFactorNetwork(uaiModel, (v,e) -> new ArrayListTableFactor(v,e));
 			Variable queryVariable = getFirst(network.getVariables());
 			ExactBP solver = new ExactBP(queryVariable, network);
 			Factor queryResult = solver.apply();
