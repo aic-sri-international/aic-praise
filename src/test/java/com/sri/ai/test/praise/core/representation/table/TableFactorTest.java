@@ -75,12 +75,12 @@ public class TableFactorTest {
 		println("MULTIPLYING f0 * f1");
 		println("-------------------");
 		
-		ArrayTableFactor f0f1 = (ArrayTableFactor) f0.multiply(f1);
+		ArrayTableFactor f0f1 = f0.multiply(f1);
 		f0f1.setName("f1f2");
 		
 		println(f0f1);
-		assertEquals("phi[{V1:card=2}, {V2:card=3}, {V3:card=4}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, "
-				   + "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", f0.multiply(f1).toString());
+		assertEquals("f1f2[{V1:card=2}, {V2:card=3}, {V3:card=4}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+				   f0f1.toString());
 		println();
 	}
 	
@@ -91,16 +91,13 @@ public class TableFactorTest {
 		println("MULTIPLYING f1 * f2");
 		println("-------------------");
 		
-		ArrayTableFactor f1f2 = (ArrayTableFactor) f1.multiply(f2);
+		ArrayTableFactor f1f2 = f1.multiply(f2);
 		f1f2.setName("f1f2");
 		
 		println(f1f2);
-		assertEquals("phi[{V1:card=2}, {V2:card=3}, {V3:card=4}, {V4:card=2}]: [11.0, 12.0, 11.0, 12.0, 11.0, 12.0, 11.0, 12.0, "
-																			 + "21.0, 22.0, 21.0, 22.0, 21.0, 22.0, 21.0, 22.0, "
-																			 + "31.0, 32.0, 31.0, 32.0, 31.0, 32.0, 31.0, 32.0, "
-																			 + "11.0, 12.0, 11.0, 12.0, 11.0, 12.0, 11.0, 12.0, "
-																			 + "21.0, 22.0, 21.0, 22.0, 21.0, 22.0, 21.0, 22.0, "
-																			 + "31.0, 32.0, 31.0, 32.0, 31.0, 32.0, 31.0, 32.0]", f1.multiply(f2).toString());
+		assertEquals(
+				"f1f2[{V1:card=2}, {V3:card=4}, {V4:card=2}, {V2:card=3}]: [11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0]",
+				f1f2.toString());
 		println();
 	}
 	
@@ -111,16 +108,13 @@ public class TableFactorTest {
 		println("MULTIPLYING f2 * f1");
 		println("-------------------");
 		
-		ArrayTableFactor f2f1 = (ArrayTableFactor) f2.multiply(f1);
+		ArrayTableFactor f2f1 = f2.multiply(f1);
 		f2f1.setName("f2f1");
 
 		println(f2f1);
-		assertEquals("phi[{V2:card=3}, {V4:card=2}, {V1:card=2}, {V3:card=4}]: [11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, "
-																			 + "12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, 12.0, "
-																			 + "21.0, 21.0, 21.0, 21.0, 21.0, 21.0, 21.0, 21.0, "
-																			 + "22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, 22.0, "
-																			 + "31.0, 31.0, 31.0, 31.0, 31.0, 31.0, 31.0, 31.0, "
-																			 + "32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0, 32.0]", f2.multiply(f1).toString());
+		assertEquals(
+				"f2f1[{V4:card=2}, {V1:card=2}, {V3:card=4}, {V2:card=3}]: [11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0]", 
+				f2f1.toString());
 		println();
 	}
 	
@@ -323,16 +317,13 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1);
-		ArrayTableFactor f2f1SumOutV1 = (ArrayTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayTableFactor f2f1SumOutV1 = (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1.setName("f2f1SumOutV1");
 		
 		println(f2f1SumOutV1);
-		assertEquals("f2f1SumOutV1[{V2:card=3}, {V4:card=2}, {V3:card=4}]: [22.0, 22.0, 22.0, 22.0, "
-																		 + "24.0, 24.0, 24.0, 24.0, "
-																		 + "42.0, 42.0, 42.0, 42.0, "
-																		 + "44.0, 44.0, 44.0, 44.0, "
-																		 + "62.0, 62.0, 62.0, 62.0, "
-																		 + "64.0, 64.0, 64.0, 64.0]", f2f1SumOutV1.toString());
+		assertEquals(
+				"f2f1SumOutV1[{V4:card=2}, {V3:card=4}, {V2:card=3}]: [22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0]", 
+				f2f1SumOutV1.toString());
 		
 		println();
 	}
@@ -345,7 +336,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2);
-		ArrayTableFactor f2f1SumOutV1V2 = (ArrayTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayTableFactor f2f1SumOutV1V2 = (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1V2.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2);
@@ -362,7 +353,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<TableVariable> variablesToSumOut = Util.arrayList(V1,V2,V3);
-		ArrayTableFactor f2f1SumOutV1V2V3 = (ArrayTableFactor) (f2.multiply(f1)).sumOut(variablesToSumOut);
+		ArrayTableFactor f2f1SumOutV1V2V3 = (f2.multiply(f1)).sumOut(variablesToSumOut);
 		f2f1SumOutV1V2V3.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2V3);

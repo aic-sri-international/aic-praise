@@ -21,8 +21,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.AbstractTestsOnBatchOfFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.ConfigurationForTestsOnRandomTableFactorNetworks;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.LargerProblems;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.SmallProblems;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.DebugProblems;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.LargestProblems;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
@@ -38,11 +38,11 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 	
 	@Test
 	void test() {
-		new TestsOnRandomTableFactorNetworks().run(new SmallProblems());
+		new TestsOnRandomTableFactorNetworks().run(new DebugProblems());
 	}
 
 	public static void main(String[] args) {
-		new TestsOnRandomTableFactorNetworks().run(new LargerProblems());
+		new TestsOnRandomTableFactorNetworks().run(new LargestProblems());
 	}
 
 	@Override

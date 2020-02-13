@@ -1,6 +1,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.toIntArray;
+
+import java.util.List;
 
 import com.sri.ai.util.Util;
 
@@ -26,6 +29,10 @@ public class ArrayIndex {
 		this.strides = strides;
 		this.adjustedStrides = computeAdjustedStrides(strides);
 		reset();
+	}
+	
+	public ArrayIndex(List<Integer> cardinalities, List<Integer> strides) {
+		this(toIntArray(cardinalities), toIntArray(strides));
 	}
 	
 	public void reset() {
@@ -60,11 +67,11 @@ public class ArrayIndex {
 		return canMoveUp == -1;
 	}
 	
-	public int[] getIndex() {
+	public int[] index() {
 		return index;
 	}
 	
-	public int getOffset() {
+	public int offset() {
 		return offset;
 	}
 	
@@ -94,13 +101,13 @@ public class ArrayIndex {
 	
 	public static void main(String[] args) {
 		ArrayIndex ai = new ArrayIndex(new int[] {2, 3, 2}, new int[] {12, 2, 1} );
-		println(Util.join(ai.getIndex()) + ", offset: " + ai.getOffset() + ", over: " + ai.isOver());
+		println(Util.join(ai.index()) + ", offset: " + ai.offset() + ", over: " + ai.isOver());
 		for (int i = 0; !ai.isOver() && i != 8000000; i++) {
 			if (i % 10000 == 0) {
 				println(i);
 			}
 			ai.increment();
-			println(Util.join(ai.getIndex()) + ", offset: " + ai.getOffset() + ", over: " + ai.isOver());
+			println(Util.join(ai.index()) + ", offset: " + ai.offset() + ", over: " + ai.isOver());
 		}
 	}
 	

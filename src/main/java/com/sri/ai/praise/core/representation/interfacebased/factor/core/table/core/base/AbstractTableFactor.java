@@ -206,7 +206,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 			result = another.add(this);
 		}		
 		else if (another.getClass() != this.getClass()) {
-			throw new Error("Trying to multiply different types of factors: this is a " +
+			throw new Error("Trying to add different types of factors: this is a " +
 						this.getClass() + "and another is a " + another.getClass());
 		}
 		else {
@@ -303,6 +303,10 @@ public abstract class AbstractTableFactor implements TableFactor {
 	
 	protected int getStride(int variableIndex) {
 		return getStrides()[variableIndex];
+	}
+
+	protected int getStride(TableVariable variable) {
+		return getStrides()[getVariables().indexOf(variable)];
 	}
 
 	private int[] strides;

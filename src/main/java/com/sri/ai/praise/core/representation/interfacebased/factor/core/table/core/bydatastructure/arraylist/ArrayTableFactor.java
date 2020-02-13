@@ -1,22 +1,23 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
 import static com.sri.ai.util.Util.arrayListFilledWith;
-import static com.sri.ai.util.Util.fromIntegerListToIntArray;
+import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.in;
+import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.setDifference;
+import static com.sri.ai.util.Util.toIntArray;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -223,6 +224,8 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	protected ArrayTableFactor slicePossiblyModifyingAssignment(
 			Map<TableVariable, Integer> assignment,
 			ArrayList<? extends TableVariable> remainingVariables) {
+
+		// TODO: too slow! Use offset techniques
 		
 		ArrayTableFactor result = new ArrayTableFactor(remainingVariables, 1.0);
 		Iterator<ArrayList<Integer>> assignmentsToRemainingVariables = makeCartesianProductIterator(remainingVariables);
@@ -240,8 +243,11 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected ArrayTableFactor addTableFactor(TableFactor another) {
-		ArrayTableFactor result = initializeNewFactorUnioningVariables(another);
-		result = operateOnUnionedParameters(another, result, (a,b) -> a + b);
+		ArrayTableFactor result = new ArrayTableFactor(getVariables());
+		ArrayTableFactor anotherArrayTableFactor = (ArrayTableFactor) another;
+		for (int i = 0; i != numberOfEntries(); i++) {
+			result.set(i, get(i) + anotherArrayTableFactor.get(i));
+		}
 		return result;
 	}
 	
@@ -256,35 +262,44 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected ArrayTableFactor multiplyTableFactor(TableFactor another) {
-		ArrayTableFactor result = initializeNewFactorUnioningVariables(another);
-		result = operateOnUnionedParameters(another, result, (a,b) -> a * b);
-		return result;
-	}
-	
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// SHARED SUPPORT FOR ADDING AND MULTIPLYING ////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	private ArrayTableFactor initializeNewFactorUnioningVariables(TableFactor another) {
-		LinkedHashSet<TableVariable> newSetOfVariables = new LinkedHashSet<>(this.variables);
-		newSetOfVariables.addAll(another.getVariables());
-		Integer numberOfParametersForNewListOfVariables = numberOfEntries(newSetOfVariables);
-		ArrayList<Double> newParameters = arrayListFilledWith(-1.0, numberOfParametersForNewListOfVariables);	
-		ArrayTableFactor newFactor = new ArrayTableFactor(new ArrayList<>(newSetOfVariables), newParameters);
-		return newFactor;
-	}
+		var anotherArrayTableFactor = castOrThrowError(getClass(), another, () -> "multiplyTableFactor supported for two " + getClass() + " objects only");
+		
+		Set<TableVariable> common = intersection(getVariables(), anotherArrayTableFactor.getVariables());
+		List<TableVariable> exclusive1 = setDifference(getVariables(), common);
+		List<TableVariable> exclusive2 = setDifference(anotherArrayTableFactor.getVariables(), common);
+ 		
+		ArrayList<TableVariable> totalVariables = new ArrayList<>(exclusive1.size() + exclusive2.size() + common.size());
+		totalVariables.addAll(exclusive1);
+		totalVariables.addAll(exclusive2);
+		totalVariables.addAll(common);
+		ArrayTableFactor result = new ArrayTableFactor(totalVariables);
+		
+		ArrayIndex exclusive1Values = makeArrayIndex(exclusive1, this);
+ 		ArrayIndex exclusive2Values = makeArrayIndex(exclusive2, anotherArrayTableFactor);
+		ArrayIndex commonValuesInThis = makeArrayIndex(common, this); // these two could be combined into an ArrayIndex on multiple sets of strides
+		ArrayIndex commonValuesInAnother = makeArrayIndex(common, anotherArrayTableFactor);
 
-	private ArrayTableFactor operateOnUnionedParameters(TableFactor another, ArrayTableFactor result, BiFunction<Double, Double, Double> operator) {
-		Iterator<ArrayList<Integer>> cartesianProduct = makeCartesianProductIterator(result.variables);
-		LinkedHashMap<Variable, Integer> variableValueMap = new LinkedHashMap<>();
-		for(ArrayList<Integer> values: in(cartesianProduct)) {
-			variableValueMap = result.putAll(variableValueMap, values);
-			Double product = operator.apply(this.getEntryFor(variableValueMap), another.getEntryFor(variableValueMap));
-			result.setEntryFor(variableValueMap, product);
-		}
+		int offsetInResult = 0;
+		do {
+			exclusive2Values.reset();
+			do {
+				commonValuesInThis.reset();
+				commonValuesInAnother.reset();
+				do {
+					
+					double value1 = get(exclusive1Values.offset() + commonValuesInThis.offset());
+					double value2 = anotherArrayTableFactor.get(exclusive2Values.offset() + commonValuesInAnother.offset());
+					result.set(offsetInResult, value1 * value2);
+					
+					offsetInResult++;
+					
+					commonValuesInThis.incrementIfPossible();
+				} while (commonValuesInAnother.incrementIfPossible());
+			} while (exclusive2Values.incrementIfPossible());
+		} while (exclusive1Values.incrementIfPossible());
+		
 		return result;
 	}
-	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// NORMALIZATION ////////////////////////////////////////////////////////////////////////////////////
@@ -318,28 +333,6 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		return (ArrayTableFactor) super.sumOut(variablesToSumOut);
 	}
 
-//	@Override
-	protected ArrayTableFactor sumOutEverythingExceptOld(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
-
-		ArrayTableFactor result = new ArrayTableFactor(variablesNotToSumOut, 0.0);
-		
-		LinkedHashMap<Variable, Integer> assignment = new LinkedHashMap<>();
-		for (ArrayList<Integer> values: in(makeCartesianProductIterator(variables))) {
-			assignment = putAll(assignment, values);
-			Double currentValue = result.getEntryFor(assignment);
-			Double addedValue = getEntryFor(assignment);
-			result.setEntryFor(assignment, currentValue + addedValue);
-		}
-		return result;
-	}
-	
-	private LinkedHashMap<Variable,Integer> putAll(LinkedHashMap<Variable, Integer> assignment, ArrayList<Integer> values) {
-		for (int i = 0; i < variables.size(); i++) {
-			assignment.put(variables.get(i), values.get(i));
-		}
-		return assignment;
-	}
-
 	@Override
 	protected ArrayTableFactor sumOutEverythingExcept(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
 
@@ -358,15 +351,15 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		
 		start = System.currentTimeMillis();
 
- 		ArrayIndex remainingValues = makeArrayIndex(remaining);
-		ArrayIndex eliminatedValues = makeArrayIndex(eliminated);
+ 		ArrayIndex remainingValues = makeArrayIndex(remaining, this);
+		ArrayIndex eliminatedValues = makeArrayIndex(eliminated, this);
 
 		int offsetInResult = 0; // we do not need to compute offset in resulting factor since it will be sequential
 		do {
 			double sumForTheseRemainingValues = 0;
 			eliminatedValues.reset();
 			do {
-				sumForTheseRemainingValues += get(remainingValues.getOffset() + eliminatedValues.getOffset());
+				sumForTheseRemainingValues += get(remainingValues.offset() + eliminatedValues.offset());
 			} while (eliminatedValues.incrementIfPossible());
 			result.set(offsetInResult, sumForTheseRemainingValues);
 			offsetInResult++;
@@ -391,7 +384,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			println("Time to iterate over all entries: "  + (end - start) + " ms.");
 			
 			
-			var arrayIndex = new ArrayIndex(fromIntegerListToIntArray(getCardinalities()), getStrides());
+			var arrayIndex = new ArrayIndex(toIntArray(getCardinalities()), getStrides());
 			start = System.currentTimeMillis();
 			while (!arrayIndex.isOver()) arrayIndex.increment();
 			end = System.currentTimeMillis();
@@ -443,14 +436,10 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		return result;
 	}
 
-	private ArrayIndex makeArrayIndex(List<? extends TableVariable> variablesSubSet) {
-		ArrayList<Integer> indicesOfVariablesSubSetInOriginal = mapIntoArrayList(variablesSubSet, getVariables()::indexOf);
-		ArrayList<Integer> eliminatedCardinalities = mapIntoArrayList(variablesSubSet, TableVariable::getCardinality);
-		ArrayList<Integer> eliminatedStrides = mapIntoArrayList(indicesOfVariablesSubSetInOriginal, this::getStride);
-		int[] eliminatedCardinalitiesArray = Util.fromIntegerListToIntArray(eliminatedCardinalities);
-		int[] eliminatedStridesArray = Util.fromIntegerListToIntArray(eliminatedStrides);
-		ArrayIndex arrayIndex = new ArrayIndex(eliminatedCardinalitiesArray, eliminatedStridesArray);
-		return arrayIndex;
+	private ArrayIndex makeArrayIndex(Collection<? extends TableVariable> someVariables, ArrayTableFactor factor) {
+		var cardinalities = mapIntoList(someVariables, TableVariable::getCardinality);
+		var strides = mapIntoList(someVariables, factor::getStride);
+		return new ArrayIndex(cardinalities, strides);
 	}
 
 	private int sumOfValuesTimesStridesInOriginal(MixedRadixNumber values, ArrayList<Integer> indicesOfVariablesInOriginal) {
