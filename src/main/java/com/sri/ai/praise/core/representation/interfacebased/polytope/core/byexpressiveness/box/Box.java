@@ -56,8 +56,8 @@ public class Box extends IntensionalConvexHullOfFactors{
 
 	private static Box boxNormalizedFactors(List<ArrayTableFactor> normalizedFactors, ArrayList<TableVariable> variables) {
 		
-		ArrayTableFactor phiMin= new ArrayTableFactor(variables);
-		ArrayTableFactor phiMax= new ArrayTableFactor(variables);
+		ArrayTableFactor phiMin= new ArrayTableFactor(variables, -1.0);
+		ArrayTableFactor phiMax= new ArrayTableFactor(variables, -1.0);
 		for(ArrayList<Integer> values : in(makeCartesianProductIterator(variables))){
 			Map<TableVariable, Integer> map = Util.mapFromListOfKeysAndListOfValues(variables, values);
 			List<Double> phiValues = mapIntoList(normalizedFactors, (f)-> f.getEntryFor(map));

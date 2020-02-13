@@ -27,14 +27,14 @@ public class TableBayesianNode extends ArrayTableFactor implements BayesianNode 
 	private ArrayList<? extends TableVariable> allVariables;
 	
 	public TableBayesianNode(TableVariable child) {
-		super(arrayList(child));
+		super(arrayList(child), -1.0);
 		this.child = child;
 		this.parents = arrayList();
 		this.allVariables = this.getVariables();
 	}
 	
 	public TableBayesianNode(TableVariable child, ArrayList<TableVariable> parents) {
-		super(mergeElementsIntoOneList(child, parents));
+		super(mergeElementsIntoOneList(child, parents), -1.0);
 		this.allVariables = this.getVariables();
 		this.child = child;
 		this.parents = parents; 

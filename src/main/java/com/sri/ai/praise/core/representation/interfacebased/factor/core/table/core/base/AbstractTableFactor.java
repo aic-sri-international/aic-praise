@@ -10,7 +10,7 @@ import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @param variablesNotToSumOut
 	 * @return
 	 */
-	protected abstract TableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut);
+	protected abstract TableFactor sumOutEverythingExcept(List<? extends TableVariable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut);
 
 	protected abstract TableFactor normalizeBy(Double normalizationConstant);
 
@@ -288,13 +288,35 @@ public abstract class AbstractTableFactor implements TableFactor {
 		// type of variable V it applies to, so the parameter of this method would be
 		// List<? extends V>.
 		@SuppressWarnings("unchecked")
-		LinkedHashSet<TableVariable> variablesToSumOutSet = new LinkedHashSet<>((List<TableVariable>) variablesToSumOut);
+		List<TableVariable> tableVariablesToSumOut = new LinkedList<>((List<TableVariable>) variablesToSumOut);
 		
-		var variablesNotToSumOut = setDifference(variables, variablesToSumOutSet, arrayList());
+		var variablesNotToSumOut = setDifference(getVariables(), tableVariablesToSumOut, arrayList());
 		
-		TableFactor result = sumOutEverythingExcept(variablesToSumOut, variablesNotToSumOut);
+		TableFactor result = sumOutEverythingExcept(tableVariablesToSumOut, variablesNotToSumOut);
 		
 		return result;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// STRIDE ///////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	protected int getStride(int variableIndex) {
+		return getStrides()[variableIndex];
+	}
+
+	private int[] strides;
+	
+	protected int[] getStrides() {
+		if (strides == null) {
+			strides = new int[getVariables().size()];
+			int acc = 1;
+			for (int i = getVariables().size() - 1; i != -1; i--) {
+				strides[i] = acc;
+				acc *= getVariables().get(i).getCardinality(); 
+			}
+		}
+		return strides;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

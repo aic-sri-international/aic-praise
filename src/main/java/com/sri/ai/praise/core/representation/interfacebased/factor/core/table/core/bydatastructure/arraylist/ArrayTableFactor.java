@@ -1,9 +1,11 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
 import static com.sri.ai.util.Util.arrayListFilledWith;
+import static com.sri.ai.util.Util.fromIntegerListToIntArray;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.println;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -78,6 +80,10 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		this.parameterIndexRadix = createMixedRadixNumberForIndexingFactorParameters();
 	}
 	
+	public ArrayTableFactor(Collection<? extends TableVariable> variables) {
+		this(variables, new double[numberOfEntries(variables)]);
+	}
+
 	public ArrayTableFactor(Collection<? extends TableVariable> variables, double[] parameters) {
 		this("phi", variables, parameters);
 	}
@@ -90,10 +96,6 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		this(variables, arrayListFilledWith(defaultValue, numberOfEntries(variables)));
 	}
 	
-	public ArrayTableFactor(Collection<? extends TableVariable> variables) {
-		this(variables, -1.0);
-	}
-
 	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters() {
 		ArrayList<Integer> cardinalities = getCardinalities();
 		if (cardinalities.isEmpty()) {
@@ -127,7 +129,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 	
 	private double set(int i, double value) {
-		return parameters[i] =value;
+		return parameters[i] = value;
 	}
 	
 	@Override
@@ -137,7 +139,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected String parametersString() {
-		return Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList()));
+		return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
 	}
 	
 	private double parametersSum() {
@@ -222,7 +224,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			Map<TableVariable, Integer> assignment,
 			ArrayList<? extends TableVariable> remainingVariables) {
 		
-		ArrayTableFactor result = new ArrayTableFactor(remainingVariables);
+		ArrayTableFactor result = new ArrayTableFactor(remainingVariables, 1.0);
 		Iterator<ArrayList<Integer>> assignmentsToRemainingVariables = makeCartesianProductIterator(remainingVariables);
 		for (ArrayList<Integer> remainingVariablesValues: in(assignmentsToRemainingVariables)) {
 			Util.putAll(assignment, remainingVariables, remainingVariablesValues);
@@ -316,8 +318,8 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		return (ArrayTableFactor) super.sumOut(variablesToSumOut);
 	}
 
-	@Override
-	protected ArrayTableFactor sumOutEverythingExcept(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
+//	@Override
+	protected ArrayTableFactor sumOutEverythingExceptOld(List<? extends Variable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
 
 		ArrayTableFactor result = new ArrayTableFactor(variablesNotToSumOut, 0.0);
 		
@@ -336,6 +338,129 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			assignment.put(variables.get(i), values.get(i));
 		}
 		return assignment;
+	}
+
+	@Override
+	protected ArrayTableFactor sumOutEverythingExcept(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+
+		if (eliminated.isEmpty()) {
+			return this;
+		}
+		
+		ArrayTableFactor result = new ArrayTableFactor(remaining);
+		
+		if (remaining.isEmpty()) {
+			result.set(0, parametersSum());
+			return result;
+		}
+		
+		long start, end;
+		
+		start = System.currentTimeMillis();
+
+ 		ArrayIndex remainingValues = makeArrayIndex(remaining);
+		ArrayIndex eliminatedValues = makeArrayIndex(eliminated);
+
+		int offsetInResult = 0; // we do not need to compute offset in resulting factor since it will be sequential
+		do {
+			double sumForTheseRemainingValues = 0;
+			eliminatedValues.reset();
+			do {
+				sumForTheseRemainingValues += get(remainingValues.getOffset() + eliminatedValues.getOffset());
+			} while (eliminatedValues.incrementIfPossible());
+			result.set(offsetInResult, sumForTheseRemainingValues);
+			offsetInResult++;
+		} while (remainingValues.incrementIfPossible());
+
+		end = System.currentTimeMillis();
+		
+		if (numberOfEntries() > Integer.MAX_VALUE) { // change to something like 200K to see how long different methods for iterating over the factor take
+			println("\n" + getVariables());
+			println("Time to eliminate variables from it: " + (end - start) + " ms.");
+			println("Number of entries: " + numberOfEntries());
+			
+			MixedRadixNumber allValues;
+			ArrayList<Integer> allIndices;
+			double sum;
+			
+
+			allValues = new MixedRadixNumber(0, getCardinalities());
+			start = System.currentTimeMillis();
+			while (allValues.canIncrement()) allValues.increment();
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries: "  + (end - start) + " ms.");
+			
+			
+			var arrayIndex = new ArrayIndex(fromIntegerListToIntArray(getCardinalities()), getStrides());
+			start = System.currentTimeMillis();
+			while (!arrayIndex.isOver()) arrayIndex.increment();
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries with ArrayIndex: "  + (end - start) + " ms.");
+			
+			
+			var iterator = makeCartesianProductIterator(getVariables());
+			start = System.currentTimeMillis();
+			while (iterator.hasNext()) iterator.next();
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries with cartesian product iterator: "  + (end - start) + " ms.");
+			
+			
+			allValues = new MixedRadixNumber(0, getCardinalities());
+			allIndices = mapIntoArrayList(getVariables(), getVariables()::indexOf);
+			start = System.currentTimeMillis();
+			while (allValues.canIncrement()) {
+				allValues.increment();
+				sumOfValuesTimesStridesInOriginal(allValues, allIndices);
+			}
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries and compute offsets: "  + (end - start) + " ms.");
+
+			
+			allValues = new MixedRadixNumber(0, getCardinalities());
+			allIndices = mapIntoArrayList(getVariables(), getVariables()::indexOf);
+			start = System.currentTimeMillis();
+			sum = 0;
+			while (allValues.canIncrement()) {
+				allValues.increment();
+				var offset = sumOfValuesTimesStridesInOriginal(allValues, allIndices);
+				sum += get(offset);
+			}
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries, compute offsets and sum all entries (" + sum + "): "  + (end - start) + " ms.");
+
+			
+			allValues = new MixedRadixNumber(0, getCardinalities());
+			allIndices = mapIntoArrayList(getVariables(), getVariables()::indexOf);
+			start = System.currentTimeMillis();
+			sum = 0;
+			while (allValues.canIncrement()) {
+				allValues.increment();
+				sum += get(100);
+			}
+			end = System.currentTimeMillis();
+			println("Time to iterate over all entries, NOT compute offsets and sum fixed entries (" + sum + "): "  + (end - start) + " ms.");
+		}
+		return result;
+	}
+
+	private ArrayIndex makeArrayIndex(List<? extends TableVariable> variablesSubSet) {
+		ArrayList<Integer> indicesOfVariablesSubSetInOriginal = mapIntoArrayList(variablesSubSet, getVariables()::indexOf);
+		ArrayList<Integer> eliminatedCardinalities = mapIntoArrayList(variablesSubSet, TableVariable::getCardinality);
+		ArrayList<Integer> eliminatedStrides = mapIntoArrayList(indicesOfVariablesSubSetInOriginal, this::getStride);
+		int[] eliminatedCardinalitiesArray = Util.fromIntegerListToIntArray(eliminatedCardinalities);
+		int[] eliminatedStridesArray = Util.fromIntegerListToIntArray(eliminatedStrides);
+		ArrayIndex arrayIndex = new ArrayIndex(eliminatedCardinalitiesArray, eliminatedStridesArray);
+		return arrayIndex;
+	}
+
+	private int sumOfValuesTimesStridesInOriginal(MixedRadixNumber values, ArrayList<Integer> indicesOfVariablesInOriginal) {
+		int result = 0;
+		for (int i = 0; i != indicesOfVariablesInOriginal.size(); i++) {
+			int stride = getStride(indicesOfVariablesInOriginal.get(i));
+			int value = values.getCurrentNumeralValue(i);
+			result += stride * value;
+		}
+		return result;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -400,8 +525,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// PROBABLY UNNECESSARY, OR AT LEAST UNNECESSARILY PUBLIC, HELPER METHODS ///////////////////////////
-	// TODO: revisit and possibly get rid of them                             ///////////////////////////
+	// PROBABLY UNNECESSARILY PUBLIC ////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Iterator<ArrayList<Integer>> makeCartesianProductIterator(Collection<? extends TableVariable> variables) {

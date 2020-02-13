@@ -272,7 +272,7 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected NDArrayTableFactor sumOutEverythingExcept(
-			List<? extends Variable> variablesToSumOut, 
+			List<? extends TableVariable> variablesToSumOut, 
 			ArrayList<? extends TableVariable> variablesNotToSumOut) {
 		
 		INDArray newParameters = parameters.sum(Util.indexOf(getVariables(), variablesToSumOut));
