@@ -1,15 +1,22 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.instances;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.randomtablefactornetworks.instances;
 
+import java.util.List;
 import java.util.Random;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.runner.configuration.DefaultConfigurationForTestsOnRandomTableFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.randomtablefactornetworks.runner.configuration.DefaultConfigurationForTestsOnRandomTableFactorNetworks;
+import com.sri.ai.util.base.BinaryFunction;
+import com.sri.ai.util.base.Pair;
 
 public class DebugProblems extends DefaultConfigurationForTestsOnRandomTableFactorNetworks {
 
-	public DebugProblems() {
+	public DebugProblems(List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms) {
 		super(
-				/* numberOfTests = */ 1,
+				algorithms,
+				/* numberOfRuns = */ 1,
 				/* minimumNumberOfVariables = */ 3,
 				/* maximumNumberOfVariables = */ 3,
 				/* minimumCardinality = */ 2,

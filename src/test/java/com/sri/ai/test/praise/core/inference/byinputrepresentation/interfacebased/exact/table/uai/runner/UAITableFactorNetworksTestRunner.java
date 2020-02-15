@@ -1,8 +1,8 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.uai;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.uai.runner;
 
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromuaitofactors.FromUAIModelToTableFactors.fromUAIModelToTableFactorNetwork;
 import static com.sri.ai.util.Util.getFirst;
-import static com.sri.ai.util.base.Pair.pair;
+import static com.sri.ai.util.Util.pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,12 +13,18 @@ import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.U
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.AbstractTestsOnBatchOfFactorNetworks;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.uai.configuration.ConfigurationForTestsOnUAITableFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.AbstractBatchOfFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.uai.instances.TestsOnUAITableFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.uai.runner.configuration.ConfigurationForTestOnUAIFile;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public abstract class AbstractUAITableFactorNetworksTestRunner extends AbstractTestsOnBatchOfFactorNetworks {
+public class UAITableFactorNetworksTestRunner extends AbstractBatchOfFactorNetworksTestRunner {
+
+	public UAITableFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks configuration) {
+		super(configuration);
+	}
 
 	@Override
 	protected NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator() {
@@ -44,8 +50,8 @@ public abstract class AbstractUAITableFactorNetworksTestRunner extends AbstractT
 	}
 
 	@Override
-	protected ConfigurationForTestsOnUAITableFactorNetworks getConfiguration() {
-		return (ConfigurationForTestsOnUAITableFactorNetworks) super.getConfiguration();
+	protected ConfigurationForTestOnUAIFile getConfiguration() {
+		return (ConfigurationForTestOnUAIFile) super.getConfiguration();
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.convertersolverwrapper;
 
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.mapIntoList;

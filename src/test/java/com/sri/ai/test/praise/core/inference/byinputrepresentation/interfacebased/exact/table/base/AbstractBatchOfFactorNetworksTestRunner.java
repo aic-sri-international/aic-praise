@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base;
 
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
@@ -11,7 +11,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.BinaryFunction;
@@ -25,25 +25,22 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
  * @author braz
  *
  */
-public abstract class AbstractTestsOnBatchOfFactorNetworks {
-
-	////////// DATA MEMBERS
-	
-	private List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms;
-
-	private int[] totalTime;
-	
-	private ConfigurationForTestsOnBatchOfFactorNetworks configuration;
+public abstract class AbstractBatchOfFactorNetworksTestRunner {
 
 	////////// ABSTRACT METHODS
 	
-	protected abstract List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms();
-
 	protected abstract NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator();
 
+	////////// DATA MEMBERS
+	
+	private ConfigurationForTestsOnBatchOfFactorNetworks configuration;
+
+	private int[] totalTime;
+	
     //////// IMPLEMENTATION METHODS
 	
-	protected AbstractTestsOnBatchOfFactorNetworks() {
+	protected AbstractBatchOfFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks configuration) {
+		this.configuration = configuration;
 		totalTime = new int[getAlgorithms().size()];
 	}
 	
@@ -56,26 +53,24 @@ public abstract class AbstractTestsOnBatchOfFactorNetworks {
 	}
 
 	protected List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> getAlgorithms() {
-		if (algorithms == null) {
-			algorithms = makeAlgorithms();
-		}
-		return algorithms;
+		return getConfiguration().getAlgorithms();
 	}
 
-	protected int getNumberOfTests() {
-		return getConfiguration().getNumberOfTests();
+	protected int getNumberOfRuns() {
+		return getConfiguration().getNumberOfRuns();
 	}
 
-	public void run(ConfigurationForTestsOnBatchOfFactorNetworks configuration) {
-		setConfiguration(configuration);
-		run();
-	}
-	
 	public void run() {
-		int numberOfTests = getNumberOfTests();
-		var problemGenerator = makeProblemGenerator();
-		repeat(numberOfTests, testNumber -> runTest(testNumber, problemGenerator));
+		repeat(getNumberOfRuns(), testNumber -> runTest(testNumber, getProblemGenerator()));
 		printTotalTimes();
+	}
+
+	private NullaryFunction<Pair<Variable, FactorNetwork>> problemGenerator;
+	public NullaryFunction<Pair<Variable, FactorNetwork>> getProblemGenerator() {
+		if (problemGenerator == null) {
+			problemGenerator = makeProblemGenerator();
+		}
+		return problemGenerator;
 	}
 
 	private void runTest(int testNumber, NullaryFunction<Pair<Variable, FactorNetwork>> problemGenerator) {

@@ -67,6 +67,22 @@ public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableF
 				.apply();
 	}
 	
+	public RandomTableFactorNetworkGenerator(ConfigurationForRandomTableFactorNetworksGeneration configuration) {
+		
+		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
+		this.maximumNumberOfVariables = configuration.getMaximumNumberOfVariables();
+		this.minimumCardinality = configuration.getMinimumCardinality();
+		this.maximumCardinality = configuration.getMaximumCardinality();
+		this.minimumNumberOfFactors = configuration.getMinimumNumberOfFactors();
+		this.maximumNumberOfFactors = configuration.getMaximumNumberOfFactors();
+		this.minimumNumberOfVariablesPerFactor = configuration.getMinimumNumberOfVariablesPerFactor();
+		this.maximumNumberOfVariablesPerFactor = configuration.getMaximumNumberOfVariablesPerFactor();
+		this.minimumPotential = configuration.getMinimumPotential();
+		this.maximumPotential = configuration.getMaximumPotential();
+		this.tableFactorMaker = configuration.getTableFactorMaker();
+		this.random = configuration.getRandom();
+	}
+
 	public RandomTableFactorNetworkGenerator(
 			int minimumNumberOfVariables, int maximumNumberOfVariables,
 			int minimumCardinality, int maximumCardinality, 
@@ -90,22 +106,6 @@ public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableF
 						maximumPotential,
 						tableFactorMaker,
 						random));
-	}
-
-	public RandomTableFactorNetworkGenerator(ConfigurationForRandomTableFactorNetworksGeneration configuration) {
-		
-		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
-		this.maximumNumberOfVariables = configuration.getMaximumNumberOfVariables();
-		this.minimumCardinality = configuration.getMinimumCardinality();
-		this.maximumCardinality = configuration.getMaximumCardinality();
-		this.minimumNumberOfFactors = configuration.getMinimumNumberOfFactors();
-		this.maximumNumberOfFactors = configuration.getMaximumNumberOfFactors();
-		this.minimumNumberOfVariablesPerFactor = configuration.getMinimumNumberOfVariablesPerFactor();
-		this.maximumNumberOfVariablesPerFactor = configuration.getMaximumNumberOfVariablesPerFactor();
-		this.minimumPotential = configuration.getMinimumPotential();
-		this.maximumPotential = configuration.getMaximumPotential();
-		this.tableFactorMaker = configuration.getTableFactorMaker();
-		this.random = configuration.getRandom();
 	}
 
 	@Override
@@ -170,8 +170,7 @@ public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableF
 		double minimumPotential = 1.0;
 		double maximumPotential = 4.0;
 		
-		var configuration =
-				new DefaultConfigurationForRandomTableFactorNetworksGeneration(
+		var network = generateRandomTableFactorNetwork(
 						minimumNumberOfVariables, maximumNumberOfVariables, 
 						minimumCardinality, maximumCardinality, 
 						minimumNumberOfFactors, maximumNumberOfFactors, 
@@ -179,8 +178,6 @@ public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableF
 						minimumPotential, maximumPotential,
 						(ArrayList<TableVariable> variables, ArrayList<Double> entries) -> new ArrayTableFactor(variables, entries),
 						new Random());
-		
-		TableFactorNetwork network = generateRandomTableFactorNetwork(configuration);
 		
 		println(join("\n", network.getVariables()));
 		println();
