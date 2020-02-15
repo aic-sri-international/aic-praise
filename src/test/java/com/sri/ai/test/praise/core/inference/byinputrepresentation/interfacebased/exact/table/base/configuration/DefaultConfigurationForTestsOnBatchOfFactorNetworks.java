@@ -9,12 +9,12 @@ import com.sri.ai.util.base.Pair;
 
 public class DefaultConfigurationForTestsOnBatchOfFactorNetworks<Result> implements ConfigurationForTestsOnBatchOfFactorNetworks<Result> {
 
-	private List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms;
+	private List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms;
 	
 	private int numberOfRuns;
 
 	public DefaultConfigurationForTestsOnBatchOfFactorNetworks(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms, 
+			List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms, 
 			int numberOfRuns) {
 		
 		this.algorithms = algorithms;

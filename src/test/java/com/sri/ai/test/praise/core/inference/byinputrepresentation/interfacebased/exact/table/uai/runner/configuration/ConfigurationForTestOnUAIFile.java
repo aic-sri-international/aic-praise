@@ -18,7 +18,7 @@ public class ConfigurationForTestOnUAIFile<Result> extends DefaultConfigurationF
 	private String uaiFileResourcePath;
 	
 	public ConfigurationForTestOnUAIFile(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
+			List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns,
 			String uaiFileResourcePath,
 			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker) {
@@ -28,7 +28,7 @@ public class ConfigurationForTestOnUAIFile<Result> extends DefaultConfigurationF
 	}
 
 	public ConfigurationForTestOnUAIFile(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
+			List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns, 
 			String uaiFileResourcePath) {
 		this(algorithms, numberOfRuns, uaiFileResourcePath, (v,e) -> new ArrayTableFactor(v,e));

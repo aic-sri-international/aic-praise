@@ -21,7 +21,7 @@ implements ConfigurationForTestsOnRandomTableFactorNetworks<Result> {
 	private ConfigurationForTestsOnBatchOfFactorNetworks<Result> configurationForTestsOnBatchOfFactorNetworks; // "multiple inheritance" by containment
 
 	protected DefaultConfigurationForTestsOnRandomTableFactorNetworks(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
+			List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns,
 			int minimumNumberOfVariables, int maximumNumberOfVariables, 
 			int minimumCardinality, int maximumCardinality, 

@@ -12,7 +12,7 @@ import com.sri.ai.util.base.Pair;
 
 public class LargestProblems<Result> extends DefaultConfigurationForTestsOnRandomTableFactorNetworks<Result> {
 
-	public LargestProblems(List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms) {
+	public LargestProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
 		super(
 				algorithms,
 				/* numberOfRuns = */ 10,

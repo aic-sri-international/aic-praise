@@ -1,5 +1,6 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base;
 
+import static com.sri.ai.util.Util.compareNumbersComponentWise;
 import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.util.Timer;
-import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
@@ -19,14 +19,16 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
  * Abstract class for running a list of "full-time" algorithms on a batch of problems,
  * where "full-time" means that the whole operation is performed in one shot, without intermediary stages.
  * The actual generation of problem is done by extension classes implementing the abstract methods.
+ * 
  * @author braz
  *
  */
-public abstract class AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result> extends AbstractBatchOfFactorNetworksTestRunner<Result> {
+public abstract class AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result, Configuration extends ConfigurationForTestsOnBatchOfFactorNetworks<Result>> 
+extends AbstractBatchOfFactorNetworksTestRunner<Result, Configuration> {
 
 	private int[] totalTimeForEachAlgorithm;
 	
-	protected AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks<Result> configuration) {
+	protected AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
 		super(configuration);
 		totalTimeForEachAlgorithm = new int[getAlgorithms().size()];
 	}
@@ -99,7 +101,7 @@ public abstract class AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner
 			var array1 = ((TableFactor) resultAndTime1.first).getEntries();
 			var array2 = ((TableFactor) resultAndTime2.first).getEntries();
 			println("Comparing " + name1 + " and " + name2 + "...");
-			Util.compareNumbersComponentWise(array1, array2, 0.001);
+			compareNumbersComponentWise(array1, array2, 0.001);
 		}
 		println();
 	}

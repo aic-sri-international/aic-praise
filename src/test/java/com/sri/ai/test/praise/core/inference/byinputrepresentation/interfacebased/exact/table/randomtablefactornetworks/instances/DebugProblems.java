@@ -12,7 +12,7 @@ import com.sri.ai.util.base.Pair;
 
 public class DebugProblems<Result> extends DefaultConfigurationForTestsOnRandomTableFactorNetworks<Result> {
 
-	public DebugProblems(List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms) {
+	public DebugProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
 		super(
 				algorithms,
 				/* numberOfRuns = */ 1,

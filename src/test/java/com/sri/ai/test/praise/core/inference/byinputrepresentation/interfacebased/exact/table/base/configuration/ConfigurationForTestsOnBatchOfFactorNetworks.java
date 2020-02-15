@@ -11,6 +11,6 @@ public interface ConfigurationForTestsOnBatchOfFactorNetworks<Result> {
 
 	int getNumberOfRuns();
 	
-	List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> getAlgorithms();
+	List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms();
 
 }
