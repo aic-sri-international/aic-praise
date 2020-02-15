@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
@@ -29,5 +30,7 @@ public interface ConfigurationForRandomTableFactorNetworksGeneration<T extends T
 	double getMaximumPotential();
 	
 	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> getTableFactorMaker();
+	
+	Random getRandom();
 
 }

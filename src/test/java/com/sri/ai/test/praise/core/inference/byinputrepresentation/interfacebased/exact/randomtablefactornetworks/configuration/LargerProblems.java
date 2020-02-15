@@ -4,7 +4,7 @@ import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 
-public class LargerProblems extends AbstractConfigurationForTestsOnRandomTableFactorNetworks {
+public class LargerProblems extends DefaultConfigurationForTestsOnRandomTableFactorNetworks {
 
 	public LargerProblems() {
 		super(

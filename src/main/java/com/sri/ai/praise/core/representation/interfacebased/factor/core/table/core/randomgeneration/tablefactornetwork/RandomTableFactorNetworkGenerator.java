@@ -27,34 +27,30 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
  */
 public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements NullaryFunction<TableFactorNetwork> {
 
-	private int minimumNumberOfVariables;
-	private int maximumNumberOfVariables;
-	
-	private int minimumCardinality;
-	private int maximumCardinality;
-	
-	private int minimumNumberOfFactors;
-	private int maximumNumberOfFactors;
-
-	private int minimumNumberOfVariablesPerFactor;
-	private int maximumNumberOfVariablesPerFactor;
-
-	private double minimumPotential;
-	private double maximumPotential;
-
-	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
-	
-	private Random random;
-	
 	private ArrayList<Integer> variableIndices;
 	private int[] cardinalitiesByVariable;
+
+	////////// Convenience duplication of data members from ConfigurationForRandomTableFactorGeneration
 	
-	public static <T1 extends TableFactor> TableFactorNetwork generateRandomTableFactorNetwork(
-			ConfigurationForRandomTableFactorNetworksGeneration<T1> configuration, 
-			Random random) {
-		return 
-				new RandomTableFactorNetworkGenerator<T1>(configuration, random)
-				.apply();
+	private int minimumNumberOfVariables;
+	private int maximumNumberOfVariables;
+	private int minimumCardinality;
+	private int maximumCardinality;
+	private int minimumNumberOfFactors;
+	private int maximumNumberOfFactors;
+	private int minimumNumberOfVariablesPerFactor;
+	private int maximumNumberOfVariablesPerFactor;
+	private double minimumPotential;
+	private double maximumPotential;
+	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
+	private Random random;
+	
+	/////////////////////////////
+
+	public static 
+	<T1 extends TableFactor> TableFactorNetwork 
+	generateRandomTableFactorNetwork(ConfigurationForRandomTableFactorNetworksGeneration<T1> configuration) {
+		return new RandomTableFactorNetworkGenerator<T1>(configuration) .apply();
 	}
 	
 	public static <T1 extends TableFactor> TableFactorNetwork generateRandomTableFactorNetwork(
@@ -92,13 +88,12 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 						maximumNumberOfVariablesPerFactor,
 						minimumPotential,
 						maximumPotential,
-						tableFactorMaker),
-				random);
+						tableFactorMaker,
+						random));
 	}
 
 	public RandomTableFactorNetworkGenerator(
-			ConfigurationForRandomTableFactorNetworksGeneration<T> configuration,
-			Random random) {
+			ConfigurationForRandomTableFactorNetworksGeneration<T> configuration) {
 		
 		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
 		this.maximumNumberOfVariables = configuration.getMaximumNumberOfVariables();
@@ -111,7 +106,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 		this.minimumPotential = configuration.getMinimumPotential();
 		this.maximumPotential = configuration.getMaximumPotential();
 		this.tableFactorMaker = configuration.getTableFactorMaker();
-		this.random = random;
+		this.random = configuration.getRandom();
 	}
 
 	@Override
@@ -176,15 +171,17 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 		double minimumPotential = 1.0;
 		double maximumPotential = 4.0;
 		
-		TableFactorNetwork network = 
-				generateRandomTableFactorNetwork(
+		var configuration =
+				new DefaultConfigurationForRandomTableFactorNetworksGeneration<>(
 						minimumNumberOfVariables, maximumNumberOfVariables, 
 						minimumCardinality, maximumCardinality, 
 						minimumNumberOfFactors, maximumNumberOfFactors, 
 						minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, 
 						minimumPotential, maximumPotential,
-						(variables, entries) -> new ArrayTableFactor(variables, entries),
+						(ArrayList<TableVariable> variables, ArrayList<Double> entries) -> new ArrayTableFactor(variables, entries),
 						new Random());
+		
+		TableFactorNetwork network = generateRandomTableFactorNetwork(configuration);
 		
 		println(join("\n", network.getVariables()));
 		println();

@@ -53,7 +53,7 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 	@Override
 	protected NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator() {
 		return () -> {
-			TableFactorNetwork factorNetwork = generateRandomTableFactorNetwork(getConfiguration(), getConfiguration().getRandom());
+			TableFactorNetwork factorNetwork = generateRandomTableFactorNetwork(getConfiguration());
 			Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 			return pair(query, factorNetwork);
 		};

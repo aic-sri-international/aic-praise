@@ -1,24 +1,27 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.base.BinaryFunction;
 
-public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extends TableFactor> implements ConfigurationForRandomTableFactorNetworksGeneration<T> {
+public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extends TableFactor>
+implements          ConfigurationForRandomTableFactorNetworksGeneration<T> {
 
-	protected int minimumNumberOfVariables;
-	protected int maximumNumberOfVariables;
-	protected int minimumCardinality;
-	protected int maximumCardinality;
-	protected int minimumNumberOfFactors;
-	protected int maximumNumberOfFactors;
-	protected int minimumNumberOfVariablesPerFactor;
-	protected int maximumNumberOfVariablesPerFactor;
-	protected double minimumPotential;
-	protected double maximumPotential;
-	protected BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
+	private int minimumNumberOfVariables;
+	private int maximumNumberOfVariables;
+	private int minimumCardinality;
+	private int maximumCardinality;
+	private int minimumNumberOfFactors;
+	private int maximumNumberOfFactors;
+	private int minimumNumberOfVariablesPerFactor;
+	private int maximumNumberOfVariablesPerFactor;
+	private double minimumPotential;
+	private double maximumPotential;
+	private BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
+	private Random random;
 	
 	public DefaultConfigurationForRandomTableFactorNetworksGeneration(
 			int minimumNumberOfVariables, int maximumNumberOfVariables, 
@@ -26,7 +29,8 @@ public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extend
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
 			int minimumNumberOfVariablesPerFactor, int maximumNumberOfVariablesPerFactor,
 			double minimumPotential, double maximumPotential,
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker) {
+			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker,
+			Random random) {
 		
 		this.minimumNumberOfVariables = minimumNumberOfVariables;
 		this.maximumNumberOfVariables = maximumNumberOfVariables;
@@ -39,6 +43,7 @@ public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extend
 		this.minimumPotential = minimumPotential;
 		this.maximumPotential = maximumPotential;
 		this.tableFactorMaker = tableFactorMaker;
+		this.random = random;
 	}
 
 	@Override
@@ -94,6 +99,11 @@ public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extend
 	@Override
 	public BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> getTableFactorMaker() {
 		return tableFactorMaker;
+	}
+
+	@Override
+	public Random getRandom() {
+		return random;
 	}
 
 }

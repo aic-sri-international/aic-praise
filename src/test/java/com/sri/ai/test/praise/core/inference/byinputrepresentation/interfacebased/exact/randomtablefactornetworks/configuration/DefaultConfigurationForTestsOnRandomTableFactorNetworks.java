@@ -8,12 +8,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork.DefaultConfigurationForRandomTableFactorNetworksGeneration;
 import com.sri.ai.util.base.BinaryFunction;
 
-public class AbstractConfigurationForTestsOnRandomTableFactorNetworks extends DefaultConfigurationForRandomTableFactorNetworksGeneration<TableFactor> implements ConfigurationForTestsOnRandomTableFactorNetworks {
+public class DefaultConfigurationForTestsOnRandomTableFactorNetworks
+extends DefaultConfigurationForRandomTableFactorNetworksGeneration<TableFactor> 
+implements ConfigurationForTestsOnRandomTableFactorNetworks {
 
-	Random random;
 	int numberOfTests;
 
-	protected AbstractConfigurationForTestsOnRandomTableFactorNetworks(
+	protected DefaultConfigurationForTestsOnRandomTableFactorNetworks(
 			int numberOfTests,
 			int minimumNumberOfVariables, int maximumNumberOfVariables, 
 			int minimumCardinality, int maximumCardinality, 
@@ -29,19 +30,14 @@ public class AbstractConfigurationForTestsOnRandomTableFactorNetworks extends De
 				minimumNumberOfFactors, maximumNumberOfFactors,
 				minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor,
 				minimumPotential, maximumPotential,
-				tableFactorMaker);
+				tableFactorMaker,
+				random);
 		this.numberOfTests = numberOfTests;
-		this.random = random;
 	}
 	
 	@Override
 	public int getNumberOfTests() {
 		return numberOfTests;
-	}
-
-	@Override
-	public Random getRandom() {
-		return random;
 	}
 
 }
