@@ -2,7 +2,11 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 public class AbstractConfigurationForTestsOnBatchOfFactorNetworks implements ConfigurationForTestsOnBatchOfFactorNetworks {
 
-	protected int numberOfTests;
+	private int numberOfTests;
+
+	public AbstractConfigurationForTestsOnBatchOfFactorNetworks(int numberOfTests) {
+		this.numberOfTests = numberOfTests;
+	}
 
 	@Override
 	public int getNumberOfTests() {

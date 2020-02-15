@@ -9,15 +9,15 @@ public class SmallProblems extends DefaultConfigurationForTestsOnRandomTableFact
 
 	public SmallProblems() {
 		super(
-				/* numberOfTests = */ 100,
-				/* minimumNumberOfVariables = */ 2,
-				/* maximumNumberOfVariables = */ 3,
+				/* numberOfTests = */ 1000,
+				/* minimumNumberOfVariables = */ 3,
+				/* maximumNumberOfVariables = */ 5,
 				/* minimumCardinality = */ 2,
-				/* maximumCardinality = */ 2,
+				/* maximumCardinality = */ 3,
 				/* minimumNumberOfFactors = */ 1,
-				/* maximumNumberOfFactors = */ 3,
+				/* maximumNumberOfFactors = */ 4,
 				/* minimumNumberOfVariablesPerFactor = */ 1,
-				/* maximumNumberOfVariablesPerFactor = */ 2,
+				/* maximumNumberOfVariablesPerFactor = */ 3,
 				/* minimumPotential = */ 1.0,
 				/* maximumPotential = */ 4.0,
 				/* tableFactorMaker = */ 
