@@ -14,7 +14,7 @@ extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result, Confi
 	}
 
 	@Override
-	protected TableFactorNetwork makeFactorNetwork() {
+	protected TableFactorNetwork makeNextFactorNetwork() {
 		return generateRandomTableFactorNetwork(getConfiguration());
 	}
 

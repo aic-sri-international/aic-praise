@@ -21,7 +21,7 @@ extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result, Confi
 	}
 
 	@Override
-	protected TableFactorNetwork makeFactorNetwork() {
+	protected TableFactorNetwork makeNextFactorNetwork() {
 		String uaiFileResourcePath = getConfiguration().getUAIFileResourcePath();
 		TableFactorNetwork factorNetwork; 
 		try {

@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
@@ -25,7 +24,7 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 
 	//////////////////// ABSTRACT METHODS
 	
-	abstract protected TableFactorNetwork makeFactorNetwork();
+	abstract protected FactorNetwork makeNextFactorNetwork();
 
 	protected abstract void runTest(int testNumber, NullaryFunction<Pair<Variable, FactorNetwork>> problemGenerator);
 
@@ -59,6 +58,8 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 	protected int getNumberOfRuns() {
 		return getConfiguration().getNumberOfRuns();
 	}
+	
+	/////////////////////// MAKING ONCE AND KEEPING PROBLEM GENERATOR
 
 	private NullaryFunction<Pair<Variable, FactorNetwork>> problemGenerator;
 	public NullaryFunction<Pair<Variable, FactorNetwork>> getProblemGenerator() {
@@ -70,7 +71,7 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 
 	protected NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator() {
 		return () -> {
-			TableFactorNetwork factorNetwork = makeFactorNetwork();
+			FactorNetwork factorNetwork = makeNextFactorNetwork();
 			Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 			return pair(query, factorNetwork);
 		};
