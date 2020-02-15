@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
@@ -15,14 +14,14 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class DefaultConfigurationForTestsOnRandomTableFactorNetworks
+public class DefaultConfigurationForTestsOnRandomTableFactorNetworks<Result>
 extends DefaultConfigurationForRandomTableFactorNetworksGeneration 
-implements ConfigurationForTestsOnRandomTableFactorNetworks {
+implements ConfigurationForTestsOnRandomTableFactorNetworks<Result> {
 
-	private ConfigurationForTestsOnBatchOfFactorNetworks configurationForTestsOnBatchOfFactorNetworks; // "multiple inheritance" by containment
+	private ConfigurationForTestsOnBatchOfFactorNetworks<Result> configurationForTestsOnBatchOfFactorNetworks; // "multiple inheritance" by containment
 
 	protected DefaultConfigurationForTestsOnRandomTableFactorNetworks(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms,
+			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
 			int numberOfRuns,
 			int minimumNumberOfVariables, int maximumNumberOfVariables, 
 			int minimumCardinality, int maximumCardinality, 
@@ -40,11 +39,11 @@ implements ConfigurationForTestsOnRandomTableFactorNetworks {
 				minimumPotential, maximumPotential,
 				tableFactorMaker,
 				random);
-		this.configurationForTestsOnBatchOfFactorNetworks = new DefaultConfigurationForTestsOnBatchOfFactorNetworks(algorithms, numberOfRuns);
+		this.configurationForTestsOnBatchOfFactorNetworks = new DefaultConfigurationForTestsOnBatchOfFactorNetworks<Result>(algorithms, numberOfRuns);
 	}
 
 	@Override
-	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> getAlgorithms() {
+	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms() {
 		return configurationForTestsOnBatchOfFactorNetworks.getAlgorithms();
 	}
 	

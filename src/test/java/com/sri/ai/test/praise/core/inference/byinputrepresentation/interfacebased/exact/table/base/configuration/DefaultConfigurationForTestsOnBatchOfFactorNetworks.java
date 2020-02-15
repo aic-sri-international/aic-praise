@@ -2,20 +2,19 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 import java.util.List;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class DefaultConfigurationForTestsOnBatchOfFactorNetworks implements ConfigurationForTestsOnBatchOfFactorNetworks {
+public class DefaultConfigurationForTestsOnBatchOfFactorNetworks<Result> implements ConfigurationForTestsOnBatchOfFactorNetworks<Result> {
 
-	private List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms;
+	private List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms;
 	
 	private int numberOfRuns;
 
 	public DefaultConfigurationForTestsOnBatchOfFactorNetworks(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms, 
+			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms, 
 			int numberOfRuns) {
 		
 		this.algorithms = algorithms;
@@ -28,7 +27,7 @@ public class DefaultConfigurationForTestsOnBatchOfFactorNetworks implements Conf
 	}
 
 	@Override
-	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> getAlgorithms() {
+	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms() {
 		return algorithms;
 	}
 

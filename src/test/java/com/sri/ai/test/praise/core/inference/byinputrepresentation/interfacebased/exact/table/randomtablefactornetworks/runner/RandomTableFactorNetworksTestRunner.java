@@ -7,15 +7,15 @@ import static com.sri.ai.util.base.Pair.pair;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.AbstractBatchOfFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.randomtablefactornetworks.runner.configuration.ConfigurationForTestsOnRandomTableFactorNetworks;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class RandomTableFactorNetworksTestRunner extends AbstractBatchOfFactorNetworksTestRunner {
+public class RandomTableFactorNetworksTestRunner<Result> extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result> {
 
-	public RandomTableFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks configuration) {
+	public RandomTableFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks<Result> configuration) {
 		super(configuration);
 	}
 
@@ -29,8 +29,8 @@ public class RandomTableFactorNetworksTestRunner extends AbstractBatchOfFactorNe
 	}
 
 	@Override
-	protected ConfigurationForTestsOnRandomTableFactorNetworks getConfiguration() {
-		return (ConfigurationForTestsOnRandomTableFactorNetworks) super.getConfiguration();
+	protected ConfigurationForTestsOnRandomTableFactorNetworks<Result> getConfiguration() {
+		return (ConfigurationForTestsOnRandomTableFactorNetworks<Result>) super.getConfiguration();
 	}
 
 }

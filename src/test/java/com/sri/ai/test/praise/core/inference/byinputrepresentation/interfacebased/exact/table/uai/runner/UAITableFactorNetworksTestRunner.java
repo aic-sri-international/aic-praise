@@ -7,22 +7,26 @@ import static com.sri.ai.util.Util.pair;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.AbstractBatchOfFactorNetworksTestRunner;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.uai.instances.TestsOnUAITableFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.uai.runner.configuration.ConfigurationForTestOnUAIFile;
+import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class UAITableFactorNetworksTestRunner extends AbstractBatchOfFactorNetworksTestRunner {
+public class UAITableFactorNetworksTestRunner<Result> extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Result> {
 
-	public UAITableFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks configuration) {
+	public UAITableFactorNetworksTestRunner(ConfigurationForTestsOnBatchOfFactorNetworks<Result> configuration) {
 		super(configuration);
 	}
 
@@ -50,8 +54,8 @@ public class UAITableFactorNetworksTestRunner extends AbstractBatchOfFactorNetwo
 	}
 
 	@Override
-	protected ConfigurationForTestOnUAIFile getConfiguration() {
-		return (ConfigurationForTestOnUAIFile) super.getConfiguration();
+	protected ConfigurationForTestOnUAIFile<Result> getConfiguration() {
+		return (ConfigurationForTestOnUAIFile<Result>) super.getConfiguration();
 	}
 
 }

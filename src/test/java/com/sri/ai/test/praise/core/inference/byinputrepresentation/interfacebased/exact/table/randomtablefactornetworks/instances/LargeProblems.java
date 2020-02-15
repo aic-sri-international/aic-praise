@@ -3,7 +3,6 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import java.util.List;
 import java.util.Random;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
@@ -11,9 +10,9 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class LargeProblems extends DefaultConfigurationForTestsOnRandomTableFactorNetworks {
+public class LargeProblems<Result> extends DefaultConfigurationForTestsOnRandomTableFactorNetworks<Result> {
 
-	public LargeProblems(List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms) {
+	public LargeProblems(List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms) {
 		super(
 				algorithms,
 				/* numberOfRuns = */ 10,

@@ -39,8 +39,8 @@ public class TestsOnUAITableFactorNetworks {
 
 	@Test
 	void test() {
-		new UAITableFactorNetworksTestRunner(
-				new ConfigurationForTestOnUAIFile(
+		new UAITableFactorNetworksTestRunner<>(
+				new ConfigurationForTestOnUAIFile<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
 						"/UAITests/grid10x10.f10.uai")
@@ -48,8 +48,8 @@ public class TestsOnUAITableFactorNetworks {
 	}
 
 	public static void main(String[] args) {
-		new UAITableFactorNetworksTestRunner(
-				new ConfigurationForTestOnUAIFile(
+		new UAITableFactorNetworksTestRunner<>(
+				new ConfigurationForTestOnUAIFile<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
 						"/UAITests/BN_1.uai")

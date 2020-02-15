@@ -3,8 +3,8 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork.ConfigurationForRandomTableFactorNetworksGeneration;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.table.base.configuration.ConfigurationForTestsOnBatchOfFactorNetworks;
 
-public interface ConfigurationForTestsOnRandomTableFactorNetworks 
+public interface ConfigurationForTestsOnRandomTableFactorNetworks<Result> 
 extends ConfigurationForRandomTableFactorNetworksGeneration, 
-        ConfigurationForTestsOnBatchOfFactorNetworks {
+        ConfigurationForTestsOnBatchOfFactorNetworks<Result> {
 	
 }

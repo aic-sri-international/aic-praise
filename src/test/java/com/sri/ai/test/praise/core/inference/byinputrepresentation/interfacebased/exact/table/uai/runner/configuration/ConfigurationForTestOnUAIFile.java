@@ -3,7 +3,6 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
@@ -13,13 +12,13 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class ConfigurationForTestOnUAIFile extends DefaultConfigurationForTestsOnBatchOfFactorNetworks {
+public class ConfigurationForTestOnUAIFile<Result> extends DefaultConfigurationForTestsOnBatchOfFactorNetworks<Result> {
 
 	private BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker; 
 	private String uaiFileResourcePath;
 	
 	public ConfigurationForTestOnUAIFile(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms,
+			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
 			int numberOfRuns,
 			String uaiFileResourcePath,
 			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker) {
@@ -29,7 +28,7 @@ public class ConfigurationForTestOnUAIFile extends DefaultConfigurationForTestsO
 	}
 
 	public ConfigurationForTestOnUAIFile(
-			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms,
+			List<Pair<String,BinaryFunction<Variable,FactorNetwork,Result>>> algorithms,
 			int numberOfRuns, 
 			String uaiFileResourcePath) {
 		this(algorithms, numberOfRuns, uaiFileResourcePath, (v,e) -> new ArrayTableFactor(v,e));

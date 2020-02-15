@@ -32,11 +32,11 @@ class TestsOnRandomTableFactorNetworks {
 
 	@Test
 	void test() {
-		new RandomTableFactorNetworksTestRunner(new SmallProblems(algorithms)).run();
+		new RandomTableFactorNetworksTestRunner<>(new SmallProblems<>(algorithms)).run();
 	}
 
 	public static void main(String[] args) {
-		new RandomTableFactorNetworksTestRunner(new LargestProblems(algorithms)).run();
+		new RandomTableFactorNetworksTestRunner<>(new LargestProblems<>(algorithms)).run();
 	}
 
 }
