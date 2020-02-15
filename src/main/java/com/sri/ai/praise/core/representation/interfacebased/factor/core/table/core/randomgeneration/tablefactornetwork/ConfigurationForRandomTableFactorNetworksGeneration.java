@@ -7,7 +7,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ap
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.base.BinaryFunction;
 
-public interface ConfigurationForRandomTableFactorNetworksGeneration<T extends TableFactor> {
+public interface ConfigurationForRandomTableFactorNetworksGeneration {
 
 	int getMinimumNumberOfVariables();
 
@@ -29,7 +29,7 @@ public interface ConfigurationForRandomTableFactorNetworksGeneration<T extends T
 
 	double getMaximumPotential();
 	
-	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> getTableFactorMaker();
+	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> getTableFactorMaker();
 	
 	Random getRandom();
 

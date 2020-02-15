@@ -1,8 +1,9 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.instances;
 
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.runner.configuration.DefaultConfigurationForTestsOnRandomTableFactorNetworks;
 
 public class LargestProblems extends DefaultConfigurationForTestsOnRandomTableFactorNetworks {
 

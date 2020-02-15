@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.runner.configuration;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,7 +9,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.util.base.BinaryFunction;
 
 public class DefaultConfigurationForTestsOnRandomTableFactorNetworks
-extends DefaultConfigurationForRandomTableFactorNetworksGeneration<TableFactor> 
+extends DefaultConfigurationForRandomTableFactorNetworksGeneration 
 implements ConfigurationForTestsOnRandomTableFactorNetworks {
 
 	int numberOfTests;

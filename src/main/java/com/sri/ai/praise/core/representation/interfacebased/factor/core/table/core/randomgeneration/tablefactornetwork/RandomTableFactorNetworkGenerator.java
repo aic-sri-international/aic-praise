@@ -25,7 +25,7 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
 /** 
  * A utility for generating random table factor networks given a set of parameters with self-explanatory names.
  */
-public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements NullaryFunction<TableFactorNetwork> {
+public class RandomTableFactorNetworkGenerator implements NullaryFunction<TableFactorNetwork> {
 
 	private ArrayList<Integer> variableIndices;
 	private int[] cardinalitiesByVariable;
@@ -42,28 +42,28 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 	private int maximumNumberOfVariablesPerFactor;
 	private double minimumPotential;
 	private double maximumPotential;
-	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
+	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker;
 	private Random random;
 	
 	/////////////////////////////
 
 	public static 
-	<T1 extends TableFactor> TableFactorNetwork 
-	generateRandomTableFactorNetwork(ConfigurationForRandomTableFactorNetworksGeneration<T1> configuration) {
-		return new RandomTableFactorNetworkGenerator<T1>(configuration) .apply();
+	TableFactorNetwork 
+	generateRandomTableFactorNetwork(ConfigurationForRandomTableFactorNetworksGeneration configuration) {
+		return new RandomTableFactorNetworkGenerator(configuration).apply();
 	}
 	
-	public static <T1 extends TableFactor> TableFactorNetwork generateRandomTableFactorNetwork(
+	public static TableFactorNetwork generateRandomTableFactorNetwork(
 			int minimumNumberOfVariables, int maximumNumberOfVariables,
 			int minimumCardinality, int maximumCardinality, 
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
 			int minimumNumberOfVariablesPerFactor, int maximumNumberOfVariablesPerFactor, 
 			double minimumPotential, double maximumPotential, 
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T1> tableFactorMaker,
+			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker,
 			Random random) {
 		
 		return 
-				new RandomTableFactorNetworkGenerator<T1>(minimumNumberOfVariables, maximumNumberOfVariables, minimumCardinality, maximumCardinality, minimumNumberOfFactors, maximumNumberOfFactors, minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, minimumPotential, maximumPotential, tableFactorMaker, random)
+				new RandomTableFactorNetworkGenerator(minimumNumberOfVariables, maximumNumberOfVariables, minimumCardinality, maximumCardinality, minimumNumberOfFactors, maximumNumberOfFactors, minimumNumberOfVariablesPerFactor, maximumNumberOfVariablesPerFactor, minimumPotential, maximumPotential, tableFactorMaker, random)
 				.apply();
 	}
 	
@@ -73,11 +73,11 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
 			int minimumNumberOfVariablesPerFactor, int maximumNumberOfVariablesPerFactor, 
 			double minimumPotential, double maximumPotential,
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker,
+			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker,
 			Random random) {
 		
 		this(
-				new DefaultConfigurationForRandomTableFactorNetworksGeneration<T>(
+				new DefaultConfigurationForRandomTableFactorNetworksGeneration(
 						minimumNumberOfVariables,
 						maximumNumberOfVariables,
 						minimumCardinality,
@@ -92,8 +92,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 						random));
 	}
 
-	public RandomTableFactorNetworkGenerator(
-			ConfigurationForRandomTableFactorNetworksGeneration<T> configuration) {
+	public RandomTableFactorNetworkGenerator(ConfigurationForRandomTableFactorNetworksGeneration configuration) {
 		
 		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
 		this.maximumNumberOfVariables = configuration.getMaximumNumberOfVariables();
@@ -172,7 +171,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 		double maximumPotential = 4.0;
 		
 		var configuration =
-				new DefaultConfigurationForRandomTableFactorNetworksGeneration<>(
+				new DefaultConfigurationForRandomTableFactorNetworksGeneration(
 						minimumNumberOfVariables, maximumNumberOfVariables, 
 						minimumCardinality, maximumCardinality, 
 						minimumNumberOfFactors, maximumNumberOfFactors, 

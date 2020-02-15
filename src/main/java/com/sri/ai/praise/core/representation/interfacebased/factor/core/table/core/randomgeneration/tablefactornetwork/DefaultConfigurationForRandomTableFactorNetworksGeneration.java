@@ -7,8 +7,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.ap
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.base.BinaryFunction;
 
-public class DefaultConfigurationForRandomTableFactorNetworksGeneration<T extends TableFactor>
-implements          ConfigurationForRandomTableFactorNetworksGeneration<T> {
+public class DefaultConfigurationForRandomTableFactorNetworksGeneration
+implements          ConfigurationForRandomTableFactorNetworksGeneration {
 
 	private int minimumNumberOfVariables;
 	private int maximumNumberOfVariables;
@@ -20,7 +20,7 @@ implements          ConfigurationForRandomTableFactorNetworksGeneration<T> {
 	private int maximumNumberOfVariablesPerFactor;
 	private double minimumPotential;
 	private double maximumPotential;
-	private BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker;
+	private BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker;
 	private Random random;
 	
 	public DefaultConfigurationForRandomTableFactorNetworksGeneration(
@@ -29,7 +29,7 @@ implements          ConfigurationForRandomTableFactorNetworksGeneration<T> {
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
 			int minimumNumberOfVariablesPerFactor, int maximumNumberOfVariablesPerFactor,
 			double minimumPotential, double maximumPotential,
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker,
+			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker,
 			Random random) {
 		
 		this.minimumNumberOfVariables = minimumNumberOfVariables;
@@ -97,7 +97,7 @@ implements          ConfigurationForRandomTableFactorNetworksGeneration<T> {
 	}
 
 	@Override
-	public BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> getTableFactorMaker() {
+	public BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> getTableFactorMaker() {
 		return tableFactorMaker;
 	}
 
