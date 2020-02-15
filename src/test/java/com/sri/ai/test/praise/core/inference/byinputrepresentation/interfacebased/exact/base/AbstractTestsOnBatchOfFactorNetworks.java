@@ -4,6 +4,7 @@ import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -28,7 +29,7 @@ public abstract class AbstractTestsOnBatchOfFactorNetworks {
 
 	////////// DATA MEMBERS
 	
-	private ArrayList<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms;
+	private List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms;
 
 	private int[] totalTime;
 	
@@ -36,7 +37,7 @@ public abstract class AbstractTestsOnBatchOfFactorNetworks {
 
 	////////// ABSTRACT METHODS
 	
-	protected abstract ArrayList<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> makeAlgorithms();
+	protected abstract List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms();
 
 	protected abstract NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator();
 
@@ -54,7 +55,7 @@ public abstract class AbstractTestsOnBatchOfFactorNetworks {
 		this.configuration = configuration;
 	}
 
-	protected ArrayList<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> getAlgorithms() {
+	protected List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> getAlgorithms() {
 		if (algorithms == null) {
 			algorithms = makeAlgorithms();
 		}

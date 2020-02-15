@@ -1,11 +1,11 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactornetwork.RandomTableFactorNetworkGenerator.generateRandomTableFactorNetwork;
-import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.base.Pair.pair;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,31 +14,21 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.var
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.AbstractTestsOnBatchOfFactorNetworks;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.base.tablefactorconverter.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.ConfigurationForTestsOnRandomTableFactorNetworks;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.DebugProblems;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.LargestProblems;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.exact.randomtablefactornetworks.configuration.SmallProblems;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
 
 class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetworks {
 
-	///////////////// USER INTERFACE
-
-	BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> 
-	tableFactorMaker = 
-//			(v,e) -> new NDArrayTableFactor(v,e);
-			(v,e) -> new ArrayTableFactor(v,e);
-	
 	@Test
 	void test() {
-		new TestsOnRandomTableFactorNetworks().run(new DebugProblems());
+		new TestsOnRandomTableFactorNetworks().run(new SmallProblems());
 	}
 
 	public static void main(String[] args) {
@@ -46,8 +36,8 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 	}
 
 	@Override
-	protected ArrayList<Pair<String, BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms() {
-		return arrayList( 
+	protected List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> makeAlgorithms() {
+		return list( 
 				pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
 				,
 				pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering())))
@@ -63,7 +53,7 @@ class TestsOnRandomTableFactorNetworks extends AbstractTestsOnBatchOfFactorNetwo
 	@Override
 	protected NullaryFunction<Pair<Variable, FactorNetwork>> makeProblemGenerator() {
 		return () -> {
-			TableFactorNetwork factorNetwork = generateRandomTableFactorNetwork(getConfiguration(), tableFactorMaker, getConfiguration().getRandom());
+			TableFactorNetwork factorNetwork = generateRandomTableFactorNetwork(getConfiguration(), getConfiguration().getRandom());
 			Variable query = getFirst(factorNetwork.getFactors()).getVariables().get(0);
 			return pair(query, factorNetwork);
 		};

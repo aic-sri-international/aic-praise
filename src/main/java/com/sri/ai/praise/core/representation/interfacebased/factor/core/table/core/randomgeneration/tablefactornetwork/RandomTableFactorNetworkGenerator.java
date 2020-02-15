@@ -50,11 +50,10 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 	private int[] cardinalitiesByVariable;
 	
 	public static <T1 extends TableFactor> TableFactorNetwork generateRandomTableFactorNetwork(
-			ConfigurationForRandomTableFactorNetworksGeneration configuration, 
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T1> tableFactorMaker,
+			ConfigurationForRandomTableFactorNetworksGeneration<T1> configuration, 
 			Random random) {
 		return 
-				new RandomTableFactorNetworkGenerator<T1>(configuration, tableFactorMaker, random)
+				new RandomTableFactorNetworkGenerator<T1>(configuration, random)
 				.apply();
 	}
 	
@@ -82,7 +81,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 			Random random) {
 		
 		this(
-				new DefaultConfigurationForRandomTableFactorNetworksGeneration(
+				new DefaultConfigurationForRandomTableFactorNetworksGeneration<T>(
 						minimumNumberOfVariables,
 						maximumNumberOfVariables,
 						minimumCardinality,
@@ -92,14 +91,13 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 						minimumNumberOfVariablesPerFactor,
 						maximumNumberOfVariablesPerFactor,
 						minimumPotential,
-						maximumPotential),
-				tableFactorMaker,	
+						maximumPotential,
+						tableFactorMaker),
 				random);
 	}
 
 	public RandomTableFactorNetworkGenerator(
-			ConfigurationForRandomTableFactorNetworksGeneration configuration,
-			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, T> tableFactorMaker,
+			ConfigurationForRandomTableFactorNetworksGeneration<T> configuration,
 			Random random) {
 		
 		this.minimumNumberOfVariables = configuration.getMinimumNumberOfVariables();
@@ -112,7 +110,7 @@ public class RandomTableFactorNetworkGenerator<T extends TableFactor> implements
 		this.maximumNumberOfVariablesPerFactor = configuration.getMaximumNumberOfVariablesPerFactor();
 		this.minimumPotential = configuration.getMinimumPotential();
 		this.maximumPotential = configuration.getMaximumPotential();
-		this.tableFactorMaker = tableFactorMaker;
+		this.tableFactorMaker = configuration.getTableFactorMaker();
 		this.random = random;
 	}
 
