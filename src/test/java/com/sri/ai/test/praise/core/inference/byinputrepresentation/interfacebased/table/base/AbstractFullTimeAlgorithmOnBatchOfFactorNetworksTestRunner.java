@@ -11,7 +11,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
-import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
@@ -32,17 +31,15 @@ extends AbstractBatchOfFactorNetworksTestRunner<Factor, Configuration> {
 	}
 
 	@Override
-	protected Pair<Factor, Long> execute(
-			String algorithmName,
-			BinaryFunction<Variable, FactorNetwork, Factor> algorithm,
-			Variable query,
-			FactorNetwork factorNetwork) {
-		
+	protected void beforeExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Factor> algorithm, Variable query, FactorNetwork factorNetwork) {
 		ThreadExplanationLogger.setIsActive(algorithm instanceof VariableEliminationSolver);
 		println("Running " + algorithmName + "...");
-		var resultAndTime = Timer.timeAndGetResult(() -> algorithm.apply(query, factorNetwork));
-		println("Done running  " + algorithmName + ". Time: " + resultAndTime.second + " ms.");
+	}
+
+	@Override
+	protected Pair<Factor, Long> afterExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Factor> algorithm, Variable query, FactorNetwork factorNetwork, Pair<Factor, Long> resultAndTime) {
 		ThreadExplanationLogger.setIsActive(false);
+		println("Done running  " + algorithmName + ". Time: " + resultAndTime.second + " ms.");
 		println();
 		return resultAndTime;
 	}

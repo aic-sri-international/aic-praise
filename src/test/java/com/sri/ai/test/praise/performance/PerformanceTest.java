@@ -1,7 +1,7 @@
 package com.sri.ai.test.praise.performance;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.randomgeneration.tablefactor.RandomTableFactorGenerator.makeRandomTableFactor;
-import static com.sri.ai.util.Timer.timeAndGetResult;
+import static com.sri.ai.util.Timer.getResultAndTime;
 import static com.sri.ai.util.Util.fill;
 import static com.sri.ai.util.Util.getFirstHalfSubList;
 import static com.sri.ai.util.Util.getLastHalfSubList;
@@ -474,7 +474,7 @@ public class PerformanceTest {
 
 	private static FactorOperationResultAndTimes timeFactorOperation(NullaryFunction<Factor> operation) {
 		ConstraintSplitting.resetTotalConstraintSplittingTime();
-		Pair<Factor,Long> timeAndResult = timeAndGetResult( () -> operation.apply() );
+		Pair<Factor,Long> timeAndResult = getResultAndTime( () -> operation.apply() );
 		long contextSplittingTime = ConstraintSplitting.getTotalConstraintSplittingTime();
 		FactorOperationResultAndTimes result = new FactorOperationResultAndTimes( timeAndResult.first,
 				timeAndResult.second,

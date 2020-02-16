@@ -1,0 +1,72 @@
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base;
+
+import static com.sri.ai.util.Util.println;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
+import com.sri.ai.util.Timer;
+import com.sri.ai.util.base.BinaryFunction;
+import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
+
+/** 
+ * Abstract class for running a list of anytime algorithms on a batch of problems
+ * which return a list of (partial result, time) pairs.
+ * 
+ * @author braz
+ *
+ */
+public abstract class 
+AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner
+<PartialResult, Configuration extends ConfigurationForBatchOfFactorNetworksTest<Iterator<PartialResult>>> 
+extends AbstractBatchOfFactorNetworksTestRunner<Iterator<PartialResult>, Configuration> {
+
+	protected AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
+		super(configuration);
+	}
+
+	@Override
+	protected void beforeExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<PartialResult>> algorithm, Variable query, FactorNetwork factorNetwork) {
+		ThreadExplanationLogger.setIsActive(false);
+		println("Running " + algorithmName + "...");
+	}
+
+	@Override
+	protected Pair<Iterator<PartialResult>, Long> afterExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<PartialResult>> algorithm, Variable query, FactorNetwork factorNetwork, Pair<Iterator<PartialResult>, Long> resultAndTime) {
+		var realResultAndTime = Timer.getResultAndTime(() ->  iterate(resultAndTime.first));
+		resultAndTime.second = realResultAndTime.second;
+		ThreadExplanationLogger.setIsActive(false);
+		println("Done running  " + algorithmName + " to completion. Time: " + resultAndTime.second + " ms.");
+		println();
+		return resultAndTime;
+	}
+
+	private PartialResult iterate(Iterator<PartialResult> anytimeIterator) {
+		PartialResult current = null;
+		while (anytimeIterator.hasNext()) {
+			println("One more iteration");
+			current = anytimeIterator.next();
+		}
+		return current;
+	}
+
+	@Override
+	protected void compareResults(ArrayList<Pair<Iterator<PartialResult>, Long>> resultsAndTimes) {
+//		for (int i = 0; i != getAlgorithms().size() - 1; i++) {
+//			var name1 = getAlgorithms().get(i).first;
+//			var name2 = getAlgorithms().get(i + 1).first;
+//			var resultAndTime1 = resultsAndTimes.get(i);
+//			var resultAndTime2 = resultsAndTimes.get(i + 1);
+//			var anytimeResults1 = resultAndTime1.first;
+//			var anytimeResults2 = resultAndTime2.first;
+//			println("Comparing " + name1 + " and " + name2 + "...");
+//			// compareNumbersComponentWise(array1, array2, 0.001);
+//		}
+//		println();
+	}
+
+}

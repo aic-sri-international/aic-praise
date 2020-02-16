@@ -11,6 +11,7 @@ import java.util.List;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
+import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.base.Pair;
@@ -29,11 +30,19 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 	
 	abstract protected FactorNetwork makeNextFactorNetwork();
 
-	abstract protected Pair<Result, Long> execute(
+
+	abstract protected void beforeExecution(
 			String algorithmName,
 			BinaryFunction<Variable, FactorNetwork, Result> algorithm,
 			Variable query,
 			FactorNetwork factorNetwork);
+
+	abstract protected Pair<Result, Long> afterExecution(
+			String algorithmName,
+			BinaryFunction<Variable, FactorNetwork, Result> algorithm,
+			Variable query,
+			FactorNetwork factorNetwork,
+			Pair<Result, Long> resultAndTime);
 
 	protected abstract void compareResults(ArrayList<Pair<Result, Long>> resultsAndTimes);
 
@@ -82,19 +91,31 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 
 	private ArrayList<Pair<Result, Long>> computeResults(Variable query, FactorNetwork factorNetwork) {
 		ArrayList<Pair<Result, Long>> resultsAndTimes = new ArrayList<>(getAlgorithms().size());
-		for (int i = 0; i != getAlgorithms().size(); i++) {
-			var name = getAlgorithms().get(i).first;
-			var algorithm = getAlgorithms().get(i).second;
+		for (int algorithmIndex = 0; algorithmIndex != getAlgorithms().size(); algorithmIndex++) {
+			var name = getAlgorithms().get(algorithmIndex).first;
+			var algorithm = getAlgorithms().get(algorithmIndex).second;
 			var resultAndTime = execute(name, algorithm, query, factorNetwork);
-			recordOneExecutionTimeForAlgorithm(i, resultAndTime.second);
+			addToTotalTime(algorithmIndex, resultAndTime.second);
 			resultsAndTimes.add(resultAndTime);
 		}
 		return resultsAndTimes;
 	}
 
+	protected Pair<Result, Long> execute(
+			String algorithmName,
+			BinaryFunction<Variable, FactorNetwork, Result> algorithm,
+			Variable query,
+			FactorNetwork factorNetwork) {
+		
+		beforeExecution(algorithmName, algorithm, query, factorNetwork);
+		var resultAndTime = Timer.getResultAndTime(() -> algorithm.apply(query, factorNetwork));
+		resultAndTime = afterExecution(algorithmName, algorithm, query, factorNetwork, resultAndTime);
+		return resultAndTime;
+	}
+
 	//////////////////// TIME-KEEPING
 
-	protected int recordOneExecutionTimeForAlgorithm(int i, Long executionTime) {
+	protected int addToTotalTime(int i, Long executionTime) {
 		return totalTimeForEachAlgorithm[i] += executionTime;
 	}
 

@@ -14,8 +14,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.base.FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations.LargeProblems;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations.LargestProblems;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations.SmallProblems;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
@@ -34,7 +34,7 @@ class FullTimeAlgorithmsOnRandomTableFactorNetworksTest {
 
 	@Test
 	void test() {
-		new FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new SmallProblems<>(algorithms)).run();
+		new FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargeProblems<>(algorithms)).run();
 	}
 
 	public static void main(String[] args) {
