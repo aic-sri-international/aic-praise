@@ -4,13 +4,13 @@ import static com.sri.ai.praise.core.representation.translation.rodrigoframework
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.configuration.ConfigurationForUAITest;
 
-public class FullTimeAlgorithmsOnUAITestRunner
-extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<ConfigurationForUAITest<Factor>> {
+public class FulltimeAlgorithmsOnUAITestRunner
+extends AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner<ConfigurationForUAITest<Factor>> {
 
-	public FullTimeAlgorithmsOnUAITestRunner(ConfigurationForUAITest<Factor> configuration) {
+	public FulltimeAlgorithmsOnUAITestRunner(ConfigurationForUAITest<Factor> configuration) {
 		super(configuration);
 	}
 

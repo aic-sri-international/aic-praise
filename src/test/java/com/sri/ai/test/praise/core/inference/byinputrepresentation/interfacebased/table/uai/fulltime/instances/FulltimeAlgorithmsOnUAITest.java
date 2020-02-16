@@ -16,11 +16,11 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.configuration.ConfigurationForUAITest;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.fulltime.base.FullTimeAlgorithmsOnUAITestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.fulltime.base.FulltimeAlgorithmsOnUAITestRunner;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class FullTimeAlgorithmsOnUAITest {
+public class FulltimeAlgorithmsOnUAITest {
 
 	static List<Pair<String,BinaryFunction<Variable,FactorNetwork,Factor>>> algorithms =
 			arrayList( 
@@ -39,7 +39,7 @@ public class FullTimeAlgorithmsOnUAITest {
 
 	@Test
 	void test() {
-		new FullTimeAlgorithmsOnUAITestRunner(
+		new FulltimeAlgorithmsOnUAITestRunner(
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
@@ -48,7 +48,7 @@ public class FullTimeAlgorithmsOnUAITest {
 	}
 
 	public static void main(String[] args) {
-		new FullTimeAlgorithmsOnUAITestRunner(
+		new FulltimeAlgorithmsOnUAITestRunner(
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 

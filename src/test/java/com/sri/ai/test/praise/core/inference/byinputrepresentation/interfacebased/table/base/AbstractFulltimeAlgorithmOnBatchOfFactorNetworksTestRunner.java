@@ -23,10 +23,10 @@ import com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger;
  * @author braz
  *
  */
-public abstract class AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<Configuration extends ConfigurationForBatchOfFactorNetworksTest<Factor>> 
+public abstract class AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner<Configuration extends ConfigurationForBatchOfFactorNetworksTest<Factor>> 
 extends AbstractBatchOfFactorNetworksTestRunner<Factor, Configuration> {
 
-	protected AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
+	protected AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
 		super(configuration);
 	}
 

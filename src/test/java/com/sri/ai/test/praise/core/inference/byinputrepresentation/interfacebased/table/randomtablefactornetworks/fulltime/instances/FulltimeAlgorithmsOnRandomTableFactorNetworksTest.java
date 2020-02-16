@@ -13,13 +13,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.base.FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.base.FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations.LargeProblems;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations.LargestProblems;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-class FullTimeAlgorithmsOnRandomTableFactorNetworksTest {
+class FulltimeAlgorithmsOnRandomTableFactorNetworksTest {
 
 	static List<Pair<String,BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms =
 			list( 
@@ -34,11 +34,11 @@ class FullTimeAlgorithmsOnRandomTableFactorNetworksTest {
 
 	@Test
 	void test() {
-		new FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargeProblems<>(algorithms)).run();
+		new FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargeProblems<>(algorithms)).run();
 	}
 
 	public static void main(String[] args) {
-		new FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargestProblems<>(algorithms)).run();
+		new FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargestProblems<>(algorithms)).run();
 	}
 
 }

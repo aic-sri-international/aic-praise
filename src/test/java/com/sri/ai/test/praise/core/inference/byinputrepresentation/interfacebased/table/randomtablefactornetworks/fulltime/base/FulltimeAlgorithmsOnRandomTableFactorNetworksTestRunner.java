@@ -4,13 +4,13 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.t
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableFactorNetwork;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.configuration.ConfigurationForRandomTableFactorNetworksTest;
 
-public class FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner 
-extends AbstractFullTimeAlgorithmOnBatchOfFactorNetworksTestRunner<ConfigurationForRandomTableFactorNetworksTest<Factor>> {
+public class FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner 
+extends AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner<ConfigurationForRandomTableFactorNetworksTest<Factor>> {
 
-	public FullTimeAlgorithmsOnRandomTableFactorNetworksTestRunner(ConfigurationForRandomTableFactorNetworksTest<Factor> configuration) {
+	public FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner(ConfigurationForRandomTableFactorNetworksTest<Factor> configuration) {
 		super(configuration);
 	}
 
