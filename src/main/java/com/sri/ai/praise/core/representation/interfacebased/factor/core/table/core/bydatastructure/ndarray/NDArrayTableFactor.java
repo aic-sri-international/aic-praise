@@ -271,7 +271,7 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
-	protected NDArrayTableFactor sumOutEverythingExcept(
+	protected NDArrayTableFactor sumOut(
 			List<? extends TableVariable> variablesToSumOut, 
 			ArrayList<? extends TableVariable> variablesNotToSumOut) {
 		
@@ -341,6 +341,16 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 		Integer[] integerArray = values.toArray(new Integer[values.size()]);
 		int[] intValues = toPrimitive(integerArray);
 		return intValues;
+	}
+
+	@Override
+	protected TableFactor max(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		throw new Error("Maximization not yet implemented for NDArrayTableFactor");
+	}
+
+	@Override
+	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		throw new Error("Minimization not yet implemented for NDArrayTableFactor");
 	}
 
 }

@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.c
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -20,6 +21,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.Con
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty.EmptyTableFactor;
 import com.sri.ai.util.Enclosing;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -49,7 +51,11 @@ public abstract class AbstractTableFactor implements TableFactor {
 	 * @param variablesNotToSumOut
 	 * @return
 	 */
-	protected abstract TableFactor sumOutEverythingExcept(List<? extends TableVariable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut);
+	protected abstract TableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining);
+
+	protected abstract TableFactor max(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining);
+
+	protected abstract TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining);
 
 	protected abstract TableFactor normalizeBy(Double normalizationConstant);
 
@@ -59,7 +65,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 
 	protected abstract TableFactor multiplyTableFactor(TableFactor another);
 
-	protected abstract TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment, ArrayList<? extends TableVariable> remainingVariables);
+	protected abstract TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment, ArrayList<? extends TableVariable> remaining);
 
 	protected abstract String parametersString();
 
@@ -185,9 +191,9 @@ public abstract class AbstractTableFactor implements TableFactor {
 	}
 
 	private TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment) {
-		var remainingVariables = new ArrayList<>(getVariables());
-		remainingVariables.removeAll(assignment.keySet());
-		TableFactor result = slicePossiblyModifyingAssignment(assignment, remainingVariables);
+		var remaining = new ArrayList<>(getVariables());
+		remaining.removeAll(assignment.keySet());
+		TableFactor result = slicePossiblyModifyingAssignment(assignment, remaining);
 		return result;
 	}
 
@@ -270,31 +276,44 @@ public abstract class AbstractTableFactor implements TableFactor {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// SUMMING OUT //////////////////////////////////////////////////////////////////////////////////////
+	// AGGREGATION //////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	/**
-	 * Sums out given variables from factor.
-	 * 
-	 * @param variablesToSumOut (variables to sum out)
-	 * @return new factor with given variables summed out
-	 */
 	@Override
-	public TableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+	public TableFactor sumOut(List<? extends Variable> eliminated) {
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		return sumOut(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
+	}
 
-		myAssert(getVariables().containsAll(variablesToSumOut), () -> "Not all variables to be summed out occur in factor: " + variablesToSumOut + " not all in " + getVariables());
+	@Override
+	public TableFactor max(Collection<? extends Variable> eliminated) {
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		return max(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
+	}
+
+	@Override
+	public TableFactor min(Collection<? extends Variable> eliminated) {
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		return min(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// SUPPORT FOR AGGREGATION OPERATORS ////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private Pair<List<TableVariable>, ArrayList<TableVariable>> organizeVariablesForElimination(Collection<? extends Variable> eliminated) {
+		
+		myAssert(getVariables().containsAll(eliminated), () -> "Not all variables to be eliminated occur in factor: " + eliminated + " not all in " + getVariables());
 		
 		// TODO: to avoid this ugly cast we would have to make TableFactor generic with the
 		// type of variable V it applies to, so the parameter of this method would be
 		// List<? extends V>.
 		@SuppressWarnings("unchecked")
-		List<TableVariable> tableVariablesToSumOut = new LinkedList<>((List<TableVariable>) variablesToSumOut);
+		List<TableVariable> eliminatedTableVariables = new LinkedList<>((List<TableVariable>) eliminated);
 		
-		var variablesNotToSumOut = setDifference(getVariables(), tableVariablesToSumOut, arrayList());
+		var remaining = setDifference(getVariables(), eliminatedTableVariables, arrayList());
 		
-		TableFactor result = sumOutEverythingExcept(tableVariablesToSumOut, variablesNotToSumOut);
-		
-		return result;
+		return pair(eliminatedTableVariables, remaining);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -364,17 +383,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 	}
 
 	@Override
-	public Factor max(Collection<? extends Variable> variablesToMaximize) {
-		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
-	}
-
-	@Override
 	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
-		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
-	}
-
-	@Override
-	public Factor min(Collection<? extends Variable> variablesToMinimize) {
 		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}
 

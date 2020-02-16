@@ -152,10 +152,21 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected EmptyTableFactor sumOutEverythingExcept(List<? extends TableVariable> variablesToSumOut, ArrayList<? extends TableVariable> variablesNotToSumOut) {
-		return new EmptyTableFactor(variablesNotToSumOut);
+	protected EmptyTableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		return new EmptyTableFactor(remaining);
 	}
 	
+
+	@Override
+	protected TableFactor max(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		return new EmptyTableFactor(remaining);
+	}
+
+	@Override
+	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		return new EmptyTableFactor(remaining);
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INVERSION ////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

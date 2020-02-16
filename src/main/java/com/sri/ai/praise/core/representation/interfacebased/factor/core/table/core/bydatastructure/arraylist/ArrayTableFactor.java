@@ -30,6 +30,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
@@ -143,6 +144,14 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	@Override
 	protected String parametersString() {
 		return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
+	}
+	
+	private double parametersAggregate(BinaryDoubleOperator operator, double initialValue) {
+		double result = initialValue;
+		for (int i = 0; i != parameters.length; i++) {
+			result = operator.apply(result, parameters[i]);
+		}
+		return result;
 	}
 	
 	private double parametersSum() {
@@ -320,16 +329,18 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected ArrayTableFactor normalizeBy(Double normalizationConstant) {
-		ArrayTableFactor result;
 		Double divider = normalizationConstant;
 		var newEntries = parametersDividedBy(divider);
-		result = new ArrayTableFactor(getVariables(), newEntries);
-		return result;
+		return new ArrayTableFactor(getVariables(), newEntries);
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
-	// SUMMING OUT ///////////////////////////////////////////////////////////////////////////////////
+	// AGGREGATION //////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private static interface BinaryDoubleOperator {
+		double apply(double aggregatedValue, double newValue);
+	}
 	
 	@Override
 	public ArrayTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
@@ -337,48 +348,32 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
-	protected ArrayTableFactor sumOutEverythingExcept(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+	public ArrayTableFactor max(Collection<? extends Variable> variablesToSumOut) {
+		return (ArrayTableFactor) super.max(variablesToSumOut);
+	}
 
-		if (eliminated.isEmpty()) {
-			return this;
-		}
-		
-		ArrayTableFactor result = new ArrayTableFactor(remaining);
-		
-		if (remaining.isEmpty()) {
-			result.set(0, parametersSum());
-			return result;
-		}
-		
-		long start, end;
-		
-		start = System.currentTimeMillis();
+	@Override
+	public ArrayTableFactor min(Collection<? extends Variable> variablesToSumOut) {
+		return (ArrayTableFactor) super.min(variablesToSumOut);
+	}
 
- 		ArrayIndex remainingValues = makeArrayIndex(remaining, this);
-		ArrayIndex eliminatedValues = makeArrayIndex(eliminated, this);
+	@Override
+	protected ArrayTableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
 
-		int offsetInResult = 0; // we do not need to compute offset in resulting factor since it will be sequential
-		do {
-			double sumForTheseRemainingValues = 0;
-			eliminatedValues.reset();
-			do {
-				sumForTheseRemainingValues += get(remainingValues.offset() + eliminatedValues.offset());
-			} while (eliminatedValues.incrementIfPossible());
-			result.set(offsetInResult, sumForTheseRemainingValues);
-			offsetInResult++;
-		} while (remainingValues.incrementIfPossible());
+		var resultAndTime = Timer.getResultAndTime(() -> aggregate((a, v) -> a + v, 0, eliminated, remaining));
 
-		end = System.currentTimeMillis();
+		var result = resultAndTime.first;
+		long time = resultAndTime.second;
 		
 		if (numberOfEntries() > Integer.MAX_VALUE) { // change to something like 200K to see how long different methods for iterating over the factor take
 			println("\n" + getVariables());
-			println("Time to eliminate variables from it: " + (end - start) + " ms.");
+			println("Time to eliminate variables from it: " + time + " ms.");
 			println("Number of entries: " + numberOfEntries());
 			
 			MixedRadixNumber allValues;
 			ArrayList<Integer> allIndices;
 			double sum;
-			
+			long start, end;
 
 			allValues = new MixedRadixNumber(0, getCardinalities());
 			start = System.currentTimeMillis();
@@ -438,6 +433,47 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		}
 		return result;
 	}
+
+	@Override
+	protected TableFactor max(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		return aggregate((a, v) -> v > a ? v : a, Double.MIN_VALUE, eliminated, remaining);
+	}
+
+	@Override
+	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		return aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining);
+	}
+
+	private ArrayTableFactor aggregate(BinaryDoubleOperator operator, double initialValue, List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
+		
+		if (eliminated.isEmpty()) {
+			return this;
+		}
+		
+		if (remaining.isEmpty()) {
+			return new ArrayTableFactor(remaining, parametersAggregate(operator, initialValue));
+		}
+		
+		ArrayTableFactor result = new ArrayTableFactor(remaining);
+		
+ 		ArrayIndex remainingValues = makeArrayIndex(remaining, this);
+		ArrayIndex eliminatedValues = makeArrayIndex(eliminated, this);
+
+		int offsetInResult = 0; // we do not need to compute offset in resulting factor since it will be sequential
+		do {
+			double aggregatedValueForTheseRemainingValues = initialValue;
+			eliminatedValues.reset();
+			do {
+				double value = get(remainingValues.offset() + eliminatedValues.offset());
+				aggregatedValueForTheseRemainingValues = operator.apply(aggregatedValueForTheseRemainingValues, value);
+			} while (eliminatedValues.incrementIfPossible());
+			result.set(offsetInResult, aggregatedValueForTheseRemainingValues);
+			offsetInResult++;
+		} while (remainingValues.incrementIfPossible());
+		
+		return result;
+	}
+
 
 	private ArrayIndex makeArrayIndex(Collection<? extends TableVariable> someVariables, ArrayTableFactor factor) {
 		var cardinalities = mapIntoList(someVariables, TableVariable::getCardinality);
