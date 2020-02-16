@@ -4,8 +4,10 @@ import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersection;
+import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.toIntArray;
@@ -289,6 +291,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 					
 					double value1 = get(exclusive1Values.offset() + commonValuesInThis.offset());
 					double value2 = anotherArrayTableFactor.get(exclusive2Values.offset() + commonValuesInAnother.offset());
+					
 					result.set(offsetInResult, value1 * value2);
 					
 					offsetInResult++;
@@ -323,7 +326,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		result = new ArrayTableFactor(getVariables(), newEntries);
 		return result;
 	}
-
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// SUMMING OUT ///////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,6 +452,86 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			int value = values.getCurrentNumeralValue(i);
 			result += stride * value;
 		}
+		return result;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// NRMALIZATION /////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Override
+	public ArrayTableFactor normalize(Collection<? extends Variable> variablesToNormalize) {
+
+		if (variablesToNormalize.isEmpty()) {
+			// This means each element is normalized by itself, so we return a table of 1's.
+			return new ArrayTableFactor(getVariables(), 1.0);
+		}
+
+		myAssert(getVariables().containsAll(variablesToNormalize), () -> "Not all variables to normalize occur in factor: " + variablesToNormalize + " not all in " + getVariables());
+
+		// TODO: it's odd that sum takes a List and normalize takes a Collection, forcing us here to create a new list.
+		
+		return divideByTableFactor(sumOut(listFrom(variablesToNormalize)));
+		
+		// I wonder if reducing normalization to a division by a sum is as efficient
+		// as writing dedicated code.
+		// Having thought about it for a bit, it seems that it is, because doing this normalization in one swipe
+		// would not work since we need to sum certain subsets of elements and then "go back" to compute their division
+		// by their respective normalization constant.
+		// Doing it like this does it in two swipes, which seems pretty much required anyway,
+		// but stores all normalization constants in memory at once, thus incurring
+		// in an allocation time overhead and memory overhead.
+		// There is also a probably negligible overhead for copying variable lists more than once.
+		// We may want to benchmark this at some point.
+		// Right now I am leaving it since normalization is not used very often anyway.
+	}
+
+
+	private ArrayTableFactor divideByTableFactor(TableFactor another) {
+		
+		// ATTENTION: THIS IS BASICALLY A COPY OF multiplyTableFactor.
+		// I've copied the code, only changing the basic operation line, to avoid any overhead since this is an inner loop.
+		// Also, this is here for normalization and I didn't make division an interface method for Factor, but it is worth considering.
+		// Note that implementing normalization by using multiplication and inversion would make it significantly more expensive,
+		// performing a division of 1.0 by the normalization constant and then multiplying by the numerator. Might as well do it only once.
+		
+		var anotherArrayTableFactor = castOrThrowError(getClass(), another, () -> "divideTableFactor supported for two " + getClass() + " objects only");
+		
+		Set<TableVariable> common = intersection(getVariables(), anotherArrayTableFactor.getVariables());
+		List<TableVariable> exclusive1 = setDifference(getVariables(), common);
+		List<TableVariable> exclusive2 = setDifference(anotherArrayTableFactor.getVariables(), common);
+ 		
+		ArrayList<TableVariable> totalVariables = new ArrayList<>(exclusive1.size() + exclusive2.size() + common.size());
+		totalVariables.addAll(exclusive1);
+		totalVariables.addAll(exclusive2);
+		totalVariables.addAll(common);
+		ArrayTableFactor result = new ArrayTableFactor(totalVariables);
+		
+		ArrayIndex exclusive1Values = makeArrayIndex(exclusive1, this);
+ 		ArrayIndex exclusive2Values = makeArrayIndex(exclusive2, anotherArrayTableFactor);
+		ArrayIndex commonValuesInThis = makeArrayIndex(common, this); // these two could be combined into an ArrayIndex on multiple sets of strides
+		ArrayIndex commonValuesInAnother = makeArrayIndex(common, anotherArrayTableFactor);
+
+		int offsetInResult = 0;
+		do {
+			exclusive2Values.reset();
+			do {
+				commonValuesInThis.reset();
+				commonValuesInAnother.reset();
+				do {
+					
+					double value1 = get(exclusive1Values.offset() + commonValuesInThis.offset());
+					double value2 = anotherArrayTableFactor.get(exclusive2Values.offset() + commonValuesInAnother.offset());
+					
+					result.set(offsetInResult, value1 / value2);
+					
+					offsetInResult++;
+					
+					commonValuesInThis.incrementIfPossible();
+				} while (commonValuesInAnother.incrementIfPossible());
+			} while (exclusive2Values.incrementIfPossible());
+		} while (exclusive1Values.incrementIfPossible());
+		
 		return result;
 	}
 

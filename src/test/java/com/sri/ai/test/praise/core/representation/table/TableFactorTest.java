@@ -1,6 +1,7 @@
 package com.sri.ai.test.praise.core.representation.table;
 
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -379,6 +380,73 @@ public class TableFactorTest {
 		
 		println();
 	}
+	
+	
+	@Test
+	public void testF2NormalizationOnAllVariables() {
+		
+		println();
+		println("Normalize F2");
+		println("------------------");
+
+		ArrayList<? extends TableVariable> variablesToNormalize = f2.getVariables();
+		ArrayTableFactor normalizedF2 = f2.normalize(variablesToNormalize);
+		normalizedF2.setName("normalizedF2");
+		
+		println(normalizedF2);
+		assertEquals(
+				"normalizedF2[{V2:card=3}, {V4:card=2}]: [0.08527131782945736, 0.09302325581395349, 0.16279069767441862, 0.17054263565891473, 0.24031007751937986, 0.24806201550387597]", 
+				normalizedF2.toString());
+		
+		assertEquals(1.0, normalizedF2.sumOut(normalizedF2.getVariables()).getEntries().get(0), 0.0001);
+		
+		println();
+	}
+	
+	
+	@Test
+	public void testF2NormalizationOnV2() {
+		
+		println();
+		println("Normalize F2 on V2");
+		println("------------------");
+
+		ArrayList<? extends TableVariable> variablesToNormalize = arrayList(V2);
+		ArrayTableFactor normalizedF2OnV2 = f2.normalize(variablesToNormalize);
+		normalizedF2OnV2.setName("normalizedF2OnV2");
+		
+		println(normalizedF2OnV2);
+		assertEquals(
+				"normalizedF2OnV2[{V2:card=3}, {V4:card=2}]: [0.1746031746031746, 0.18181818181818182, 0.3333333333333333, 0.3333333333333333, 0.49206349206349204, 0.48484848484848486]", 
+				normalizedF2OnV2.toString());
+		
+		assertEquals(arrayList(1.0, 1.0), normalizedF2OnV2.sumOut(list(V2)).getEntries());
+		
+		println();
+	}
+	
+	
+	@Test
+	public void testF2NormalizationOnNoVariables() {
+		
+		println();
+		println("Normalize F2 on no variables");
+		println("------------------");
+
+		ArrayList<? extends TableVariable> variablesToNormalize = arrayList();
+		ArrayTableFactor normalizedF2OnNoVariables = f2.normalize(variablesToNormalize);
+		normalizedF2OnNoVariables.setName("normalizedF2OnNoVariables");
+		
+		println(normalizedF2OnNoVariables);
+		assertEquals(
+				"normalizedF2OnNoVariables[{V2:card=3}, {V4:card=2}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", 
+				normalizedF2OnNoVariables.toString());
+		
+		assertEquals(arrayList(1.0, 1.0, 1.0, 1.0,1.0, 1.0), normalizedF2OnNoVariables.getEntries());
+		
+		println();
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

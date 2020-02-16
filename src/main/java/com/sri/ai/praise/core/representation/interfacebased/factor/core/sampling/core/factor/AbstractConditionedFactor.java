@@ -250,6 +250,13 @@ public abstract class AbstractConditionedFactor implements Factor {
 	}
 
 	@Override
+	public Factor normalize(Collection<? extends Variable> variablesToMaximize) {
+		Factor normalizedFactor = factor.normalize(variablesToMaximize);
+		Factor result = getConditionedFactor(conditioningSample, normalizedFactor);
+		return result;
+	}
+
+	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		Factor maximizedFactor = factor.max(variablesToMaximize);
 		Factor result = getConditionedFactor(conditioningSample, maximizedFactor);

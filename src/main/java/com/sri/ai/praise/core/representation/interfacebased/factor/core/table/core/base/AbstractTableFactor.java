@@ -359,6 +359,11 @@ public abstract class AbstractTableFactor implements TableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
+	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
+	}
+
+	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass().getSimpleName());
 	}

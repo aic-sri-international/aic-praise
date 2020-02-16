@@ -87,20 +87,23 @@ public class DefaultExpressionFactor extends AbstractExpressionFactor implements
 	}
 
 	@Override
+	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error("normalize not supported for " + getClass());
+	}
+
+	@Override
 	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("argmax not supported for " + getClass());
 	}
 
 	@Override
 	public Factor min(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("min not supported for " + getClass());
 	}
 
 	@Override
 	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new Error("argmin not supported for " + getClass());
 	}
+
 }

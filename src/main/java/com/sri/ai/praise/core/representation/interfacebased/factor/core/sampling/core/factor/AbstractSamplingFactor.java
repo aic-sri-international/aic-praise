@@ -123,6 +123,11 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
+	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error("normalize not supported for " + getClass());
+	}
+
+	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		throw new Error("max not supported for " + getClass());
 	}

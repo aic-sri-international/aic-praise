@@ -223,38 +223,40 @@ public class ConstantFactor implements Factor {
 	}
 
 	@Override
+	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error("normalize not implemented for " + getClass());
+	}
+
+	@Override
 	public Factor max(Collection<? extends Variable> variablesToMaximize) {
 		return this;
 	}
 	
+	@Override
+	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
+		throw new Error("argmax not implemented for " + getClass());
+	}
+
+	@Override
+	public Factor min(Collection<? extends Variable> variablesToMinimize) {
+		throw new Error("min not implemented for " + getClass());
+	}
+
+	@Override
+	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
+		throw new Error("argmin not implemented for " + getClass());
+	}
+
 	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
 
 	@Override
 	public ExplanationTree getExplanation() {
 		return explanation;
 	}
-	
+
 	@Override
 	public void setExplanation(ExplanationTree explanation) {
 		this.explanation = explanation;
-	}
-
-	@Override
-	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Factor min(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
