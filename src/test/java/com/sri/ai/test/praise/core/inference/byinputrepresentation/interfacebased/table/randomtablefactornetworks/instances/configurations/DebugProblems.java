@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations;
 
 import java.util.List;
 import java.util.Random;
@@ -10,26 +10,26 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class LargeProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
+public class DebugProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
 
-	public LargeProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
+	public DebugProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
 		super(
 				algorithms,
-				/* numberOfRuns = */ 10,
-				/* minimumNumberOfVariables = */ 10,
-				/* maximumNumberOfVariables = */ 25,
+				/* numberOfRuns = */ 1,
+				/* minimumNumberOfVariables = */ 3,
+				/* maximumNumberOfVariables = */ 3,
 				/* minimumCardinality = */ 2,
 				/* maximumCardinality = */ 2,
-				/* minimumNumberOfFactors = */ 10,
-				/* maximumNumberOfFactors = */ 25,
-				/* minimumNumberOfVariablesPerFactor = */ 3,
-				/* maximumNumberOfVariablesPerFactor = */ 6,
+				/* minimumNumberOfFactors = */ 2,
+				/* maximumNumberOfFactors = */ 2,
+				/* minimumNumberOfVariablesPerFactor = */ 2,
+				/* maximumNumberOfVariablesPerFactor = */ 2,
 				/* minimumPotential = */ 1.0,
 				/* maximumPotential = */ 4.0,
 				/* tableFactorMaker = */ 
 					// (v,e) -> new NDArrayTableFactor(v,e);
 					(v,e) -> new ArrayTableFactor(v,e),
-				/* random = */ new Random(0) // fixed seed since we usually want to compare performance between runs
+				/* random = */ new Random() // no seed since we usually want to run different tests each time to ensure we catch errors
 				);
 	}
 }

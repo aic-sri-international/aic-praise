@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.fulltime.instances;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.instances;
 
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.base.Pair.pair;
@@ -15,8 +15,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.base.FulltimeAlgorithmsOnUAITestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.configuration.ConfigurationForUAITest;
-import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.fulltime.base.FulltimeAlgorithmsOnUAITestRunner;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 

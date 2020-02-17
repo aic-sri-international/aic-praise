@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations;
 
 import java.util.List;
 import java.util.Random;
@@ -10,26 +10,26 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class SmallProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
+public class LargeProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
 
-	public SmallProblems(List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
+	public LargeProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
 		super(
 				algorithms,
-				/* numberOfRuns = */ 1000,
-				/* minimumNumberOfVariables = */ 3,
-				/* maximumNumberOfVariables = */ 5,
+				/* numberOfRuns = */ 10,
+				/* minimumNumberOfVariables = */ 10,
+				/* maximumNumberOfVariables = */ 25,
 				/* minimumCardinality = */ 2,
-				/* maximumCardinality = */ 3,
-				/* minimumNumberOfFactors = */ 1,
-				/* maximumNumberOfFactors = */ 4,
-				/* minimumNumberOfVariablesPerFactor = */ 1,
-				/* maximumNumberOfVariablesPerFactor = */ 3,
+				/* maximumCardinality = */ 2,
+				/* minimumNumberOfFactors = */ 10,
+				/* maximumNumberOfFactors = */ 25,
+				/* minimumNumberOfVariablesPerFactor = */ 3,
+				/* maximumNumberOfVariablesPerFactor = */ 6,
 				/* minimumPotential = */ 1.0,
 				/* maximumPotential = */ 4.0,
 				/* tableFactorMaker = */ 
 					// (v,e) -> new NDArrayTableFactor(v,e);
 					(v,e) -> new ArrayTableFactor(v,e),
-				/* random = */ new Random() // no seed since we usually want to run different tests each time to ensure we catch errors
+				/* random = */ new Random(0) // fixed seed since we usually want to compare performance between runs
 				);
 	}
 }

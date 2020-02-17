@@ -85,7 +85,12 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 	
 	public ArrayTableFactor(Collection<? extends TableVariable> variables) {
-		this(variables, new double[numberOfEntries(variables)]);
+		this(variables, allocate(variables));
+	}
+
+	private static double[] allocate(Collection<? extends TableVariable> variables) {
+		// println("Creating array table factor on " + variables);
+		return new double[numberOfEntries(variables)];
 	}
 
 	public ArrayTableFactor(Collection<? extends TableVariable> variables, double[] parameters) {

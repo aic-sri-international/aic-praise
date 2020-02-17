@@ -345,7 +345,7 @@ public class Polytopes {
 		return new IntensionalConvexHullOfFactors(list(), IDENTITY_FACTOR);
 	}
 	
-	public static Polytope multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne(
+	public static Polytope multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(
 			Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes, 
 			AtomicPolytope nonIdentityAtomicAnother) {
 		

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -84,7 +84,7 @@ public class ProductPolytope implements Polytope {
 		}
 		else {
 			AtomicPolytope nonIdentityAtomicAnother = (AtomicPolytope) another;
-			result = multiplyListOfAlreadyMultipledNonIdentityAtomicPolytopesWithANewOne(nonIdentityAtomicPolytopes, nonIdentityAtomicAnother);
+			result = multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(nonIdentityAtomicPolytopes, nonIdentityAtomicAnother);
 		}
 		return result;
 	}

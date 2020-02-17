@@ -1,4 +1,4 @@
-package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.fulltime.instances.configurations;
+package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations;
 
 import java.util.List;
 import java.util.Random;
@@ -10,20 +10,20 @@ import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebase
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 
-public class DebugProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
+public class SmallProblems<Result> extends DefaultConfigurationForRandomTableFactorNetworksTest<Result> {
 
-	public DebugProblems(List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
+	public SmallProblems(List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms) {
 		super(
 				algorithms,
-				/* numberOfRuns = */ 1,
+				/* numberOfRuns = */ 1000,
 				/* minimumNumberOfVariables = */ 3,
-				/* maximumNumberOfVariables = */ 3,
+				/* maximumNumberOfVariables = */ 5,
 				/* minimumCardinality = */ 2,
-				/* maximumCardinality = */ 2,
-				/* minimumNumberOfFactors = */ 2,
-				/* maximumNumberOfFactors = */ 2,
-				/* minimumNumberOfVariablesPerFactor = */ 2,
-				/* maximumNumberOfVariablesPerFactor = */ 2,
+				/* maximumCardinality = */ 3,
+				/* minimumNumberOfFactors = */ 1,
+				/* maximumNumberOfFactors = */ 4,
+				/* minimumNumberOfVariablesPerFactor = */ 1,
+				/* maximumNumberOfVariablesPerFactor = */ 3,
 				/* minimumPotential = */ 1.0,
 				/* maximumPotential = */ 4.0,
 				/* tableFactorMaker = */ 
