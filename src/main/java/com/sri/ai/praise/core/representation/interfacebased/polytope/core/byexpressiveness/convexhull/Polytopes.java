@@ -38,12 +38,12 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
-import static com.sri.ai.util.Util.addAllElementsOfCollectionsToList;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
@@ -196,16 +196,15 @@ public class Polytopes {
 
 	private static IntensionalConvexHullOfFactors mergeIntensionalConvexHulls(List<? extends AtomicPolytope> convexHulls) {
 		
-		List<Variable> indicesFromConvexHulls = collectIndicesFromIntensionalPolytopes(convexHulls);
+		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesThatAreIntensionalConvexHulls(convexHulls);
 		Factor productOfFactors = makeProductOfFactors(convexHulls);
 		IntensionalConvexHullOfFactors result = new IntensionalConvexHullOfFactors(indicesFromConvexHulls, productOfFactors);
 		return result;
 	}
 
 	private static Factor makeProductOfFactors(List<? extends AtomicPolytope> convexHulls) {
-		List<Factor> factors = collectFactorsFromIntensionalPolytopes(convexHulls);
-		Factor productOfFactors = Factor.multiply(factors);
-		return productOfFactors;
+		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(convexHulls);
+		return Factor.multiply(factors);
 	}
 
 	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
@@ -233,29 +232,30 @@ public class Polytopes {
 				independentOfVariablesToBeSummedOut, 
 				dependentOfVariablesToBeSummedOut);
 
-		Polytope projectedPolytope = makeProjectedPolytopeOfIntensionalConvexHull(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
+		Polytope projectedPolytope = sumOutGivenThatPolytopesAllDependOnEliminatedVariables(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
 
 		Polytope result = makeProductOfPolytopes(independentOfVariablesToBeSummedOut, projectedPolytope);
 
 		return result;
 	}
 	
-	private static Polytope makeProjectedPolytopeOfIntensionalConvexHull(List<? extends Variable> variablesToBeSummedOut, List<Polytope> dependentOfVariablesToBeSummedOut) {
+	private static Polytope sumOutGivenThatPolytopesAllDependOnEliminatedVariables(List<? extends Variable> eliminated, List<Polytope> polytopesDependentOnEliminated) {
 
-		List<Variable> simplexVariables = collectSimplexVariables(dependentOfVariablesToBeSummedOut);
+		List<Variable> simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
+		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
-		List<Variable> indicesFromConvexHulls = collectIndicesFromIntensionalPolytopes(dependentOfVariablesToBeSummedOut);
+		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
 		
-		List<Factor> factors = collectFactorsFromIntensionalPolytopes(dependentOfVariablesToBeSummedOut);
+		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
 		
 		Factor productOfFactors = Factor.multiply(factors);
 		
-		List<? extends Variable> variablesToBeSummedOutOnceSimplexesAreDealtWith = 
-				subtract(variablesToBeSummedOut, simplexVariables);
+		List<? extends Variable> variablesToBeSummedOutOnceSimplexesAreDealtWith = subtract(eliminated, simplexVariables);
 		
 		Factor projectedFactor = productOfFactors.sumOut(variablesToBeSummedOutOnceSimplexesAreDealtWith);
 		
-		List<Variable> finalIndices = addAllElementsOfCollectionsToList(indicesFromConvexHulls, simplexVariables);
+		List<Variable> finalIndices = makeListWithElementsOfTwoCollections(indicesFromConvexHulls, simplexVariables);
+		// TODO: this seems completely wrong because simplexVariables are all in eliminated!
 		
 		Polytope projectedPolytope = new IntensionalConvexHullOfFactors(finalIndices, projectedFactor);
 		
@@ -272,9 +272,9 @@ public class Polytopes {
 		return indices;
 	}
 
-	private static List<Variable> collectIndicesFromIntensionalPolytopes(List<? extends Polytope> dependentOfVariablesToBeSummedOut) {
+	private static List<Variable> collectIndicesFromPolytopesThatAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
 		List<Variable> indices = list();
-		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
+		for (Polytope polytope : polytopes) {
 			if (polytope instanceof IntensionalConvexHullOfFactors) {
 				collectIndicesFromIntensionalPolytope(indices, polytope);
 			}
@@ -291,9 +291,9 @@ public class Polytopes {
 		indices.addAll(intensionalPolytope.getIndices());
 	}
 
-	private static List<Factor> collectFactorsFromIntensionalPolytopes(List<? extends Polytope> dependentOfVariablesToBeSummedOut) {
+	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
 		List<Factor> factors = list();
-		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
+		for (Polytope polytope : polytopes) {
 			collectFactorIfIntensionalConvexHull(polytope, factors);
 		}
 		return factors;
@@ -327,7 +327,7 @@ public class Polytopes {
 		for (Polytope polytope : polytopes) {
 			if ( ! polytope.isIdentity()) {
 				if (polytope instanceof ProductPolytope) {
-					collectNonIdentityAtomicPolytopesInProduct(polytope, result);
+					collectNonIdentityAtomicPolytopesInProduct((ProductPolytope) polytope, result);
 				}
 				else {
 					result.add((AtomicPolytope) polytope);
@@ -336,8 +336,8 @@ public class Polytopes {
 		}
 	}
 
-	private static void collectNonIdentityAtomicPolytopesInProduct(Polytope polytope, List<AtomicPolytope> result) {
-		Collection<? extends Polytope> immediateSubPolytopes = ((ProductPolytope)polytope).getPolytopes();
+	private static void collectNonIdentityAtomicPolytopesInProduct(ProductPolytope productPolytope, List<AtomicPolytope> result) {
+		Collection<? extends Polytope> immediateSubPolytopes = productPolytope.getPolytopes();
 		collectNonIdentityAtomicPolytopes(immediateSubPolytopes, result);
 	}
 
@@ -352,7 +352,16 @@ public class Polytopes {
 		List<AtomicPolytope> resultNonIdentityAtomicPolytopes = list();
 		boolean anotherAlreadyIncorporated = false;
 		for (AtomicPolytope nonIdentityAtomicPolytope : nonIdentityAtomicPolytopes) {
-			anotherAlreadyIncorporated = takeNextPolytopeInList(nonIdentityAtomicPolytope, nonIdentityAtomicAnother, resultNonIdentityAtomicPolytopes, anotherAlreadyIncorporated);
+			if (anotherAlreadyIncorporated) {
+				resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicPolytope);
+			}
+			else {
+				anotherAlreadyIncorporated = 
+						addToListEitherPolytopeOrProductOfPolytopeIfProductIsAtomic(
+								nonIdentityAtomicPolytope,
+								nonIdentityAtomicAnother,
+								resultNonIdentityAtomicPolytopes);
+			}
 		}
 		
 		includeAnotherByItselfIfMultiplicationsFailed(nonIdentityAtomicAnother, anotherAlreadyIncorporated, resultNonIdentityAtomicPolytopes);
@@ -362,44 +371,21 @@ public class Polytopes {
 		return result;
 	}
 
+	private static boolean addToListEitherPolytopeOrProductOfPolytopeIfProductIsAtomic(
+			AtomicPolytope atomicPolytope,
+			AtomicPolytope anotherAtomicPolytope,
+			List<AtomicPolytope> list) {
+		
+		var product = atomicPolytope.getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(anotherAtomicPolytope);
+		var productIsAtomic = product != null;
+		list.add(productIsAtomic? product : atomicPolytope);
+		return productIsAtomic;
+	}
+
 	private static void includeAnotherByItselfIfMultiplicationsFailed(AtomicPolytope nonIdentityAtomicAnother, boolean anotherAlreadyIncorporated, List<AtomicPolytope> resultNonIdentityAtomicPolytopes) {
 		if (! anotherAlreadyIncorporated) {
 			resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicAnother);
 		}
-	}
-
-	private static boolean takeNextPolytopeInList(AtomicPolytope nonIdentityAtomicPolytope, AtomicPolytope nonIdentityAtomicAnother, List<AtomicPolytope> resultNonIdentityAtomicPolytopes, boolean anotherAlreadyIncorporated) {
-		if (anotherAlreadyIncorporated) {
-			resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicPolytope);
-		}
-		else {
-			anotherAlreadyIncorporated = 
-					tryNextPolytopeInList(
-							nonIdentityAtomicPolytope, 
-							nonIdentityAtomicAnother, 
-							resultNonIdentityAtomicPolytopes, 
-							anotherAlreadyIncorporated);
-		}
-		return anotherAlreadyIncorporated;
-	}
-
-	private static boolean tryNextPolytopeInList(AtomicPolytope nonIdentityAtomicPolytope, AtomicPolytope nonIdentityAtomicAnother, List<AtomicPolytope> resultNonIdentityAtomicPolytopes, boolean anotherAlreadyIncorporated) {
-		AtomicPolytope nonIdentityAtomicProductWithAnother = 
-				nonIdentityAtomicPolytope.getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(nonIdentityAtomicAnother);
-		if (nonIdentityAtomicProductWithAnother == null) {
-			resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicPolytope);
-		}
-		else {
-			anotherAlreadyIncorporated = addSuccessfulProductAndIndicateItsBeenIncorporated(resultNonIdentityAtomicPolytopes, nonIdentityAtomicProductWithAnother);
-		}
-		return anotherAlreadyIncorporated;
-	}
-
-	private static boolean addSuccessfulProductAndIndicateItsBeenIncorporated(List<AtomicPolytope> resultNonIdentityAtomicPolytopes, AtomicPolytope nonIdentityAtomicProductWithAnother) {
-		boolean anotherAlreadyIncorporated;
-		resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicProductWithAnother);
-		anotherAlreadyIncorporated = true;
-		return anotherAlreadyIncorporated;
 	}
 
 	public static Polytope makePolytopeFromListOfNonIdentityAtomicPolytopes(List<AtomicPolytope> resultNonIdentityAtomicPolytopes) {
