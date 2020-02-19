@@ -61,6 +61,8 @@ public interface Polytope extends Approximation<Factor> {
 
 	Polytope multiply(Polytope another);
 
+	Collection<? extends AtomicPolytope> getAtomicPolytopes();
+	
 	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
 		Polytope result = accumulate(polytopes, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
 		return result;

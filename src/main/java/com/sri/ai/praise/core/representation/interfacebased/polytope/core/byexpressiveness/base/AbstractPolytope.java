@@ -22,7 +22,7 @@ public abstract class AbstractPolytope implements Polytope {
 		List<Polytope> dependentOfEliminated = list();
 
 		collect(
-				/* original collection: */ Polytopes.getAtomicPolytopes(list(this)), 
+				/* original collection: */ this.getAtomicPolytopes(), 
 				/* criterion: */ isIndependentOf(eliminated), 
 				/* satisfy criterion: */ independentOfEliminated, 
 				/* do not satisfy criterion: */ dependentOfEliminated);

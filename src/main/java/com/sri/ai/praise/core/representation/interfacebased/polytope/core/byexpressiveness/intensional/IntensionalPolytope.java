@@ -146,4 +146,5 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 		
 		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
+
 }

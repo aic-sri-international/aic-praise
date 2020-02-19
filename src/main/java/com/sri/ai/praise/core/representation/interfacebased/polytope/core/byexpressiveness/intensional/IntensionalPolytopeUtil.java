@@ -4,6 +4,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.b
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static java.util.stream.Collectors.toList;
@@ -117,18 +118,18 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
 public class IntensionalPolytopeUtil {
 
 	/**
-	 * Takes a polytope in which the only free variable is a given query variable,
+	 * Takes a polytope in which the only free variable is a given variable,
 	 * and returns a single equivalent {@link AtomicPolytope}.
 	 * 
 	 * @return
 	 */
-	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable query, Polytope polytope) {
+	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Polytope polytope) {
 		
-		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(query), () -> "getEquivalentAtomicPolytopeOn must receive polytope whose only free variable is " + query + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
+		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(variable), () -> "getEquivalentAtomicPolytopeOn must receive polytope whose only free variable is " + variable + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
 		
-		final List<? extends AtomicPolytope> atomicPolytopes = Polytopes.getAtomicPolytopes(list(polytope));
+		final Collection<? extends AtomicPolytope> atomicPolytopes = polytope.getAtomicPolytopes();
 	
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> Polytopes.isSimplexOn(p, query));
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> Polytopes.isSimplexOn(p, variable));
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		
@@ -144,23 +145,26 @@ public class IntensionalPolytopeUtil {
 		return result;
 	}
 
-	private static IntensionalPolytope mergeNonSimplexAtomicPolytopes(List<? extends AtomicPolytope> convexHulls) {
-		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(convexHulls);
-		Factor productOfFactors = makeProductOfFactors(convexHulls);
+	private static IntensionalPolytope mergeNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
+		@SuppressWarnings("unchecked")
+		Collection<? extends IntensionalPolytope> intensionalPolytopes = (Collection<? extends IntensionalPolytope>) nonSimplexAtomicPolytopes;
+		// The only non-simplex atomic polytopes in this implementation are intensional polytopes.
+		
+		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(intensionalPolytopes);
+		Factor productOfFactors = makeProductOfFactorsOf(intensionalPolytopes);
 		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);
 	}
 
-	private static List<Variable> collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(List<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
 		List<Variable> indices = list();
-		for (Polytope polytope : polytopes) {
-			var intensionalPolytope = (IntensionalPolytope) polytope;
+		for (IntensionalPolytope intensionalPolytope : intensionalPolytopes) {
 			indices.addAll(intensionalPolytope.getIndices());
 		}
 		return indices;
 	}
 
-	public static Factor makeProductOfFactors(List<? extends AtomicPolytope> convexHulls) {
-		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(convexHulls);
+	private static Factor makeProductOfFactorsOf(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
+		List<Factor> factors = mapIntoList(intensionalPolytopes, IntensionalPolytope::getFactor);
 		return Factor.multiply(factors);
 	}
 

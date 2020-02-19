@@ -116,4 +116,5 @@ public class Simplex extends AbstractAtomicPolytope {
 		
 		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
+
 }

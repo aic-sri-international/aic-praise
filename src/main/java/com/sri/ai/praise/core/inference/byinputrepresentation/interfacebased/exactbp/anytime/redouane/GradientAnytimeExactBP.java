@@ -248,8 +248,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		if(!(approximation instanceof IntensionalPolytope)) { // can't be simplex because sub is not null
 			throw new Error("Unfit type of approximation for gradient descent");
 		}
-		IntensionalPolytope convexHull = (IntensionalPolytope) atomicPolytope;
-		return convexHull;
+		return (IntensionalPolytope) atomicPolytope;
 	}
 	
 	private static Factor computeInvertedMaxMinusMinFactor(Factor factor, Collection<? extends Variable> variablesToMaximizeAndMinimizeOver) {

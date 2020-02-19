@@ -9,7 +9,6 @@ import java.util.List;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Polytopes;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
 
 public class BoxUtil {
@@ -20,7 +19,7 @@ public class BoxUtil {
 		List<Polytope> notToBeBoxed= list();
 	
 		collect(
-				Polytopes.getAtomicPolytopes(list(polytope)), 
+				polytope.getAtomicPolytopes(), 
 				p -> p instanceof IntensionalPolytope && criteria.apply(p), 
 				toBeBoxed, 
 				notToBeBoxed);

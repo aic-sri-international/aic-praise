@@ -61,17 +61,30 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
  */
 public class ProductPolytope extends AbstractPolytope implements Polytope {
 	
-	private List<? extends AtomicPolytope> atomicPolytopes;
+	private List<? extends AtomicPolytope> alreadyMultipledAtomicPolytopes;
+	// by "already multiplied", we mean each pair of atomic polytopes in this list cannot be multiplied into an atomic polytope,
+	// that is, this is the minimum number of atomic polytopes to represent this product as far as pairwise multiplication is concerned
+	// (it is conceivable that for some implementations, three- or higher-wise multiplication may produce atomic polytopes when two-wise multiplication cannot).
 
-	public ProductPolytope(Collection<? extends AtomicPolytope> atomicPolytopes) {
+	/**
+	 * Makes a {@link ProductPolytope}. This is not meant for end-user usage, since it assumes the given atomic polytopes are already checked for pair-wise multiplication.
+	 * Users must call {@link Polytope#multiply(Collection)} instead.
+	 * @param alreadyMultipledAtomicPolytopes
+	 */
+	ProductPolytope(Collection<? extends AtomicPolytope> alreadyMultipledAtomicPolytopes) {
 		super();
-		myAssert(atomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, create an IdentityPolytope or use static Polytope.multiply.");
-		myAssert(atomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead, or use static Polytope.multiply.");
-		this.atomicPolytopes = new LinkedList<>(atomicPolytopes);
+		myAssert(alreadyMultipledAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, create an IdentityPolytope or use static Polytope.multiply.");
+		myAssert(alreadyMultipledAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead, or use static Polytope.multiply.");
+		this.alreadyMultipledAtomicPolytopes = new LinkedList<>(alreadyMultipledAtomicPolytopes);
 	}
 	
 	public Collection<? extends Polytope> getPolytopes() {
-		return atomicPolytopes;
+		return alreadyMultipledAtomicPolytopes;
+	}
+	
+	@Override
+	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
+		return alreadyMultipledAtomicPolytopes;
 	}
 
 	@Override
@@ -83,7 +96,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	public Collection<? extends Variable> getFreeVariables() {
 		
 		Collection<Collection<? extends Variable>> listOfFreeVariablesCollections = 
-				mapIntoList(atomicPolytopes, Polytope::getFreeVariables);
+				mapIntoList(alreadyMultipledAtomicPolytopes, Polytope::getFreeVariables);
 		
 		Set<? extends Variable> allFreeVariables = unionOfCollections(listOfFreeVariablesCollections);
 		
@@ -104,7 +117,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 		else {
 			AtomicPolytope anotherAtomicPolytope = (AtomicPolytope) another;
-			result = ProductPolytope.multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(atomicPolytopes, anotherAtomicPolytope);
+			result = ProductPolytope.multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(alreadyMultipledAtomicPolytopes, anotherAtomicPolytope);
 		}
 		return result;
 	}
@@ -129,7 +142,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		
 		includeAnotherByItselfIfMultiplicationsFailed(atomicAnother, anotherAlreadyIncorporated, resultAtomicPolytopes);
 		
-		Polytope result = makePolytopeFromListOfAtomicPolytopes(resultAtomicPolytopes);
+		Polytope result = makePolytopeEquivalentToProductOfAtomicPolytopes(resultAtomicPolytopes);
 		
 		return result;
 	}
@@ -155,7 +168,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 	}
 
-	private static Polytope makePolytopeFromListOfAtomicPolytopes(List<AtomicPolytope> resultAtomicPolytopes) {
+	private static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(List<AtomicPolytope> resultAtomicPolytopes) {
 		Polytope result;
 		if (resultAtomicPolytopes.isEmpty()) {
 			result = IntensionalPolytopeUtil.identityPolytope();
@@ -173,7 +186,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 	@Override
 	public String toString() {
-		String result = join(atomicPolytopes, "*");
+		String result = join(alreadyMultipledAtomicPolytopes, "*");
 		return result;
 	}
 	

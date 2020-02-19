@@ -37,14 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
 
-import static com.sri.ai.util.Util.list;
-
-import java.util.Collection;
-import java.util.List;
-
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 public class Polytopes {
 	
@@ -56,35 +50,6 @@ public class Polytopes {
 				&&
 				((Simplex)atomicPolytope).getVariable().equals(variable);
 		return result;
-	}
-	
-	//////////////////////////////////////////// GET NON-IDENTITY ATOMIC POLYTOPES
-	
-	public static List<? extends AtomicPolytope> getAtomicPolytopes(Iterable<? extends Polytope> polytopes) {
-		List<AtomicPolytope> result = list();
-		for (Polytope polytope : polytopes) {
-			if ( ! polytope.isIdentity()) {
-				if (polytope instanceof ProductPolytope) {
-					collectAtomicPolytopesInProduct((ProductPolytope) polytope, result);
-				}
-				else {
-					result.add((AtomicPolytope) polytope);
-				}
-			}
-		}
-		return result;
-	}
-
-	private static void collectAtomicPolytopesInProduct(ProductPolytope productPolytope, List<AtomicPolytope> result) {
-		Collection<? extends Polytope> immediateSubPolytopes = productPolytope.getPolytopes();
-		for (Polytope polytope : immediateSubPolytopes) {
-			if (polytope instanceof ProductPolytope) {
-				collectAtomicPolytopesInProduct((ProductPolytope) polytope, result);
-			}
-			else {
-				result.add((AtomicPolytope) polytope);
-			}
-		}
 	}
 
 }

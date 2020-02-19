@@ -39,6 +39,8 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexp
 
 import static com.sri.ai.util.Util.list;
 
+import java.util.Collection;
+
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
@@ -84,4 +86,11 @@ public abstract class AbstractAtomicPolytope extends AbstractPolytope implements
 	private Error unrecognizedCase(Polytope another) {
 		return new Error("Multiplying " + this + " by " + another + " but the latter's class is not recognized.");
 	}
+	
+
+	@Override
+	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
+		return list(this);
+	}
+
 }
