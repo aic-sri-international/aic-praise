@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexp
 
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
@@ -51,10 +52,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
+import com.sri.ai.util.Util;
 
 /**
  * @author braz
@@ -206,6 +209,30 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	}
 
 	@Override
+	public Polytope sumOut(Collection<? extends Variable> eliminated) {
+		
+		List<Polytope> independentOfEliminated = list();
+		List<Polytope> dependentOfEliminated = list();
+
+		collect(
+				/* original collection: */ this.getAtomicPolytopes(), 
+				/* criterion: */ isIndependentOf(eliminated), 
+				/* satisfy criterion: */ independentOfEliminated, 
+				/* do not satisfy criterion: */ dependentOfEliminated);
+
+		Polytope summedOutFromDependents = sumOutEliminatedVariablesFromPolytopesDependingOnThem(eliminated, dependentOfEliminated);
+
+		List<Polytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
+		allAtomicPolytopesInResult.add(summedOutFromDependents);
+		Polytope result = Polytope.multiply(allAtomicPolytopesInResult);
+
+		return result;
+	}
+	
+	private static Predicate<Polytope> isIndependentOf(Collection<? extends Variable> variables) {
+		return p -> ! Util.intersect(p.getFreeVariables(), variables);
+	}
+
 	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
 			Collection<? extends Variable> eliminated,
 			Collection<? extends Polytope> dependentPolytopes) {

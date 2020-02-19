@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexp
 
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.subtract;
 
 import java.util.Collection;
@@ -71,10 +72,13 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 		return indices;
 	}
 
+	private List<Variable> free;
 	@Override
 	public Collection<? extends Variable> getFreeVariables() {
-		List<? extends Variable> all = factor.getVariables();
-		List<Variable> free = subtract(all, getIndices());
+		if (free == null) {
+			List<? extends Variable> all = factor.getVariables();
+			free = subtract(all, getIndices());
+		}
 		return free;
 	}
 
@@ -117,6 +121,21 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 	}
 
 	@Override
+	public Polytope sumOut(Collection<? extends Variable> eliminated) {
+		var eliminatedOccurringInPolytope = intersection(eliminated, getFreeVariables());
+		if (eliminatedOccurringInPolytope.isEmpty()) {
+			return this;
+		}
+		else {
+			var newFactor = getFactor().sumOut(listFrom(eliminatedOccurringInPolytope)); // TODO: does Factor.sumOut really need a list? It should work with just a collection.
+			return new IntensionalPolytope(getIndices(), newFactor);
+		}
+		// Note that this implementation considers polytopes equivalent modulo normalization.
+		// This plays a role here because sum_V Polytope_on_U for V containing variables other than U will result in their cardinality multiplying the result.
+		// If we want to represent that, we must rely on the specific polytope implementation used.
+	}
+
+	@Override
 	public String toString() {
 		String indicesString = indices.isEmpty()? "" : "(on " + join(indices) + ") ";
 		String result = "{" + indicesString + factor + "}";
@@ -137,14 +156,6 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 	@Override
 	public int hashCode() {
 		return getIndices().hashCode() + getFactor().hashCode();
-	}
-
-	@Override
-	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
-			Collection<? extends Variable> eliminated,
-			Collection<? extends Polytope> dependentPolytopes) {
-		
-		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
 
 }

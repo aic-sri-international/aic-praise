@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.list;
 
 import java.util.Collection;
@@ -44,7 +45,6 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 /**
  * @author braz
@@ -70,6 +70,19 @@ public class Simplex extends AbstractAtomicPolytope {
 	@Override
 	public boolean isIdentity() {
 		return false;
+	}
+	
+	@Override
+	public Polytope sumOut(Collection<? extends Variable> eliminated) {
+		if (eliminated.contains(getVariable())) {
+			return identityPolytope();
+		}
+		else {
+			return this;
+		}
+		// Note that this implementation considers polytopes equivalent modulo normalization.
+		// This plays a role here because sum_V Simplex_U for V containing variables other than U will result in their cardinality multiplying the result.
+		// If we want to represent that, we must rely on the specific polytope implementation used.
 	}
 
 	@Override
@@ -107,14 +120,6 @@ public class Simplex extends AbstractAtomicPolytope {
 	@Override
 	public int hashCode() {
 		return getVariable().hashCode();
-	}
-
-	@Override
-	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
-			Collection<? extends Variable> eliminated,
-			Collection<? extends Polytope> dependentPolytopes) {
-		
-		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
 
 }
