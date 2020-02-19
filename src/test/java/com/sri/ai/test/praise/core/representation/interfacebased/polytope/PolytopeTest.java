@@ -43,7 +43,6 @@ import static com.sri.ai.praise.core.representation.interfacebased.polytope.core
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +57,6 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicP
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 public class PolytopeTest {
 
@@ -167,48 +165,43 @@ public class PolytopeTest {
 	public void testGetEquivalentAtomicPolytope() {
 		
 		product = Polytope.multiply(list(simplexU));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUV));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound, convexHullVW));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUV));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
-		try {
-			product = Polytope.multiply(list(simplexU, convexHullUBoundVFree));
-			actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
-			fail("Should have failed because V is free in polytope but query is U");
-		}
-		catch (AssertionError e) {
-			if ( ! e.getMessage().contains("free variables")) {
-				fail("Should have complained about free variables");
-			}
-		}
+		product = Polytope.multiply(list(simplexU, convexHullUBoundVFree));
+		actual = product.getEquivalentAtomicPolytopeOn(u);
+		println("Atomic polytope on u equivalent to " + product + ": " + actual);
+		expected = simplexU; // simplexU dominates
+		assertEquals(expected, actual);
 
 		product = Polytope.multiply(list(convexHullUFreeVBound, convexHullVW));
-		actual = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(u, product);
+		actual = product.getEquivalentAtomicPolytopeOn(u);
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		ExpressionFactor expectedExpressionFactor = new DefaultExpressionFactor(parse("if U then if V then if W then 8 else 10 else 15 else if V then if W then 12 else 15 else 15"), context);
 		expected = new IntensionalPolytope(list(v,w), expectedExpressionFactor);

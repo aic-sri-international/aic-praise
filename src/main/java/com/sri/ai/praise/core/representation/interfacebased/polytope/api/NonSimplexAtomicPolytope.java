@@ -17,5 +17,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
 public interface NonSimplexAtomicPolytope extends AtomicPolytope {
 
 	Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends Polytope> polytopesDependentOnEliminated);
+
+	AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Collection<? extends AtomicPolytope> atomicPolytopes);
 	
 }

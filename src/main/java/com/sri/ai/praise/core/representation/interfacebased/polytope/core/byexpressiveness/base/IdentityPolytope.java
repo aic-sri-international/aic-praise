@@ -41,4 +41,9 @@ public class IdentityPolytope implements Polytope {
 		return this; // modulo a constant!
 	}
 
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
+		throw new Error("getEquivalentAtomicPolytopeOn is not valid for IdentityPolytope");
+	}
+
 }

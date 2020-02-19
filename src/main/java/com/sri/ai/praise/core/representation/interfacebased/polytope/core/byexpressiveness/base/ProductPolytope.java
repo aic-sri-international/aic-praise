@@ -205,28 +205,8 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		return result;
 	}
 	
-	////////////////// ANCILLARY
-
-	@Override
-	public String toString() {
-		String result = join(alreadyMultipledAtomicPolytopes, "*");
-		return result;
-	}
+	//////////////////// SUMMING OUT
 	
-	@Override
-	public boolean equals(Object another) {
-		boolean result =
-				another instanceof ProductPolytope
-				&&
-				((ProductPolytope) another).getPolytopes().equals(getPolytopes());
-		return result;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getPolytopes().hashCode();
-	}
-
 	@Override
 	public Polytope sumOut(Collection<? extends Variable> eliminated) {
 		
@@ -266,6 +246,51 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		else {
 			return ((NonSimplexAtomicPolytope) nonSimplex).sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
 		}
+	}
+
+	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
+	
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
+		var nonSimplex = getFirst(getAtomicPolytopes(), p -> !( p instanceof Simplex));
+		
+		var allAreSimplices = nonSimplex == null;
+
+		if (allAreSimplices) {
+			var simplexOnVariable = getFirst(getAtomicPolytopes(), p -> ((Simplex)p).getVariable().equals(variable));
+			if (simplexOnVariable == null) {
+				throw new Error("ProductPolytope has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
+			}
+			else {
+				return simplexOnVariable;
+			}
+		}
+		else {
+			return ((NonSimplexAtomicPolytope) nonSimplex).getEquivalentAtomicPolytopeOn(variable, getAtomicPolytopes());
+		}
+		
+	}
+	
+	////////////////// ANCILLARY
+
+	@Override
+	public String toString() {
+		String result = join(alreadyMultipledAtomicPolytopes, "*");
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object another) {
+		boolean result =
+				another instanceof ProductPolytope
+				&&
+				((ProductPolytope) another).getPolytopes().equals(getPolytopes());
+		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		return getPolytopes().hashCode();
 	}
 
 }

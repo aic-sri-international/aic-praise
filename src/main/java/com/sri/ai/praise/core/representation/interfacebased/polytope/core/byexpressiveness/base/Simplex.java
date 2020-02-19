@@ -73,24 +73,6 @@ public class Simplex extends AbstractAtomicPolytope {
 	}
 	
 	@Override
-	public Polytope sumOut(Collection<? extends Variable> eliminated) {
-		if (eliminated.contains(getVariable())) {
-			return identityPolytope();
-		}
-		else {
-			return this;
-		}
-		// Note that this implementation considers polytopes equivalent modulo normalization.
-		// This plays a role here because sum_V Simplex_U for V containing variables other than U will result in their cardinality multiplying the result.
-		// If we want to represent that, we must rely on the specific polytope implementation used.
-	}
-
-	@Override
-	public String toString() {
-		return "Simplex(" + variable + ")";
-	}
-
-	@Override
 	public AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope another) {
 		AtomicPolytope result;
 		if (another instanceof Simplex) {
@@ -107,7 +89,35 @@ public class Simplex extends AbstractAtomicPolytope {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public Polytope sumOut(Collection<? extends Variable> eliminated) {
+		if (eliminated.contains(getVariable())) {
+			return identityPolytope();
+		}
+		else {
+			return this;
+		}
+		// Note that this implementation considers polytopes equivalent modulo normalization.
+		// This plays a role here because sum_V Simplex_U for V containing variables other than U will result in their cardinality multiplying the result.
+		// If we want to represent that, we must rely on the specific polytope implementation used.
+	}
+
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
+		if (variable.equals(getVariable())) {
+			return this;
+		}
+		else {
+			throw new Error("getEquivalentAtomicPolytopeOn can only be requested of Simplex for its own variable");
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "Simplex(" + variable + ")";
+	}
+
 	@Override
 	public boolean equals(Object another) {
 		boolean result =

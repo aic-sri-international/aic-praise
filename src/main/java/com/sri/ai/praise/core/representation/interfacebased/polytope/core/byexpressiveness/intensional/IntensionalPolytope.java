@@ -37,11 +37,14 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional;
 
+import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
+import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
 import static java.util.stream.Collectors.toList;
 
@@ -267,7 +270,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		return new IntensionalPolytope(finalIndices, summedOutFactor);
 	}
 
-	private List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
+	private static List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
 				.filter(p -> p instanceof Simplex)
@@ -275,7 +278,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 				.collect(toList());
 	}
 
-	private List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
 				.filter(p -> p instanceof IntensionalPolytope)
@@ -284,7 +287,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	}
 
 
-	private List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
 		List<Factor> factors = list();
 		for (Polytope polytope : polytopes) {
 			collectFactorIfIntensionalPolytope(polytope, factors);
@@ -293,11 +296,80 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	}
 
 
-	private void collectFactorIfIntensionalPolytope(Polytope polytope, List<Factor> factors) {
+	private static void collectFactorIfIntensionalPolytope(Polytope polytope, List<Factor> factors) {
 		if (polytope instanceof IntensionalPolytope) {
 			IntensionalPolytope intensionalPolytope = (IntensionalPolytope) polytope;
 			factors.add(intensionalPolytope.getFactor());
 		}
+	}
+	
+	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
+	
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
+		if (getFreeVariables().contains(variable)) {
+			if (getFreeVariables().size() == 1) {
+				// already in desired form, nothing to do
+				return this;
+			}
+			else {
+				// sum the other ones out
+				return (AtomicPolytope) sumOut(setDifference(getFreeVariables(), list(variable)));
+			}
+		}
+		else {
+			// variable is required to be in polytope
+			throw new Error("IntensionalPolytope has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
+		}
+	}	
+
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Collection<? extends AtomicPolytope> atomicPolytopes) {
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> isSimplexOn(p, variable));
+		
+		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
+		
+		AtomicPolytope result;
+		if (thereIsSimplexOnQuerySoItDominates) {
+			result = simplexOnVariableIfAny;
+		}
+		else {
+			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
+			result = makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(atomicPolytopes);
+		}
+		
+		return result;
+	}
+
+	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
+		boolean result = 
+				atomicPolytope instanceof Simplex
+				&&
+				((Simplex)atomicPolytope).getVariable().equals(variable);
+		return result;
+	}
+
+	private static IntensionalPolytope makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
+		@SuppressWarnings("unchecked")
+		Collection<? extends IntensionalPolytope> intensionalPolytopes = (Collection<? extends IntensionalPolytope>) nonSimplexAtomicPolytopes;
+		// The only non-simplex atomic polytopes in this implementation are intensional polytopes.
+		
+		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(intensionalPolytopes);
+		Factor productOfFactors = makeProductOfFactorsOf(intensionalPolytopes);
+		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);
+	}
+
+	private static List<Variable> collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
+		List<Variable> indices = list();
+		for (IntensionalPolytope intensionalPolytope : intensionalPolytopes) {
+			indices.addAll(intensionalPolytope.getIndices());
+		}
+		return indices;
+	}
+
+	private static Factor makeProductOfFactorsOf(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
+		List<Factor> factors = mapIntoList(intensionalPolytopes, IntensionalPolytope::getFactor);
+		return Factor.multiply(factors);
 	}
 
 	//////////////////////// ANCILLARY

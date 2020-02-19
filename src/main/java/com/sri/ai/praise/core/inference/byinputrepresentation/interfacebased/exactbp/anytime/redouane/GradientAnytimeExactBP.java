@@ -21,7 +21,6 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicP
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -142,7 +141,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	
 	private static AtomicPolytope collapse(Polytope subPolytope) {
 		Variable freeVariable = getFreeVariable(subPolytope);
-		AtomicPolytope subAtomicPolytope = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(freeVariable, subPolytope);
+		AtomicPolytope subAtomicPolytope = subPolytope.getEquivalentAtomicPolytopeOn(freeVariable);
 		return subAtomicPolytope;
 	}
 	

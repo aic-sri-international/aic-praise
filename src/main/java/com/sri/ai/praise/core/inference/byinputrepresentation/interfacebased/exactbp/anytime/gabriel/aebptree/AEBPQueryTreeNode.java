@@ -10,7 +10,6 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 
@@ -29,7 +28,7 @@ public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 	@Override
 	public Polytope messageSent(Predicate<Polytope> boxIt) {
 		Polytope message = super.messageSent(boxIt);
-		Polytope result = IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(this.root, message);
+		Polytope result = message.getEquivalentAtomicPolytopeOn(this.root);
 		return result;
 	}
 	//----------- Add Node -----------
