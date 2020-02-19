@@ -45,8 +45,19 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 public interface AtomicPolytope extends Polytope {
 	
 	/**
-	 * A method defining the product of {@link AtomicPolytope}s in cases this product can be represented as an atomic polytope.
+	 * A method defining the product of {@link AtomicPolytope}s in cases this product should be represented as an atomic polytope,
+	 * in the sense that the atomic polytope increases overall efficiency.
 	 * Otherwise, the method is free to return null.
+	 * <p>
+	 * Some cases in which this should return non-null are:
+	 * <ul>
+	 * <li> the multiplication of simplices on the same variable, which results in the same simplex
+	 * <li> the multiplication of intensional polytopes with indices of the same type.
+	 * In this case, the indices can be unified and the internal factors multiplied, with the resulting taking as much space as one of the original polytopes.
+	 * </ul>
+	 * <p>
+	 * Products on non-unifiable indices should be kept decoupled for as long as possible (for example, two intensional polytopes of different indices),
+	 * since an atomic product will be most costly and prevent factorization.
 	 * 
 	 * @param anotherAtomicPolytope
 	 * @return

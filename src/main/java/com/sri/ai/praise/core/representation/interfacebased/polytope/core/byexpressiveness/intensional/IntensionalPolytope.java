@@ -127,6 +127,10 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 			result = null;
 		}
 		return result;
+		
+		// We could multiply intensional polytopes with *unifiable* indices, that is,
+		// indices with the same type but different names.
+		// However whether that is worth it seems to be an empirical question.
 	}
 
 	/////////////////////////////// SUMMING OUT
@@ -255,7 +259,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
 		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
-		var indicesFromIntensionalPolytopes = collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(polytopesDependentOnEliminated);
+		var indicesFromIntensionalPolytopes = collectIndicesFromTheIntensionalPolytopesAmongThese(polytopesDependentOnEliminated);
 		
 		var factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(polytopesDependentOnEliminated);
 		
@@ -278,7 +282,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 				.collect(toList());
 	}
 
-	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromTheIntensionalPolytopesAmongThese(Collection<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
 				.filter(p -> p instanceof IntensionalPolytope)
