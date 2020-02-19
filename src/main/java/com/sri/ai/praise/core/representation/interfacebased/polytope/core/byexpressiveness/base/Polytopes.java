@@ -60,12 +60,12 @@ public class Polytopes {
 	
 	//////////////////////////////////////////// GET NON-IDENTITY ATOMIC POLYTOPES
 	
-	public static List<? extends AtomicPolytope> getNonIdentityAtomicPolytopes(Iterable<? extends Polytope> polytopes) {
+	public static List<? extends AtomicPolytope> getAtomicPolytopes(Iterable<? extends Polytope> polytopes) {
 		List<AtomicPolytope> result = list();
 		for (Polytope polytope : polytopes) {
 			if ( ! polytope.isIdentity()) {
 				if (polytope instanceof ProductPolytope) {
-					collectNonIdentityAtomicPolytopesInProduct((ProductPolytope) polytope, result);
+					collectAtomicPolytopesInProduct((ProductPolytope) polytope, result);
 				}
 				else {
 					result.add((AtomicPolytope) polytope);
@@ -75,16 +75,14 @@ public class Polytopes {
 		return result;
 	}
 
-	private static void collectNonIdentityAtomicPolytopesInProduct(ProductPolytope productPolytope, List<AtomicPolytope> result) {
+	private static void collectAtomicPolytopesInProduct(ProductPolytope productPolytope, List<AtomicPolytope> result) {
 		Collection<? extends Polytope> immediateSubPolytopes = productPolytope.getPolytopes();
 		for (Polytope polytope : immediateSubPolytopes) {
-			if ( ! polytope.isIdentity()) {
-				if (polytope instanceof ProductPolytope) {
-					collectNonIdentityAtomicPolytopesInProduct((ProductPolytope) polytope, result);
-				}
-				else {
-					result.add((AtomicPolytope) polytope);
-				}
+			if (polytope instanceof ProductPolytope) {
+				collectAtomicPolytopesInProduct((ProductPolytope) polytope, result);
+			}
+			else {
+				result.add((AtomicPolytope) polytope);
 			}
 		}
 	}

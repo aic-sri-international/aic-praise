@@ -126,9 +126,9 @@ public class IntensionalPolytopeUtil {
 		
 		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(query), () -> "getEquivalentAtomicPolytopeOn must receive polytope whose only free variable is " + query + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
 		
-		final List<? extends AtomicPolytope> nonIdentityAtomicPolytopes = Polytopes.getNonIdentityAtomicPolytopes(list(polytope));
+		final List<? extends AtomicPolytope> atomicPolytopes = Polytopes.getAtomicPolytopes(list(polytope));
 	
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(nonIdentityAtomicPolytopes, p -> Polytopes.isSimplexOn(p, query));
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> Polytopes.isSimplexOn(p, query));
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		
@@ -137,14 +137,14 @@ public class IntensionalPolytopeUtil {
 			result = simplexOnVariableIfAny;
 		}
 		else {
-			// all nonIdentityAtomicPolytopes are intensional convex hulls, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = mergeNonSimplexPolytopes(nonIdentityAtomicPolytopes);
+			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
+			result = mergeNonSimplexAtomicPolytopes(atomicPolytopes);
 		}
 		
 		return result;
 	}
 
-	private static IntensionalPolytope mergeNonSimplexPolytopes(List<? extends AtomicPolytope> convexHulls) {
+	private static IntensionalPolytope mergeNonSimplexAtomicPolytopes(List<? extends AtomicPolytope> convexHulls) {
 		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(convexHulls);
 		Factor productOfFactors = makeProductOfFactors(convexHulls);
 		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);

@@ -92,10 +92,10 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 	}
 
 	@Override
-	public AtomicPolytope getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(AtomicPolytope nonIdentityAtomicAnother) {
+	public AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope anotherAtomicPolytope) {
 		AtomicPolytope result;
-		if (nonIdentityAtomicAnother instanceof IntensionalPolytope) {
-			result = multiplyByIntensionalPolytope(nonIdentityAtomicAnother);
+		if (anotherAtomicPolytope instanceof IntensionalPolytope) {
+			result = multiplyByIntensionalPolytope(anotherAtomicPolytope);
 		}
 		else {
 			result = null;

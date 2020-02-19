@@ -61,17 +61,17 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
  */
 public class ProductPolytope extends AbstractPolytope implements Polytope {
 	
-	private List<? extends AtomicPolytope> nonIdentityAtomicPolytopes;
+	private List<? extends AtomicPolytope> atomicPolytopes;
 
-	public ProductPolytope(Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes) {
+	public ProductPolytope(Collection<? extends AtomicPolytope> atomicPolytopes) {
 		super();
-		myAssert(nonIdentityAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Create an IdentityPolytope instead.");
-		myAssert(nonIdentityAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead.");
-		this.nonIdentityAtomicPolytopes = new LinkedList<>(nonIdentityAtomicPolytopes);
+		myAssert(atomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, create an IdentityPolytope or use static Polytope.multiply.");
+		myAssert(atomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead, or use static Polytope.multiply.");
+		this.atomicPolytopes = new LinkedList<>(atomicPolytopes);
 	}
 	
 	public Collection<? extends Polytope> getPolytopes() {
-		return nonIdentityAtomicPolytopes;
+		return atomicPolytopes;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	public Collection<? extends Variable> getFreeVariables() {
 		
 		Collection<Collection<? extends Variable>> listOfFreeVariablesCollections = 
-				mapIntoList(nonIdentityAtomicPolytopes, Polytope::getFreeVariables);
+				mapIntoList(atomicPolytopes, Polytope::getFreeVariables);
 		
 		Set<? extends Variable> allFreeVariables = unionOfCollections(listOfFreeVariablesCollections);
 		
@@ -103,34 +103,33 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			result = accumulate(anotherSubPolytopes, Polytope::multiply, this);
 		}
 		else {
-			AtomicPolytope nonIdentityAtomicAnother = (AtomicPolytope) another;
-			result = ProductPolytope.multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(nonIdentityAtomicPolytopes, nonIdentityAtomicAnother);
+			AtomicPolytope anotherAtomicPolytope = (AtomicPolytope) another;
+			result = ProductPolytope.multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(atomicPolytopes, anotherAtomicPolytope);
 		}
 		return result;
 	}
 
-	private static Polytope multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(
-			Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes, 
-			AtomicPolytope nonIdentityAtomicAnother) {
+	private static Polytope multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(
+			Collection<? extends AtomicPolytope> atomicPolytopes,  AtomicPolytope atomicAnother) {
 		
-		List<AtomicPolytope> resultNonIdentityAtomicPolytopes = list();
+		List<AtomicPolytope> resultAtomicPolytopes = list();
 		boolean anotherAlreadyIncorporated = false;
-		for (AtomicPolytope nonIdentityAtomicPolytope : nonIdentityAtomicPolytopes) {
+		for (AtomicPolytope atomicPolytope : atomicPolytopes) {
 			if (anotherAlreadyIncorporated) {
-				resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicPolytope);
+				resultAtomicPolytopes.add(atomicPolytope);
 			}
 			else {
 				anotherAlreadyIncorporated = 
 						addToListEitherPolytopeOrProductOfPolytopeIfProductIsAtomic(
-								nonIdentityAtomicPolytope,
-								nonIdentityAtomicAnother,
-								resultNonIdentityAtomicPolytopes);
+								atomicPolytope,
+								atomicAnother,
+								resultAtomicPolytopes);
 			}
 		}
 		
-		includeAnotherByItselfIfMultiplicationsFailed(nonIdentityAtomicAnother, anotherAlreadyIncorporated, resultNonIdentityAtomicPolytopes);
+		includeAnotherByItselfIfMultiplicationsFailed(atomicAnother, anotherAlreadyIncorporated, resultAtomicPolytopes);
 		
-		Polytope result = makePolytopeFromListOfNonIdentityAtomicPolytopes(resultNonIdentityAtomicPolytopes);
+		Polytope result = makePolytopeFromListOfAtomicPolytopes(resultAtomicPolytopes);
 		
 		return result;
 	}
@@ -140,28 +139,32 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			AtomicPolytope anotherAtomicPolytope,
 			List<AtomicPolytope> list) {
 		
-		var product = atomicPolytope.getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(anotherAtomicPolytope);
+		var product = atomicPolytope.getProductIfItIsAAtomicPolytopeOrNullOtherwise(anotherAtomicPolytope);
 		var productIsAtomic = product != null;
 		list.add(productIsAtomic? product : atomicPolytope);
 		return productIsAtomic;
 	}
 
-	private static void includeAnotherByItselfIfMultiplicationsFailed(AtomicPolytope nonIdentityAtomicAnother, boolean anotherAlreadyIncorporated, List<AtomicPolytope> resultNonIdentityAtomicPolytopes) {
+	private static void includeAnotherByItselfIfMultiplicationsFailed(
+			AtomicPolytope anotherAtomicPolytope, 
+			boolean anotherAlreadyIncorporated, 
+			List<AtomicPolytope> resultAtomicPolytopes) {
+		
 		if (! anotherAlreadyIncorporated) {
-			resultNonIdentityAtomicPolytopes.add(nonIdentityAtomicAnother);
+			resultAtomicPolytopes.add(anotherAtomicPolytope);
 		}
 	}
 
-	private static Polytope makePolytopeFromListOfNonIdentityAtomicPolytopes(List<AtomicPolytope> resultNonIdentityAtomicPolytopes) {
+	private static Polytope makePolytopeFromListOfAtomicPolytopes(List<AtomicPolytope> resultAtomicPolytopes) {
 		Polytope result;
-		if (resultNonIdentityAtomicPolytopes.isEmpty()) {
+		if (resultAtomicPolytopes.isEmpty()) {
 			result = IntensionalPolytopeUtil.identityPolytope();
 		}
-		else if (resultNonIdentityAtomicPolytopes.size() == 1) {
-			result = getFirst(resultNonIdentityAtomicPolytopes);
+		else if (resultAtomicPolytopes.size() == 1) {
+			result = getFirst(resultAtomicPolytopes);
 		}
 		else {
-			result = new ProductPolytope(resultNonIdentityAtomicPolytopes);
+			result = new ProductPolytope(resultAtomicPolytopes);
 		}
 		return result;
 	}
@@ -170,7 +173,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 	@Override
 	public String toString() {
-		String result = join(nonIdentityAtomicPolytopes, "*");
+		String result = join(atomicPolytopes, "*");
 		return result;
 	}
 	

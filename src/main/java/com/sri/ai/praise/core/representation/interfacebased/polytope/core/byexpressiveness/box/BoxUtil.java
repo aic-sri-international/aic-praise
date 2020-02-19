@@ -20,7 +20,7 @@ public class BoxUtil {
 		List<Polytope> notToBeBoxed= list();
 	
 		collect(
-				Polytopes.getNonIdentityAtomicPolytopes(list(polytope)), 
+				Polytopes.getAtomicPolytopes(list(polytope)), 
 				p -> p instanceof IntensionalPolytope && criteria.apply(p), 
 				toBeBoxed, 
 				notToBeBoxed);

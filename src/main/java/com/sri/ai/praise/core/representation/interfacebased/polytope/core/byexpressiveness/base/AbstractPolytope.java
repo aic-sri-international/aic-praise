@@ -22,16 +22,16 @@ public abstract class AbstractPolytope implements Polytope {
 		List<Polytope> dependentOfEliminated = list();
 
 		collect(
-				/* original collection: */ Polytopes.getNonIdentityAtomicPolytopes(list(this)), 
+				/* original collection: */ Polytopes.getAtomicPolytopes(list(this)), 
 				/* criterion: */ isIndependentOf(eliminated), 
 				/* satisfy criterion: */ independentOfEliminated, 
 				/* do not satisfy criterion: */ dependentOfEliminated);
 
 		Polytope summedOutFromDependents = sumOutEliminatedVariablesFromPolytopesDependingOnThem(eliminated, dependentOfEliminated);
 
-		List<Polytope> allNonIdentityAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
-		allNonIdentityAtomicPolytopesInResult.add(summedOutFromDependents);
-		Polytope result = Polytope.multiply(allNonIdentityAtomicPolytopesInResult);
+		List<Polytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
+		allAtomicPolytopesInResult.add(summedOutFromDependents);
+		Polytope result = Polytope.multiply(allAtomicPolytopesInResult);
 
 		return result;
 	}

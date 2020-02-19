@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.ProductPolytope;
-
 /**
  * Interface for atomic polytopes, which is to say polytopes which are not represented as products of polytopes.
  * @author braz
@@ -47,13 +45,11 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
 public interface AtomicPolytope extends Polytope {
 	
 	/**
-	 * A method defining the product of {@link AtomicPolytope}s in cases this product can be represented as a non-identity atomic polytope.
+	 * A method defining the product of {@link AtomicPolytope}s in cases this product can be represented as an atomic polytope.
 	 * Otherwise, the method is free to return null.
-	 * This is mostly used to multiply polytopes in general, so when the return value is null, the super-routine creates a non-atomic
-	 * (that is, a {@link ProductPolytope} containing these factors.
 	 * 
-	 * @param nonIdentityAtomicAnother
+	 * @param anotherAtomicPolytope
 	 * @return
 	 */
-	AtomicPolytope getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(AtomicPolytope nonIdentityAtomicAnother);
+	AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope anotherAtomicPolytope);
 }
