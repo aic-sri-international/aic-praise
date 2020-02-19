@@ -48,6 +48,7 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -173,9 +174,7 @@ public class Polytopes {
 	 */
 	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable query, Polytope polytope) {
 		
-		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(query), () -> "getEquivalentIntensionalConvexHullOfFactorsOn must receive polytope whose only free variable is " + query + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
-		
-		AtomicPolytope result;
+		myAssert(polytope.getFreeVariables().size() == 1 && polytope.getFreeVariables().contains(query), () -> "getEquivalentAtomicPolytopeOn must receive polytope whose only free variable is " + query + ", but instead got <" + polytope + "> with free variables " + polytope.getFreeVariables());
 		
 		final List<? extends AtomicPolytope> nonIdentityAtomicPolytopes = getNonIdentityAtomicPolytopes(list(polytope));
 
@@ -183,6 +182,7 @@ public class Polytopes {
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		
+		AtomicPolytope result;
 		if (thereIsSimplexOnQuerySoItDominates) {
 			result = simplexOnVariableIfAny;
 		}
@@ -195,11 +195,18 @@ public class Polytopes {
 	}
 
 	private static IntensionalConvexHullOfFactors mergeIntensionalConvexHulls(List<? extends AtomicPolytope> convexHulls) {
-		
-		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesThatAreIntensionalConvexHulls(convexHulls);
+		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesGivenTheyAreAllIntensionalConvexHulls(convexHulls);
 		Factor productOfFactors = makeProductOfFactors(convexHulls);
-		IntensionalConvexHullOfFactors result = new IntensionalConvexHullOfFactors(indicesFromConvexHulls, productOfFactors);
-		return result;
+		return new IntensionalConvexHullOfFactors(indicesFromConvexHulls, productOfFactors);
+	}
+
+	private static List<Variable> collectIndicesFromPolytopesGivenTheyAreAllIntensionalConvexHulls(List<? extends Polytope> polytopes) {
+		List<Variable> indices = list();
+		for (Polytope polytope : polytopes) {
+			var intensionalConvexHull = (IntensionalConvexHullOfFactors) polytope;
+			indices.addAll(intensionalConvexHull.getIndices());
+		}
+		return indices;
 	}
 
 	private static Factor makeProductOfFactors(List<? extends AtomicPolytope> convexHulls) {
@@ -215,80 +222,67 @@ public class Polytopes {
 		return result;
 	}
 	
-	public static Polytope sumOut(List<? extends Variable> variablesSummedOut, Polytope polytope) {
-		return sumOut(variablesSummedOut, list(polytope));
+	public static Polytope sumOut(List<? extends Variable> eliminated, Polytope polytope) {
+		return sumOut(eliminated, list(polytope));
 	}
 
-	public static Polytope sumOut(
-			List<? extends Variable> variablesToBeSummedOut, 
-			Collection<? extends Polytope> polytopes) {
+	public static Polytope sumOut(List<? extends Variable> eliminated, Collection<? extends Polytope> polytopes) {
 
-		List<Polytope> independentOfVariablesToBeSummedOut = list();
-		List<Polytope> dependentOfVariablesToBeSummedOut = list();
+		List<Polytope> independentOfEliminated = list();
+		List<Polytope> dependentOfEliminated = list();
 
 		collect(
-				getNonIdentityAtomicPolytopes(polytopes), 
-				isIndependentOf(variablesToBeSummedOut), 
-				independentOfVariablesToBeSummedOut, 
-				dependentOfVariablesToBeSummedOut);
+				/* original collection: */ getNonIdentityAtomicPolytopes(polytopes), 
+				/* criterion: */ isIndependentOf(eliminated), 
+				/* satisfy criterion: */ independentOfEliminated, 
+				/* do not satisfy criterion: */ dependentOfEliminated);
 
-		Polytope projectedPolytope = sumOutGivenThatPolytopesAllDependOnEliminatedVariables(variablesToBeSummedOut, dependentOfVariablesToBeSummedOut);
+		Polytope summedOutFromDependents = sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentOfEliminated);
 
-		Polytope result = makeProductOfPolytopes(independentOfVariablesToBeSummedOut, projectedPolytope);
+		Polytope result = makeProductOfPolytopes(independentOfEliminated, summedOutFromDependents);
 
 		return result;
 	}
 	
 	private static Polytope sumOutGivenThatPolytopesAllDependOnEliminatedVariables(List<? extends Variable> eliminated, List<Polytope> polytopesDependentOnEliminated) {
 
-		List<Variable> simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
+		// This is a bit tricky to understand, but one thing to keep in mind is that eliminated simplex variables become intensional convex hell indices by this process.
+		// See full explanation in class javadoc.
+		
+		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
 		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
-		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
+		var indicesFromConvexHulls = collectIndicesFromThosePolytopesWhichAreIntensionalConvexHulls(polytopesDependentOnEliminated);
 		
-		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
+		var factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
 		
-		Factor productOfFactors = Factor.multiply(factors);
+		var productOfFactors = Factor.multiply(factors);
 		
-		List<? extends Variable> variablesToBeSummedOutOnceSimplexesAreDealtWith = subtract(eliminated, simplexVariables);
+		var variablesToBeEliminatedOnceSimplexesAreDealtWith = subtract(eliminated, simplexVariables);
 		
-		Factor projectedFactor = productOfFactors.sumOut(variablesToBeSummedOutOnceSimplexesAreDealtWith);
+		var summedOutFactor = productOfFactors.sumOut(variablesToBeEliminatedOnceSimplexesAreDealtWith);
 		
-		List<Variable> finalIndices = makeListWithElementsOfTwoCollections(indicesFromConvexHulls, simplexVariables);
-		// TODO: this seems completely wrong because simplexVariables are all in eliminated!
+		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromConvexHulls, simplexVariables);
 		
-		Polytope projectedPolytope = new IntensionalConvexHullOfFactors(finalIndices, projectedFactor);
+		var projectedPolytope = new IntensionalConvexHullOfFactors(finalIndices, summedOutFactor);
 		
 		return projectedPolytope;
 	}
 
-	private static List<Variable> collectSimplexVariables(List<Polytope> dependentOfVariablesToBeSummedOut) {
-		List<Variable> indices = list();
-		for (Polytope polytope : dependentOfVariablesToBeSummedOut) {
-			if (polytope instanceof Simplex) {
-				collectVariableFromSimplex(indices, polytope);
-			}
-		}
-		return indices;
+	private static List<Variable> collectSimplexVariables(List<Polytope> polytopes) {
+		return 
+				polytopes.stream()
+				.filter(p -> p instanceof Simplex)
+				.flatMap(p -> p.getFreeVariables().stream())
+				.collect(toList());
 	}
 
-	private static List<Variable> collectIndicesFromPolytopesThatAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
-		List<Variable> indices = list();
-		for (Polytope polytope : polytopes) {
-			if (polytope instanceof IntensionalConvexHullOfFactors) {
-				collectIndicesFromIntensionalPolytope(indices, polytope);
-			}
-		}
-		return indices;
-	}
-
-	private static void collectVariableFromSimplex(List<Variable> indices, Polytope polytope) {
-		indices.addAll(polytope.getFreeVariables());
-	}
-
-	private static void collectIndicesFromIntensionalPolytope(List<Variable> indices, Polytope polytope) {
-		IntensionalConvexHullOfFactors intensionalPolytope = (IntensionalConvexHullOfFactors) polytope;
-		indices.addAll(intensionalPolytope.getIndices());
+	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
+		return 
+				polytopes.stream()
+				.filter(p -> p instanceof IntensionalConvexHullOfFactors)
+				.flatMap(c -> ((IntensionalConvexHullOfFactors)c).getIndices().stream())
+				.collect(toList());
 	}
 
 	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
