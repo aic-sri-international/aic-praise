@@ -45,8 +45,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 public interface AtomicPolytope extends Polytope {
 	
 	/**
-	 * A method defining the product of {@link AtomicPolytope}s in cases this product should be represented as an atomic polytope,
-	 * in the sense that the atomic polytope increases overall efficiency.
+	 * A method defining the product of {@link AtomicPolytope}s in cases this is a simplification.
 	 * Otherwise, the method is free to return null.
 	 * <p>
 	 * Some cases in which this should return non-null are:
@@ -62,5 +61,5 @@ public interface AtomicPolytope extends Polytope {
 	 * @param anotherAtomicPolytope
 	 * @return
 	 */
-	AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope anotherAtomicPolytope);
+	AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope anotherAtomicPolytope);
 }

@@ -65,49 +65,49 @@ import com.sri.ai.util.Util;
  */
 public class ProductPolytope extends AbstractPolytope implements Polytope {
 	
-	private List<? extends AtomicPolytope> alreadyMultipledAtomicPolytopes;
-	// by "already multiplied", we mean each pair of atomic polytopes in this list cannot be multiplied into an atomic polytope,
+	private List<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes;
+	// by "already simplified", we mean each pair of atomic polytopes in this list cannot be simplified into an atomic polytope,
 	// that is, this is the minimum number of atomic polytopes to represent this product as far as pairwise multiplication is concerned
-	// (it is conceivable that for some implementations, three- or higher-wise multiplication may produce atomic polytopes when two-wise multiplication cannot).
+	// (it is conceivable that for some implementations, three- or higher-wise multiplication may produce simplifications when two-wise multiplication cannot).
 
 	/**
 	 * Makes a {@link ProductPolytope}. This is not meant for end-user usage, since it assumes the given atomic polytopes are already checked for pair-wise multiplication.
 	 * Users must call {@link Polytope#multiply(Collection)} instead.
-	 * @param alreadyMultipledAtomicPolytopes
+	 * @param alreadySimplifiedAtomicPolytopes
 	 */
-	ProductPolytope(Collection<? extends AtomicPolytope> alreadyMultipledAtomicPolytopes) {
+	ProductPolytope(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
 		super();
-		myAssert(alreadyMultipledAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, use makeProductFromAlreadyMultipliedAtomicPolytopes (if the polytopes satisfy the condition in the name), or create an IdentityPolytope (if you know you have zero polytopes), or use the more general static Polytope.multiply which checks everything for you.");
-		myAssert(alreadyMultipledAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element.  Instead, use makeProductFromAlreadyMultipliedAtomicPolytopes if you know for sure there will be just one atomic polytope, or general static Polytope.multiply which checks everything for you.");
-		this.alreadyMultipledAtomicPolytopes = new LinkedList<>(alreadyMultipledAtomicPolytopes);
+		myAssert(alreadySimplifiedAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, use makeProductFromAlreadySimplifiedAtomicPolytopes (if the polytopes satisfy the condition in the name), or create an IdentityPolytope (if you know you have zero polytopes), or use the more general static Polytope.multiply which checks everything for you.");
+		myAssert(alreadySimplifiedAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element.  Instead, use makeProductFromAlreadySimplifiedAtomicPolytopes if you know for sure there will be just one atomic polytope, or general static Polytope.multiply which checks everything for you.");
+		this.alreadySimplifiedAtomicPolytopes = new LinkedList<>(alreadySimplifiedAtomicPolytopes);
 	}
 	
 	/**
-	 * Only use this method if you already know that the product of no pair of these polytopes generates an atomic polytope.
+	 * Only use this method if you already know that the product of no pair of these polytopes represents a simplification.
 	 * If you need that to be checked first, use {@link Polytope#multiply(Collection)} instead.
-	 * @param alreadyMultipliedAtomicPolytopes
+	 * @param alreadySimplifiedAtomicPolytopes
 	 * @return
 	 */
-	public static Polytope makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(Collection<? extends AtomicPolytope> alreadyMultipliedAtomicPolytopes) {
+	public static Polytope makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
 		
-		if (alreadyMultipliedAtomicPolytopes.isEmpty()) {
+		if (alreadySimplifiedAtomicPolytopes.isEmpty()) {
 			return identityPolytope();
 		}
-		else if (alreadyMultipliedAtomicPolytopes.size() == 1) {
-			return getFirst(alreadyMultipliedAtomicPolytopes);
+		else if (alreadySimplifiedAtomicPolytopes.size() == 1) {
+			return getFirst(alreadySimplifiedAtomicPolytopes);
 		}
 		else {
-			return new ProductPolytope(alreadyMultipliedAtomicPolytopes);
+			return new ProductPolytope(alreadySimplifiedAtomicPolytopes);
 		}
 	}
 
 	public Collection<? extends Polytope> getPolytopes() {
-		return alreadyMultipledAtomicPolytopes;
+		return alreadySimplifiedAtomicPolytopes;
 	}
 	
 	@Override
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
-		return alreadyMultipledAtomicPolytopes;
+		return alreadySimplifiedAtomicPolytopes;
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	public Collection<? extends Variable> getFreeVariables() {
 		
 		Collection<Collection<? extends Variable>> listOfFreeVariablesCollections = 
-				mapIntoList(alreadyMultipledAtomicPolytopes, Polytope::getFreeVariables);
+				mapIntoList(alreadySimplifiedAtomicPolytopes, Polytope::getFreeVariables);
 		
 		Set<? extends Variable> allFreeVariables = unionOfCollections(listOfFreeVariablesCollections);
 		
@@ -140,12 +140,12 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 		else {
 			AtomicPolytope anotherAtomicPolytope = (AtomicPolytope) another;
-			result = ProductPolytope.multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(alreadyMultipledAtomicPolytopes, anotherAtomicPolytope);
+			result = ProductPolytope.multiplyListOfAlreadySimplifiedAtomicPolytopesWithANewOne(alreadySimplifiedAtomicPolytopes, anotherAtomicPolytope);
 		}
 		return result;
 	}
 
-	private static Polytope multiplyListOfAlreadyMultipliedAtomicPolytopesWithANewOne(
+	private static Polytope multiplyListOfAlreadySimplifiedAtomicPolytopesWithANewOne(
 			Collection<? extends AtomicPolytope> atomicPolytopes,  AtomicPolytope atomicAnother) {
 		
 		List<AtomicPolytope> resultAtomicPolytopes = list();
@@ -175,7 +175,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			AtomicPolytope anotherAtomicPolytope,
 			List<AtomicPolytope> list) {
 		
-		var product = atomicPolytope.getProductIfItIsAAtomicPolytopeOrNullOtherwise(anotherAtomicPolytope);
+		var product = atomicPolytope.getProductIfItIsASimplificationOrNullOtherwise(anotherAtomicPolytope);
 		var productIsAtomic = product != null;
 		list.add(productIsAtomic? product : atomicPolytope);
 		return productIsAtomic;
@@ -223,7 +223,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 		List<AtomicPolytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
 		allAtomicPolytopesInResult.addAll(summedOutFromDependents.getAtomicPolytopes());
-		Polytope result = makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(allAtomicPolytopesInResult);
+		Polytope result = makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(allAtomicPolytopesInResult);
 
 		return result;
 	}
@@ -241,7 +241,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		var allAreSimplices = nonSimplex == null;
 
 		if (allAreSimplices) {
-			return makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(dependentAtomicPolytopes);
+			return makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(dependentAtomicPolytopes);
 		}
 		else {
 			return ((NonSimplexAtomicPolytope) nonSimplex).sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
@@ -275,7 +275,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 	@Override
 	public String toString() {
-		String result = join(alreadyMultipledAtomicPolytopes, "*");
+		String result = join(alreadySimplifiedAtomicPolytopes, "*");
 		return result;
 	}
 	

@@ -73,7 +73,7 @@ public class Simplex extends AbstractAtomicPolytope {
 	}
 	
 	@Override
-	public AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope another) {
+	public AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope another) {
 		AtomicPolytope result;
 		if (another instanceof Simplex) {
 			Simplex anotherSimplex = (Simplex) another;

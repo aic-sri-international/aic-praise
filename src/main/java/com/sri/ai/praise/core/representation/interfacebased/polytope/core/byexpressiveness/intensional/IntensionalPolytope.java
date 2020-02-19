@@ -105,7 +105,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	}
 
 	@Override
-	public AtomicPolytope getProductIfItIsAAtomicPolytopeOrNullOtherwise(AtomicPolytope anotherAtomicPolytope) {
+	public AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope anotherAtomicPolytope) {
 		AtomicPolytope result;
 		if (anotherAtomicPolytope instanceof IntensionalPolytope) {
 			result = multiplyByIntensionalPolytope(anotherAtomicPolytope);
