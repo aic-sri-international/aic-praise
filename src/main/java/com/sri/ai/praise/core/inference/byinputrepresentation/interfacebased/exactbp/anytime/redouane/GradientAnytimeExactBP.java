@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.redouane;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -89,7 +90,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 
 	private Polytope getProductOfAllIncomingPolytopesAndFactorAtRoot(List<Approximation<Factor>> subsApproximations) {
 		List<Polytope> polytopesToMultiply = getAllPolytopes(subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		return result;
 	}
 
@@ -279,7 +280,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	private Polytope getProductOfAllIncomingPolytopesButOne(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
 		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
 		List<Polytope> polytopesToMultiply = getAllPolytopesButOne(subApproximationToRemove, subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		return result;
 	}
 
@@ -341,7 +342,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	private Polytope getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
 		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
 		List<Polytope> polytopesToMultiply = getAllPolytopesButOneWithFactor(subApproximationToRemove, subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		return result;
 	}
 

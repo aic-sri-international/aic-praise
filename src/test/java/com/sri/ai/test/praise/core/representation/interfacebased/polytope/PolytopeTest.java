@@ -39,6 +39,7 @@ package com.sri.ai.test.praise.core.representation.interfacebased.polytope;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope.multiply;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -70,7 +71,7 @@ public class PolytopeTest {
 	ExpressionVariable v = DefaultExpressionVariable.expressionVariable(parse("V"));
 	ExpressionVariable w = DefaultExpressionVariable.expressionVariable(parse("W"));
 	
-	Polytope identity = IntensionalPolytopeUtil.identityPolytope();
+	Polytope identity = identityPolytope();
 	
 	AtomicPolytope simplexU = new Simplex(u);
 	AtomicPolytope simplexV = new Simplex(v);

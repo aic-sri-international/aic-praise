@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.join;
@@ -171,7 +172,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	private static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(List<AtomicPolytope> resultAtomicPolytopes) {
 		Polytope result;
 		if (resultAtomicPolytopes.isEmpty()) {
-			result = IntensionalPolytopeUtil.identityPolytope();
+			result = identityPolytope();
 		}
 		else if (resultAtomicPolytopes.size() == 1) {
 			result = getFirst(resultAtomicPolytopes);

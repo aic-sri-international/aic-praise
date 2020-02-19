@@ -1,6 +1,5 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
@@ -130,7 +129,7 @@ public class IntensionalPolytopeUtil {
 		
 		final Collection<? extends AtomicPolytope> atomicPolytopes = polytope.getAtomicPolytopes();
 	
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> IntensionalPolytopeUtil.isSimplexOn(p, variable));
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> isSimplexOn(p, variable));
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		
@@ -214,9 +213,7 @@ public class IntensionalPolytopeUtil {
 		
 		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromIntensionalPolytopes, simplexVariables);
 		
-		var projectedPolytope = new IntensionalPolytope(finalIndices, summedOutFactor);
-		
-		return projectedPolytope;
+		return new IntensionalPolytope(finalIndices, summedOutFactor);
 	}
 
 	private static List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
@@ -233,12 +230,6 @@ public class IntensionalPolytopeUtil {
 				.filter(p -> p instanceof IntensionalPolytope)
 				.flatMap(c -> ((IntensionalPolytope)c).getIndices().stream())
 				.collect(toList());
-	}
-	
-	///////////////////////////////////////////// IDENTITY POLYTOPE
-
-	public static IntensionalPolytope identityPolytope() {
-		return new IntensionalPolytope(list(), IDENTITY_FACTOR);
 	}
 
 }

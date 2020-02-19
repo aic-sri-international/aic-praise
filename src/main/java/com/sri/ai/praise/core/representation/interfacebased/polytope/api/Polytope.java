@@ -37,13 +37,13 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
@@ -61,10 +61,14 @@ public interface Polytope extends Approximation<Factor> {
 
 	Polytope multiply(Polytope another);
 
+	/**
+	 * Returns the atomic polytopes whose product is equivalent to this one.
+	 * @return
+	 */
 	Collection<? extends AtomicPolytope> getAtomicPolytopes();
 	
 	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
-		Polytope result = accumulate(polytopes, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
+		Polytope result = accumulate(polytopes, Polytope::multiply, identityPolytope());
 		return result;
 	}
 

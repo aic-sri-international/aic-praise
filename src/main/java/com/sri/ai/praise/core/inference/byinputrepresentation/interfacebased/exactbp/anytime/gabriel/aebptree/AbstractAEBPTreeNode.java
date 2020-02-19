@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.gabriel.aebptree;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
@@ -15,7 +16,6 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.BoxUtil;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -177,7 +177,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
 		this.addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
 		
 		return result;
 	}
