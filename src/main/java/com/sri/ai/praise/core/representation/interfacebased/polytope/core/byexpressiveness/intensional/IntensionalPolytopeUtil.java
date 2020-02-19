@@ -16,7 +16,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Polytopes;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 
 /**
@@ -121,6 +120,8 @@ public class IntensionalPolytopeUtil {
 	 * Takes a polytope in which the only free variable is a given variable,
 	 * and returns a single equivalent {@link AtomicPolytope}.
 	 * 
+	 * TODO: this is a suspicious method. It seems equivalent to eliminating all variables but the given one, which should result in an atomic polytope anyway.
+	 * 
 	 * @return
 	 */
 	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Polytope polytope) {
@@ -129,7 +130,7 @@ public class IntensionalPolytopeUtil {
 		
 		final Collection<? extends AtomicPolytope> atomicPolytopes = polytope.getAtomicPolytopes();
 	
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> Polytopes.isSimplexOn(p, variable));
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> IntensionalPolytopeUtil.isSimplexOn(p, variable));
 		
 		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
 		
@@ -139,13 +140,21 @@ public class IntensionalPolytopeUtil {
 		}
 		else {
 			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = mergeNonSimplexAtomicPolytopes(atomicPolytopes);
+			result = makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(atomicPolytopes);
 		}
 		
 		return result;
 	}
 
-	private static IntensionalPolytope mergeNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
+	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
+		boolean result = 
+				atomicPolytope instanceof Simplex
+				&&
+				((Simplex)atomicPolytope).getVariable().equals(variable);
+		return result;
+	}
+
+	private static IntensionalPolytope makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
 		@SuppressWarnings("unchecked")
 		Collection<? extends IntensionalPolytope> intensionalPolytopes = (Collection<? extends IntensionalPolytope>) nonSimplexAtomicPolytopes;
 		// The only non-simplex atomic polytopes in this implementation are intensional polytopes.
