@@ -37,19 +37,14 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
 
-import static com.sri.ai.util.Util.collect;
-import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.list;
-import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.util.base.BinaryFunction;
 
 public class Polytopes {
 	
@@ -63,17 +58,9 @@ public class Polytopes {
 		return result;
 	}
 	
-	public static List<Variable> collectSimplexVariables(List<Polytope> polytopes) {
-		return 
-				polytopes.stream()
-				.filter(p -> p instanceof Simplex)
-				.flatMap(p -> p.getFreeVariables().stream())
-				.collect(toList());
-	}
-
 	//////////////////////////////////////////// GET NON-IDENTITY ATOMIC POLYTOPES
 	
-	public static List<? extends AtomicPolytope> getNonIdentityAtomicPolytopes(Collection<? extends Polytope> polytopes) {
+	public static List<? extends AtomicPolytope> getNonIdentityAtomicPolytopes(Iterable<? extends Polytope> polytopes) {
 		List<AtomicPolytope> result = list();
 		for (Polytope polytope : polytopes) {
 			if ( ! polytope.isIdentity()) {
@@ -100,35 +87,6 @@ public class Polytopes {
 				}
 			}
 		}
-	}
-
-	///////////////////////////////////////////////////// SUMMING OUT
-
-	public static Polytope sumOut(
-			List<? extends Variable> eliminated,
-			Collection<? extends Polytope> polytopes,
-			BinaryFunction<List<? extends Variable>, List<Polytope>, Polytope> sumOutDependents) {
-		
-		List<Polytope> independentOfEliminated = list();
-		List<Polytope> dependentOfEliminated = list();
-
-		collect(
-				/* original collection: */ getNonIdentityAtomicPolytopes(polytopes), 
-				/* criterion: */ isIndependentOf(eliminated), 
-				/* satisfy criterion: */ independentOfEliminated, 
-				/* do not satisfy criterion: */ dependentOfEliminated);
-
-		Polytope summedOutFromDependents = sumOutDependents.apply(eliminated, dependentOfEliminated);
-
-		List<Polytope> allNonIdentityAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
-		allNonIdentityAtomicPolytopesInResult.add(summedOutFromDependents);
-		Polytope result = Polytope.multiply(allNonIdentityAtomicPolytopesInResult);
-
-		return result;
-	}
-	
-	private static Predicate<Polytope> isIndependentOf(List<? extends Variable> variables) {
-		return p -> ! intersect(p.getFreeVariables(), variables);
 	}
 
 }

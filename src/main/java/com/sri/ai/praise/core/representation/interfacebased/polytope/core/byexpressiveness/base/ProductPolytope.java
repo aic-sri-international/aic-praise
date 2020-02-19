@@ -59,7 +59,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
  * @author braz
  *
  */
-public class ProductPolytope implements Polytope {
+public class ProductPolytope extends AbstractPolytope implements Polytope {
 	
 	private List<? extends AtomicPolytope> nonIdentityAtomicPolytopes;
 
@@ -109,7 +109,7 @@ public class ProductPolytope implements Polytope {
 		return result;
 	}
 
-	public static Polytope multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(
+	private static Polytope multiplyListOfAlreadyMultipliedNonIdentityAtomicPolytopesWithANewOne(
 			Collection<? extends AtomicPolytope> nonIdentityAtomicPolytopes, 
 			AtomicPolytope nonIdentityAtomicAnother) {
 		
@@ -187,5 +187,12 @@ public class ProductPolytope implements Polytope {
 	public int hashCode() {
 		return getPolytopes().hashCode();
 	}
-	
+
+	@Override
+	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
+			Collection<? extends Variable> eliminated,
+			Collection<? extends Polytope> dependentPolytopes) {
+		
+		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
+	}
 }

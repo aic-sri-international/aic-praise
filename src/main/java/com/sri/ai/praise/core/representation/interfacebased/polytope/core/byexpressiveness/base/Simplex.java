@@ -43,6 +43,8 @@ import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 /**
  * @author braz
@@ -105,5 +107,13 @@ public class Simplex extends AbstractAtomicPolytope {
 	@Override
 	public int hashCode() {
 		return getVariable().hashCode();
+	}
+
+	@Override
+	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
+			Collection<? extends Variable> eliminated,
+			Collection<? extends Polytope> dependentPolytopes) {
+		
+		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
 }

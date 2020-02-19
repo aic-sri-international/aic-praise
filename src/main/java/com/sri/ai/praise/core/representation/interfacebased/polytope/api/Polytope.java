@@ -65,4 +65,6 @@ public interface Polytope extends Approximation<Factor> {
 		Polytope result = accumulate(polytopes, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
 		return result;
 	}
+
+	Polytope sumOut(Collection<? extends Variable> eliminated);
 }

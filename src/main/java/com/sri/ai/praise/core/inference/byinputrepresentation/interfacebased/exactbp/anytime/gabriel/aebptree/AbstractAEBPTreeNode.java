@@ -149,7 +149,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(boxIt);
 		//Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut();
-		Polytope summedOutPolytope = IntensionalPolytopeUtil.sumOut(variablesToBeSummedOut, product);
+		Polytope summedOutPolytope = product.sumOut(variablesToBeSummedOut);
 		
 		Polytope result = 
 						BoxUtil.BoxAPolytope(summedOutPolytope,boxIt);//= Polytopes.BoxAPolytopeAccordingToCriteria(summedOutPolytope, criteriaToBoxAPolytope);

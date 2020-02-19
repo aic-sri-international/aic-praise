@@ -48,6 +48,7 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.AbstractAtomicPolytope;
 
 /**
@@ -136,5 +137,13 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 	@Override
 	public int hashCode() {
 		return getIndices().hashCode() + getFactor().hashCode();
+	}
+
+	@Override
+	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
+			Collection<? extends Variable> eliminated,
+			Collection<? extends Polytope> dependentPolytopes) {
+		
+		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
 	}
 }

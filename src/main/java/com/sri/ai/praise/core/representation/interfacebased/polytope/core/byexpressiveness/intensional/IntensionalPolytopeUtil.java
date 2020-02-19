@@ -138,13 +138,13 @@ public class IntensionalPolytopeUtil {
 		}
 		else {
 			// all nonIdentityAtomicPolytopes are intensional convex hulls, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = mergeIntensionalPolytopes(nonIdentityAtomicPolytopes);
+			result = mergeNonSimplexPolytopes(nonIdentityAtomicPolytopes);
 		}
 		
 		return result;
 	}
 
-	private static IntensionalPolytope mergeIntensionalPolytopes(List<? extends AtomicPolytope> convexHulls) {
+	private static IntensionalPolytope mergeNonSimplexPolytopes(List<? extends AtomicPolytope> convexHulls) {
 		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(convexHulls);
 		Factor productOfFactors = makeProductOfFactors(convexHulls);
 		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);
@@ -164,7 +164,7 @@ public class IntensionalPolytopeUtil {
 		return Factor.multiply(factors);
 	}
 
-	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(List<? extends Polytope> polytopes) {
+	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
 		List<Factor> factors = list();
 		for (Polytope polytope : polytopes) {
 			collectFactorIfIntensionalPolytope(polytope, factors);
@@ -179,20 +179,14 @@ public class IntensionalPolytopeUtil {
 		}
 	}
 
-	public static Polytope sumOut(List<? extends Variable> eliminated, Polytope polytope) {
-		return IntensionalPolytopeUtil.sumOut(eliminated, list(polytope));
-	}
-
-	private static Polytope sumOut(List<? extends Variable> eliminated, Collection<? extends Polytope> polytopes) {
-		return Polytopes.sumOut(eliminated, polytopes, IntensionalPolytopeUtil::sumOutGivenThatPolytopesAllDependOnEliminatedVariables);
-	}
-
-	private static Polytope sumOutGivenThatPolytopesAllDependOnEliminatedVariables(List<? extends Variable> eliminated, List<Polytope> polytopesDependentOnEliminated) {
+	////////////////////////////////////// SUMMING OUT
+	
+	public static Polytope sumOutGivenThatPolytopesAllDependOnEliminatedVariables(Collection<? extends Variable> eliminated, Collection<? extends Polytope> polytopesDependentOnEliminated) {
 	
 		// This is a bit tricky to understand, but one thing to keep in mind is that eliminated simplex variables become intensional convex hell indices by this process.
 		// See full explanation in class javadoc.
 		
-		var simplexVariables = Polytopes.collectSimplexVariables(polytopesDependentOnEliminated);
+		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
 		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
 		var indicesFromIntensionalPolytopes = IntensionalPolytopeUtil.collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(polytopesDependentOnEliminated);
@@ -212,13 +206,23 @@ public class IntensionalPolytopeUtil {
 		return projectedPolytope;
 	}
 
-	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(List<? extends Polytope> polytopes) {
+	private static List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
+		return 
+				polytopes.stream()
+				.filter(p -> p instanceof Simplex)
+				.flatMap(p -> p.getFreeVariables().stream())
+				.collect(toList());
+	}
+
+	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
 				.filter(p -> p instanceof IntensionalPolytope)
 				.flatMap(c -> ((IntensionalPolytope)c).getIndices().stream())
 				.collect(toList());
 	}
+	
+	///////////////////////////////////////////// IDENTITY POLYTOPE
 
 	public static IntensionalPolytope identityPolytope() {
 		return new IntensionalPolytope(list(), IDENTITY_FACTOR);
