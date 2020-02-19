@@ -1,6 +1,5 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.getEquivalentAtomicPolytopeOn;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.setDifference;
@@ -12,8 +11,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
@@ -62,7 +62,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<PartialResult>, Configu
 			}
 			else {
 				Polytope currentPolytope = (Polytope) current;
-				IntensionalConvexHullOfFactors hull  = (IntensionalConvexHullOfFactors) getEquivalentAtomicPolytopeOn(query, currentPolytope);
+				IntensionalConvexHullOfFactors hull  = (IntensionalConvexHullOfFactors) IntensionalConvexHullOfFactorsUtil.getEquivalentAtomicPolytopeOn(query, currentPolytope);
 				var normalizedHullFactor = hull.getFactor().normalize(list(query));
 				var allButQuery = setDifference(normalizedHullFactor.getVariables(), list(query));
 				var upperBoundPerValue = (ArrayTableFactor) normalizedHullFactor.max(allButQuery);

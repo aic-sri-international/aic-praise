@@ -48,6 +48,7 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.AbstractAtomicPolytope;
 
 /**
  * @author braz

@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.ProductPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.ProductPolytope;
 
 /**
  * Interface for atomic polytopes, which is to say polytopes which are not represented as products of polytopes.

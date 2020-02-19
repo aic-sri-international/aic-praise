@@ -1,7 +1,5 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.redouane;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.identityPolytope;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.sumOut;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -20,9 +18,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -85,13 +83,13 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
 		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
-		Approximation<Factor> result = sumOut(variablesSummedOut, product);
+		Approximation<Factor> result = IntensionalConvexHullOfFactorsUtil.sumOut(variablesSummedOut, product);
 		return result;
 	}
 
 	private Polytope getProductOfAllIncomingPolytopesAndFactorAtRoot(List<Approximation<Factor>> subsApproximations) {
 		List<Polytope> polytopesToMultiply = getAllPolytopes(subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
 		return result;
 	}
 
@@ -143,7 +141,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	
 	private static AtomicPolytope collapse(Polytope subPolytope) {
 		Variable freeVariable = getFreeVariable(subPolytope);
-		AtomicPolytope subAtomicPolytope = Polytopes.getEquivalentAtomicPolytopeOn(freeVariable, subPolytope);
+		AtomicPolytope subAtomicPolytope = IntensionalConvexHullOfFactorsUtil.getEquivalentAtomicPolytopeOn(freeVariable, subPolytope);
 		return subAtomicPolytope;
 	}
 	
@@ -282,7 +280,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	private Polytope getProductOfAllIncomingPolytopesButOne(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
 		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
 		List<Polytope> polytopesToMultiply = getAllPolytopesButOne(subApproximationToRemove, subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
 		return result;
 	}
 
@@ -337,14 +335,14 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Polytope product = getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(sub, subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
 		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
-		Polytope result = sumOut(variablesSummedOut, product);
+		Polytope result = IntensionalConvexHullOfFactorsUtil.sumOut(variablesSummedOut, product);
 		return result;
 	}
 
 	private Polytope getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(Anytime<Factor> sub, List<Approximation<Factor>> subsApproximations) {
 		Polytope subApproximationToRemove = (Polytope) sub.getCurrentApproximation();
 		List<Polytope> polytopesToMultiply = getAllPolytopesButOneWithFactor(subApproximationToRemove, subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
 		return result;
 	}
 

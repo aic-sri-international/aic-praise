@@ -10,7 +10,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
 
 public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 
@@ -29,7 +29,7 @@ public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 	@Override
 	public Polytope messageSent(Predicate<Polytope> boxIt) {
 		Polytope message = super.messageSent(boxIt);
-		Polytope result = Polytopes.getEquivalentAtomicPolytopeOn(this.root, message);
+		Polytope result = IntensionalConvexHullOfFactorsUtil.getEquivalentAtomicPolytopeOn(this.root, message);
 		return result;
 	}
 	//----------- Add Node -----------

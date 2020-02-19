@@ -37,8 +37,6 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.identityPolytope;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.sumOut;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -52,8 +50,9 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exa
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -152,13 +151,13 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
 		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
-		Approximation<Factor> result = sumOut(variablesSummedOut, product);
+		Approximation<Factor> result = IntensionalConvexHullOfFactorsUtil.sumOut(variablesSummedOut, product);
 		return result;
 	}
 
 	private Polytope getProductOfAllIncomingPolytopesAndFactorAtRoot(List<Approximation<Factor>> subsApproximations) {
 		List<Polytope> polytopesToMultiply = getAllPolytopes(subsApproximations);
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
 		return result;
 	}
 

@@ -1,6 +1,5 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.gabriel.aebptree;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
@@ -13,9 +12,10 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.BoxUtil;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Polytopes;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -149,10 +149,10 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(boxIt);
 		//Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut();
-		Polytope summedOutPolytope = Polytopes.sumOut(variablesToBeSummedOut, product);
+		Polytope summedOutPolytope = IntensionalConvexHullOfFactorsUtil.sumOut(variablesToBeSummedOut, product);
 		
 		Polytope result = 
-						Polytopes.BoxAPolytope(summedOutPolytope,boxIt);//= Polytopes.BoxAPolytopeAccordingToCriteria(summedOutPolytope, criteriaToBoxAPolytope);
+						BoxUtil.BoxAPolytope(summedOutPolytope,boxIt);//= Polytopes.BoxAPolytopeAccordingToCriteria(summedOutPolytope, criteriaToBoxAPolytope);
 		currentApproximation = result;
 		return result;
 	}
@@ -177,7 +177,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
 		this.addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
 		
 		return result;
 	}
