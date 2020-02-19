@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional;
 
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
@@ -54,13 +54,13 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
  * @author braz
  *
  */
-public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
+public class IntensionalPolytope extends AbstractAtomicPolytope {
 	
 	private Set<? extends Variable> indices;
 
 	private Factor factor;
 	
-	public IntensionalConvexHullOfFactors(Collection<? extends Variable> indices, Factor factor) {
+	public IntensionalPolytope(Collection<? extends Variable> indices, Factor factor) {
 		Set<Variable> indicesAppearingInFactor = intersection(indices, factor.getVariables());
 		this.indices = indicesAppearingInFactor;
 		this.factor = factor;
@@ -93,8 +93,8 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 	@Override
 	public AtomicPolytope getProductIfItIsANonIdentityAtomicPolytopeOrNullOtherwise(AtomicPolytope nonIdentityAtomicAnother) {
 		AtomicPolytope result;
-		if (nonIdentityAtomicAnother instanceof IntensionalConvexHullOfFactors) {
-			result = multiplyByConvexHull(nonIdentityAtomicAnother);
+		if (nonIdentityAtomicAnother instanceof IntensionalPolytope) {
+			result = multiplyByIntensionalPolytope(nonIdentityAtomicAnother);
 		}
 		else {
 			result = null;
@@ -102,12 +102,12 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 		return result;
 	}
 
-	private AtomicPolytope multiplyByConvexHull(AtomicPolytope another) {
+	private AtomicPolytope multiplyByIntensionalPolytope(AtomicPolytope another) {
 		AtomicPolytope result;
-		IntensionalConvexHullOfFactors anotherConvexHull = (IntensionalConvexHullOfFactors) another;
-		if (indices.equals(anotherConvexHull.getIndices())) {
-			Factor productFactor = factor.multiply(anotherConvexHull.getFactor());
-			result = new IntensionalConvexHullOfFactors(indices, productFactor);
+		IntensionalPolytope anotherIntensionalPolytope = (IntensionalPolytope) another;
+		if (indices.equals(anotherIntensionalPolytope.getIndices())) {
+			Factor productFactor = factor.multiply(anotherIntensionalPolytope.getFactor());
+			result = new IntensionalPolytope(indices, productFactor);
 		}
 		else {
 			result = null;
@@ -125,11 +125,11 @@ public class IntensionalConvexHullOfFactors extends AbstractAtomicPolytope {
 	@Override
 	public boolean equals(Object another) {
 		boolean result =
-				another instanceof IntensionalConvexHullOfFactors
+				another instanceof IntensionalPolytope
 				&&
-				((IntensionalConvexHullOfFactors) another).getIndices().equals(getIndices())
+				((IntensionalPolytope) another).getIndices().equals(getIndices())
 				&&
-				((IntensionalConvexHullOfFactors) another).getFactor().equals(getFactor());
+				((IntensionalPolytope) another).getFactor().equals(getFactor());
 		return result;
 	}
 	

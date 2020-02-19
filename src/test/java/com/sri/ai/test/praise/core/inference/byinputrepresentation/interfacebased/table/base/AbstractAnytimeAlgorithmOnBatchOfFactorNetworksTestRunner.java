@@ -12,8 +12,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
@@ -62,7 +62,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<PartialResult>, Configu
 			}
 			else {
 				Polytope currentPolytope = (Polytope) current;
-				IntensionalConvexHullOfFactors hull  = (IntensionalConvexHullOfFactors) IntensionalConvexHullOfFactorsUtil.getEquivalentAtomicPolytopeOn(query, currentPolytope);
+				IntensionalPolytope hull  = (IntensionalPolytope) IntensionalPolytopeUtil.getEquivalentAtomicPolytopeOn(query, currentPolytope);
 				var normalizedHullFactor = hull.getFactor().normalize(list(query));
 				var allButQuery = setDifference(normalizedHullFactor.getVariables(), list(query));
 				var upperBoundPerValue = (ArrayTableFactor) normalizedHullFactor.max(allButQuery);

@@ -39,7 +39,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
@@ -329,7 +329,7 @@ public class AnytimeExactBPTest {
 			throw new Error("Anytime BP should have at least one approximation, but had none.");
 		}
 		else {
-			ExpressionFactor resultFactor = (ExpressionFactor) ((IntensionalConvexHullOfFactors) current).getFactor();
+			ExpressionFactor resultFactor = (ExpressionFactor) ((IntensionalPolytope) current).getFactor();
 			result = PRAiSEUtil.normalize(query, resultFactor, context);
 			println("P(" + exactBP.getMessageVariable() + "): " + result);
 			println("Time: " + (finalTime - initialTime) + " ms.");

@@ -43,7 +43,7 @@ import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
@@ -62,7 +62,7 @@ public interface Polytope extends Approximation<Factor> {
 	Polytope multiply(Polytope another);
 
 	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
-		Polytope result = accumulate(polytopes, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
+		Polytope result = accumulate(polytopes, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
 		return result;
 	}
 }

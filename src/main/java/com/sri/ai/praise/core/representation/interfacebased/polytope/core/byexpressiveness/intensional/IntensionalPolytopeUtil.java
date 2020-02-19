@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.util.Util.getFirst;
@@ -114,7 +114,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
  * @author braz
  *
  */
-public class IntensionalConvexHullOfFactorsUtil {
+public class IntensionalPolytopeUtil {
 
 	/**
 	 * Takes a polytope in which the only free variable is a given query variable,
@@ -138,53 +138,53 @@ public class IntensionalConvexHullOfFactorsUtil {
 		}
 		else {
 			// all nonIdentityAtomicPolytopes are intensional convex hulls, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = mergeIntensionalConvexHulls(nonIdentityAtomicPolytopes);
+			result = mergeIntensionalPolytopes(nonIdentityAtomicPolytopes);
 		}
 		
 		return result;
 	}
 
-	private static IntensionalConvexHullOfFactors mergeIntensionalConvexHulls(List<? extends AtomicPolytope> convexHulls) {
-		List<Variable> indicesFromConvexHulls = collectIndicesFromPolytopesGivenTheyAreAllIntensionalConvexHulls(convexHulls);
+	private static IntensionalPolytope mergeIntensionalPolytopes(List<? extends AtomicPolytope> convexHulls) {
+		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(convexHulls);
 		Factor productOfFactors = makeProductOfFactors(convexHulls);
-		return new IntensionalConvexHullOfFactors(indicesFromConvexHulls, productOfFactors);
+		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);
 	}
 
-	private static List<Variable> collectIndicesFromPolytopesGivenTheyAreAllIntensionalConvexHulls(List<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromPolytopesGivenTheyAreAllIntensionalPolytopes(List<? extends Polytope> polytopes) {
 		List<Variable> indices = list();
 		for (Polytope polytope : polytopes) {
-			var intensionalConvexHull = (IntensionalConvexHullOfFactors) polytope;
-			indices.addAll(intensionalConvexHull.getIndices());
+			var intensionalPolytope = (IntensionalPolytope) polytope;
+			indices.addAll(intensionalPolytope.getIndices());
 		}
 		return indices;
 	}
 
 	public static Factor makeProductOfFactors(List<? extends AtomicPolytope> convexHulls) {
-		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(convexHulls);
+		List<Factor> factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(convexHulls);
 		return Factor.multiply(factors);
 	}
 
-	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
+	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(List<? extends Polytope> polytopes) {
 		List<Factor> factors = list();
 		for (Polytope polytope : polytopes) {
-			collectFactorIfIntensionalConvexHull(polytope, factors);
+			collectFactorIfIntensionalPolytope(polytope, factors);
 		}
 		return factors;
 	}
 
-	private static void collectFactorIfIntensionalConvexHull(Polytope polytope, List<Factor> factors) {
-		if (polytope instanceof IntensionalConvexHullOfFactors) {
-			IntensionalConvexHullOfFactors intensionalConvexHull = (IntensionalConvexHullOfFactors) polytope;
-			factors.add(intensionalConvexHull.getFactor());
+	private static void collectFactorIfIntensionalPolytope(Polytope polytope, List<Factor> factors) {
+		if (polytope instanceof IntensionalPolytope) {
+			IntensionalPolytope intensionalPolytope = (IntensionalPolytope) polytope;
+			factors.add(intensionalPolytope.getFactor());
 		}
 	}
 
 	public static Polytope sumOut(List<? extends Variable> eliminated, Polytope polytope) {
-		return IntensionalConvexHullOfFactorsUtil.sumOut(eliminated, list(polytope));
+		return IntensionalPolytopeUtil.sumOut(eliminated, list(polytope));
 	}
 
 	private static Polytope sumOut(List<? extends Variable> eliminated, Collection<? extends Polytope> polytopes) {
-		return Polytopes.sumOut(eliminated, polytopes, IntensionalConvexHullOfFactorsUtil::sumOutGivenThatPolytopesAllDependOnEliminatedVariables);
+		return Polytopes.sumOut(eliminated, polytopes, IntensionalPolytopeUtil::sumOutGivenThatPolytopesAllDependOnEliminatedVariables);
 	}
 
 	private static Polytope sumOutGivenThatPolytopesAllDependOnEliminatedVariables(List<? extends Variable> eliminated, List<Polytope> polytopesDependentOnEliminated) {
@@ -195,9 +195,9 @@ public class IntensionalConvexHullOfFactorsUtil {
 		var simplexVariables = Polytopes.collectSimplexVariables(polytopesDependentOnEliminated);
 		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
-		var indicesFromConvexHulls = IntensionalConvexHullOfFactorsUtil.collectIndicesFromThosePolytopesWhichAreIntensionalConvexHulls(polytopesDependentOnEliminated);
+		var indicesFromIntensionalPolytopes = IntensionalPolytopeUtil.collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(polytopesDependentOnEliminated);
 		
-		var factors = collectFactorsFromPolytopesThatAreIntensionalConvexHulls(polytopesDependentOnEliminated);
+		var factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(polytopesDependentOnEliminated);
 		
 		var productOfFactors = Factor.multiply(factors);
 		
@@ -205,23 +205,23 @@ public class IntensionalConvexHullOfFactorsUtil {
 		
 		var summedOutFactor = productOfFactors.sumOut(variablesToBeEliminatedOnceSimplexesAreDealtWith);
 		
-		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromConvexHulls, simplexVariables);
+		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromIntensionalPolytopes, simplexVariables);
 		
-		var projectedPolytope = new IntensionalConvexHullOfFactors(finalIndices, summedOutFactor);
+		var projectedPolytope = new IntensionalPolytope(finalIndices, summedOutFactor);
 		
 		return projectedPolytope;
 	}
 
-	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalConvexHulls(List<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(List<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
-				.filter(p -> p instanceof IntensionalConvexHullOfFactors)
-				.flatMap(c -> ((IntensionalConvexHullOfFactors)c).getIndices().stream())
+				.filter(p -> p instanceof IntensionalPolytope)
+				.flatMap(c -> ((IntensionalPolytope)c).getIndices().stream())
 				.collect(toList());
 	}
 
-	public static IntensionalConvexHullOfFactors identityPolytope() {
-		return new IntensionalConvexHullOfFactors(list(), IDENTITY_FACTOR);
+	public static IntensionalPolytope identityPolytope() {
+		return new IntensionalPolytope(list(), IDENTITY_FACTOR);
 	}
 
 }

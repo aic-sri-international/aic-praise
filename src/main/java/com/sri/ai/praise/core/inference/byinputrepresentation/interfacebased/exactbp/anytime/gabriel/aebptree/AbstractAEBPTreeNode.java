@@ -14,8 +14,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.BoxUtil;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -149,7 +149,7 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		Polytope product = computeProductOfFactorAtRootTimesTheIncomingMessages(boxIt);
 		//Collection<? extends Variable> allFreeVariablesInProduct = product.getFreeVariables();
 		List<? extends Variable> variablesToBeSummedOut = getVariablesToBeSummedOut();
-		Polytope summedOutPolytope = IntensionalConvexHullOfFactorsUtil.sumOut(variablesToBeSummedOut, product);
+		Polytope summedOutPolytope = IntensionalPolytopeUtil.sumOut(variablesToBeSummedOut, product);
 		
 		Polytope result = 
 						BoxUtil.BoxAPolytope(summedOutPolytope,boxIt);//= Polytopes.BoxAPolytopeAccordingToCriteria(summedOutPolytope, criteriaToBoxAPolytope);
@@ -177,16 +177,16 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 		//P.S: if the root is a factor: add {(on:) root} to the list; if is a non exhausted variable, add a Simplex(root)
 		this.addSimplexOrFactortoTheListOfProducts(polytopesToMultiply);
 		
-		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalConvexHullOfFactorsUtil.identityPolytope());
+		Polytope result = accumulate(polytopesToMultiply, Polytope::multiply, IntensionalPolytopeUtil.identityPolytope());
 		
 		return result;
 	}
 
 	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
 		if(isRootAFactor()) {
-			IntensionalConvexHullOfFactors singletonConvexHullOfFactorAtRoot = 
-					new IntensionalConvexHullOfFactors(list(),(Factor) this.getRoot());
-			polytopesToMultiply.add(singletonConvexHullOfFactorAtRoot);
+			IntensionalPolytope singletonIntensionalPolytopeAtRoot = 
+					new IntensionalPolytope(list(),(Factor) this.getRoot());
+			polytopesToMultiply.add(singletonIntensionalPolytopeAtRoot);
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
 			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));

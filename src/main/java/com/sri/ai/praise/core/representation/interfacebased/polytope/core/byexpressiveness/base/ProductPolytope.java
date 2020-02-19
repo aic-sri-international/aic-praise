@@ -53,7 +53,7 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactorsUtil;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 
 /**
  * @author braz
@@ -155,7 +155,7 @@ public class ProductPolytope implements Polytope {
 	private static Polytope makePolytopeFromListOfNonIdentityAtomicPolytopes(List<AtomicPolytope> resultNonIdentityAtomicPolytopes) {
 		Polytope result;
 		if (resultNonIdentityAtomicPolytopes.isEmpty()) {
-			result = IntensionalConvexHullOfFactorsUtil.identityPolytope();
+			result = IntensionalPolytopeUtil.identityPolytope();
 		}
 		else if (resultNonIdentityAtomicPolytopes.size() == 1) {
 			result = getFirst(resultNonIdentityAtomicPolytopes);

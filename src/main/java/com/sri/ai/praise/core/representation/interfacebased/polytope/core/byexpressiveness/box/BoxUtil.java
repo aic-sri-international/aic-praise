@@ -10,7 +10,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Polytopes;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.convexhull.IntensionalConvexHullOfFactors;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
 
 public class BoxUtil {
 
@@ -21,7 +21,7 @@ public class BoxUtil {
 	
 		collect(
 				Polytopes.getNonIdentityAtomicPolytopes(list(polytope)), 
-				p -> p instanceof IntensionalConvexHullOfFactors && criteria.apply(p), 
+				p -> p instanceof IntensionalPolytope && criteria.apply(p), 
 				toBeBoxed, 
 				notToBeBoxed);
 	
@@ -35,12 +35,12 @@ public class BoxUtil {
 	public static Polytope boxPolytopes(List<Polytope> toBeBoxed) {
 		LinkedList<Polytope> boxedPolytopes = list();
 		for(Polytope p : toBeBoxed) {
-			if(p instanceof IntensionalConvexHullOfFactors && 
-					!((IntensionalConvexHullOfFactors)p).getIndices().isEmpty() &&
-					((IntensionalConvexHullOfFactors)p).getFactor() instanceof ArrayTableFactor){
+			if(p instanceof IntensionalPolytope && 
+					!((IntensionalPolytope)p).getIndices().isEmpty() &&
+					((IntensionalPolytope)p).getFactor() instanceof ArrayTableFactor){
 				
-					//Box boxedP = TableFactorBoxBuilder.makeTableBox((IntensionalConvexHullOfFactors) p);
-				Box boxedP = Box.boxIt((IntensionalConvexHullOfFactors) p);	
+					//Box boxedP = TableFactorBoxBuilder.makeTableBox((IntensionalPolytope) p);
+				Box boxedP = Box.boxIt((IntensionalPolytope) p);	
 				boxedPolytopes.add(boxedP);
 			}
 			else {
