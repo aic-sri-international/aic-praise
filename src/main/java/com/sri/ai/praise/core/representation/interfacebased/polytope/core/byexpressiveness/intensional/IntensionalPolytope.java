@@ -39,8 +39,11 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexp
 
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
+import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.subtract;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,14 +52,17 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.AbstractAtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.ProductPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 
 /**
  * @author braz
  *
  */
-public class IntensionalPolytope extends AbstractAtomicPolytope {
+public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
 	
 	private Set<? extends Variable> indices;
 
@@ -120,6 +126,8 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 		return result;
 	}
 
+	/////////////////////////////// SUMMING OUT
+	
 	@Override
 	public Polytope sumOut(Collection<? extends Variable> eliminated) {
 		var eliminatedOccurringInPolytope = intersection(eliminated, getFreeVariables());
@@ -135,6 +143,165 @@ public class IntensionalPolytope extends AbstractAtomicPolytope {
 		// If we want to represent that, we must rely on the specific polytope implementation used.
 	}
 
+	/**
+	 * Method for summing out a set of variables from a product polytope.
+	 * This is implemented at this class because {@link ProductPolytope} is a generic class that does not know the representation details of the polytopes it multiplies,
+	 * so it delegates to the class implementing non-simplex atomic polytopes.
+
+	 * <pre>
+	 * The problem is as follows:
+	 * 
+	 * sum_V polytope
+	 * 
+	 * A polytope may be of three types: atomic polytopes simplex and intensional convex hull, and products of polytopes.
+	 * 
+	 * We break product of polytopes into their atomic component and obtain the form:
+	 * 
+	 * sum_V CH_1...CH_m S_1 ... S_n
+	 * 
+	 * where
+	 * CH_i = {(on U_i) phi_i } is an intensional convex hull, and
+	 * S_j is a simplex on variable W_j.
+	 * 
+	 * We can easily factor out polytopes whose free variables do not intersect with V,
+	 * and assume the form above in which free variables always intersect with V.
+	 * Then we have:
+	 * 
+	* sum_V { (on U_1) phi_1 }...{ (on U_m) phi_m }   S_1 ... S_n
+	 * 
+	 * =
+	 * 
+	 * Union_{W_1,...,W_n} sum_{V \ {W_1,...,W_n}} {(on U_1) phi_1 }...{(on U_m) phi_m } 
+	 * 
+	 * =
+	 * 
+	 * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m }
+	 *  
+	 * =
+	 * 
+	 * {(on W_1,...,W_n, U_1...U_m) sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m } 
+	 *  
+	 * =
+	 * 
+	 * {(on W_1,...,W_n, U_1...U_m) phi' } 
+	 * 
+	 * which is an intensional convex hull representing the result.
+	 * 
+	 * The result can be further simplified by eliminating indices that do no appear in phi',
+	 * and by considering {(on ) 1} a multiplication identity polytope that can be eliminated from products.
+	 * 
+	 * Examples:
+	 *
+	 * Example 1:
+	 * 
+	 * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K S_M
+	 * =
+	 * S_M * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K
+	 * =
+	 * S_M * Union_K sum_I {(on J) if I = K and I = M then 1 else 0}
+	 * =
+	 * S_M * Union_{J,K} { sum_I if I = K and I = M then 1 else 0 }
+	 * =
+	 * S_M * Union_{J,K} { phi(K,M) }  for some phi
+	 * =
+	 * S_M * {(on J,K) phi(K,M) }
+	 * =
+	 * S_M * {(on K) phi(K,M) }
+	 * 
+	 * 
+	 * Example 2: m = 0.
+	 * 
+	 * sum_{I,J,K} S_K S_M
+	 * =
+	 * S_M * sum_{I,J,K} S_K
+	 * =
+	 * S_M * Union_K { sum_{I,J} 1 }
+	 * =
+	 * S_M * Union_K { 1 }
+	 * =
+	 * S_M * {(on K) 1 }
+	 * =
+	 * S_M
+	 * </pre>
+	 *
+	 * 
+	 * Example 3:
+	 * 
+	 * sum_{I,J,K} phi(I,K) S_K S_M
+	 * =
+	 * sum_{I,J,K} {(on ) phi(I,K)} S_K S_M
+	 * =
+	 * S_M * sum_{I,J,K} {(on ) phi(I,K)} S_K
+	 * =
+	 * S_M * Union_K { sum_{I,J} phi(I,K) }
+	 * =
+	 * S_M * Union_K { phi'(K) }
+	 * =
+	 * S_M * {(on K) phi'(K) }
+	 * </pre>
+
+	 * @author braz
+	 *
+	 */
+	@Override
+	public Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends Polytope> polytopesDependentOnEliminated) {
+		
+		// This is a bit tricky to understand, but one thing to keep in mind is that eliminated simplex variables become intensional convex hell indices by this process.
+		// See full explanation in class javadoc.
+		
+		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
+		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
+		
+		var indicesFromIntensionalPolytopes = collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(polytopesDependentOnEliminated);
+		
+		var factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(polytopesDependentOnEliminated);
+		
+		var productOfFactors = Factor.multiply(factors);
+		
+		var variablesToBeEliminatedOnceSimplexesAreDealtWith = subtract(eliminated, simplexVariables);
+		
+		var summedOutFactor = productOfFactors.sumOut(variablesToBeEliminatedOnceSimplexesAreDealtWith);
+		
+		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromIntensionalPolytopes, simplexVariables);
+		
+		return new IntensionalPolytope(finalIndices, summedOutFactor);
+	}
+
+	private List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
+		return 
+				polytopes.stream()
+				.filter(p -> p instanceof Simplex)
+				.flatMap(p -> p.getFreeVariables().stream())
+				.collect(toList());
+	}
+
+	private List<Variable> collectIndicesFromThosePolytopesWhichAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+		return 
+				polytopes.stream()
+				.filter(p -> p instanceof IntensionalPolytope)
+				.flatMap(c -> ((IntensionalPolytope)c).getIndices().stream())
+				.collect(toList());
+	}
+
+
+	private List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+		List<Factor> factors = list();
+		for (Polytope polytope : polytopes) {
+			collectFactorIfIntensionalPolytope(polytope, factors);
+		}
+		return factors;
+	}
+
+
+	private void collectFactorIfIntensionalPolytope(Polytope polytope, List<Factor> factors) {
+		if (polytope instanceof IntensionalPolytope) {
+			IntensionalPolytope intensionalPolytope = (IntensionalPolytope) polytope;
+			factors.add(intensionalPolytope.getFactor());
+		}
+	}
+
+	//////////////////////// ANCILLARY
+	
 	@Override
 	public String toString() {
 		String indicesString = indices.isEmpty()? "" : "(on " + join(indices) + ") ";

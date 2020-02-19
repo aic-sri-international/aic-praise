@@ -38,7 +38,7 @@ public class IdentityPolytope implements Polytope {
 
 	@Override
 	public Polytope sumOut(Collection<? extends Variable> eliminated) {
-		return this;
+		return this; // modulo a constant!
 	}
 
 }

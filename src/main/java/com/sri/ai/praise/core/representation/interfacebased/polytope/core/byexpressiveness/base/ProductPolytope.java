@@ -55,8 +55,8 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytopeUtil;
 import com.sri.ai.util.Util;
 
 /**
@@ -77,11 +77,30 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	 */
 	ProductPolytope(Collection<? extends AtomicPolytope> alreadyMultipledAtomicPolytopes) {
 		super();
-		myAssert(alreadyMultipledAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, create an IdentityPolytope or use static Polytope.multiply.");
-		myAssert(alreadyMultipledAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element. Use the single element instead, or use static Polytope.multiply.");
+		myAssert(alreadyMultipledAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, use makeProductFromAlreadyMultipliedAtomicPolytopes (if the polytopes satisfy the condition in the name), or create an IdentityPolytope (if you know you have zero polytopes), or use the more general static Polytope.multiply which checks everything for you.");
+		myAssert(alreadyMultipledAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element.  Instead, use makeProductFromAlreadyMultipliedAtomicPolytopes if you know for sure there will be just one atomic polytope, or general static Polytope.multiply which checks everything for you.");
 		this.alreadyMultipledAtomicPolytopes = new LinkedList<>(alreadyMultipledAtomicPolytopes);
 	}
 	
+	/**
+	 * Only use this method if you already know that the product of no pair of these polytopes generates an atomic polytope.
+	 * If you need that to be checked first, use {@link Polytope#multiply(Collection)} instead.
+	 * @param alreadyMultipliedAtomicPolytopes
+	 * @return
+	 */
+	public static Polytope makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(Collection<? extends AtomicPolytope> alreadyMultipliedAtomicPolytopes) {
+		
+		if (alreadyMultipliedAtomicPolytopes.isEmpty()) {
+			return identityPolytope();
+		}
+		else if (alreadyMultipliedAtomicPolytopes.size() == 1) {
+			return getFirst(alreadyMultipliedAtomicPolytopes);
+		}
+		else {
+			return new ProductPolytope(alreadyMultipliedAtomicPolytopes);
+		}
+	}
+
 	public Collection<? extends Polytope> getPolytopes() {
 		return alreadyMultipledAtomicPolytopes;
 	}
@@ -172,7 +191,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 	}
 
-	private static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(List<AtomicPolytope> resultAtomicPolytopes) {
+	private static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(List<? extends AtomicPolytope> resultAtomicPolytopes) {
 		Polytope result;
 		if (resultAtomicPolytopes.isEmpty()) {
 			result = identityPolytope();
@@ -211,8 +230,8 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	@Override
 	public Polytope sumOut(Collection<? extends Variable> eliminated) {
 		
-		List<Polytope> independentOfEliminated = list();
-		List<Polytope> dependentOfEliminated = list();
+		List<AtomicPolytope> independentOfEliminated = list();
+		List<AtomicPolytope> dependentOfEliminated = list();
 
 		collect(
 				/* original collection: */ this.getAtomicPolytopes(), 
@@ -222,21 +241,31 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 		Polytope summedOutFromDependents = sumOutEliminatedVariablesFromPolytopesDependingOnThem(eliminated, dependentOfEliminated);
 
-		List<Polytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
-		allAtomicPolytopesInResult.add(summedOutFromDependents);
-		Polytope result = Polytope.multiply(allAtomicPolytopesInResult);
+		List<AtomicPolytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
+		allAtomicPolytopesInResult.addAll(summedOutFromDependents.getAtomicPolytopes());
+		Polytope result = makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(allAtomicPolytopesInResult);
 
 		return result;
 	}
 	
-	private static Predicate<Polytope> isIndependentOf(Collection<? extends Variable> variables) {
+	private static Predicate<? super AtomicPolytope> isIndependentOf(Collection<? extends Variable> variables) {
 		return p -> ! Util.intersect(p.getFreeVariables(), variables);
 	}
-
-	protected Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
+	
+	private Polytope sumOutEliminatedVariablesFromPolytopesDependingOnThem(
 			Collection<? extends Variable> eliminated,
-			Collection<? extends Polytope> dependentPolytopes) {
+			Collection<? extends AtomicPolytope> dependentAtomicPolytopes) {
+
+		var nonSimplex = getFirst(dependentAtomicPolytopes, p -> !( p instanceof Simplex));
 		
-		return IntensionalPolytopeUtil.sumOutGivenThatPolytopesAllDependOnEliminatedVariables(eliminated, dependentPolytopes);
+		var allAreSimplices = nonSimplex == null;
+
+		if (allAreSimplices) {
+			return makeProductPolytopeFromAlreadyMultipliedAtomicPolytopes(dependentAtomicPolytopes);
+		}
+		else {
+			return ((NonSimplexAtomicPolytope) nonSimplex).sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
+		}
 	}
+
 }
