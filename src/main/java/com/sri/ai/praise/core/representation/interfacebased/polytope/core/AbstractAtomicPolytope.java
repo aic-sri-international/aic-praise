@@ -87,6 +87,10 @@ public abstract class AbstractAtomicPolytope extends AbstractPolytope implements
 		return new Error("Multiplying " + this + " by " + another + " but the latter's class is not recognized.");
 	}
 	
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytope() {
+		return this;
+	}
 
 	@Override
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {

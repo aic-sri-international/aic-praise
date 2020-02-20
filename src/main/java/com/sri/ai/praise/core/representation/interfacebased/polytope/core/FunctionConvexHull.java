@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes;
+import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
@@ -46,7 +48,6 @@ import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
-import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
@@ -70,8 +71,8 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
  * @author braz
  *
  */
-public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
 	
+public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
 	private Set<? extends Variable> indices;
 
 	private Factor factor;
@@ -256,62 +257,44 @@ public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSim
 	 *
 	 */
 	@Override
-	public Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends Polytope> polytopesDependentOnEliminated) {
+	public Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends AtomicPolytope> polytopesDependentOnEliminated) {
+
+		// 1. separate simplices and convex hulls
+		// 2. atomicConvexHull = compute atomic convex hull equivalent to the product of the convex hulls
+		// 3. sum out (eliminated - simplex variables) from atomicConvexHull
+		// 4. add simplices indices to result
+		// Note that line 2. is crucial because it is at forming an atomic polytope that convex hull representation might be simplified.
+		// Note that one intuition is that turning the product of polytopes into an atomic one and invoking sumOut would suffice,
+		// but it is not true. That would create a convex hull with the simplex free variables that are also to be eliminated
+		// as indices of the resulting convex hull,
+		// and then try to sum out those same variables from the convex hull with them as indices.
+		// This requires special care because the eliminated variables must be free variables in the polytopes and the indices
+		// are not free variables.
+		// This would still be well-defined because indices are a new scope so they could just be standardized apart,
+		// but the method sumOut does not attempt to standardize apart all the time as that would be expensive.
+		// To use sumOut without having to worry about standardizing apart, we instead use a technique
+		// that takes care of the simplices separately, and explicitly uses the fact that this is a summation.
 		
-		// This is a bit tricky to understand, but one thing to keep in mind is that eliminated simplex variables become intensional convex hell indices by this process.
-		// See full explanation in class javadoc.
+		List<AtomicPolytope> simplices = list();
+		List<AtomicPolytope> functionConvexHulls = list();
+		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplices, functionConvexHulls);
+
+		@SuppressWarnings("unchecked")
+		var simplexVariables = mapIntoList((List<? extends Simplex>) simplices, Simplex::getVariable);
+
+		var functionConvexHullsProduct = makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(functionConvexHulls);
+		var atomicFunctionConvexHullsProduct = (FunctionConvexHull) functionConvexHullsProduct.getEquivalentAtomicPolytope();
 		
-		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
-		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
+		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
+		var atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables = (FunctionConvexHull) 
+				atomicFunctionConvexHullsProduct.sumOut(eliminatedMinusSimplexVariables);
+
+		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
+		var result = new FunctionConvexHull(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
 		
-		var indicesFromFunctionConvexHulls = collectIndicesFromTheFunctionConvexHullsAmongThese(polytopesDependentOnEliminated);
-		
-		var factors = collectFactorsFromPolytopesThatAreFunctionConvexHulls(polytopesDependentOnEliminated);
-		
-		var productOfFactors = Factor.multiply(factors);
-		
-		var variablesToBeEliminatedOnceSimplexesAreDealtWith = subtract(eliminated, simplexVariables);
-		
-		var summedOutFactor = productOfFactors.sumOut(variablesToBeEliminatedOnceSimplexesAreDealtWith);
-		
-		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromFunctionConvexHulls, simplexVariables);
-		
-		return new FunctionConvexHull(finalIndices, summedOutFactor);
+		return result;
 	}
 
-	private static List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
-		return 
-				polytopes.stream()
-				.filter(p -> p instanceof Simplex)
-				.flatMap(p -> p.getFreeVariables().stream())
-				.collect(toList());
-	}
-
-	private static List<Variable> collectIndicesFromTheFunctionConvexHullsAmongThese(Collection<? extends Polytope> polytopes) {
-		return 
-				polytopes.stream()
-				.filter(p -> p instanceof FunctionConvexHull)
-				.flatMap(c -> ((FunctionConvexHull)c).getIndices().stream())
-				.collect(toList());
-	}
-
-
-	private static List<Factor> collectFactorsFromPolytopesThatAreFunctionConvexHulls(Collection<? extends Polytope> polytopes) {
-		List<Factor> factors = list();
-		for (Polytope polytope : polytopes) {
-			collectFactorIfFunctionConvexHull(polytope, factors);
-		}
-		return factors;
-	}
-
-
-	private static void collectFactorIfFunctionConvexHull(Polytope polytope, List<Factor> factors) {
-		if (polytope instanceof FunctionConvexHull) {
-			FunctionConvexHull functionConvexHull = (FunctionConvexHull) polytope;
-			factors.add(functionConvexHull.getFactor());
-		}
-	}
-	
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
 	
 	@Override

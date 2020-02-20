@@ -45,7 +45,9 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.Util.unionOfCollections;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -53,6 +55,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
@@ -248,6 +251,20 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 	}
 
+	
+	//////////////////////// GET SINGLE ATOMIC POLYTOPE
+	
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytope() {
+		myAssert(Util.forAll(alreadySimplifiedAtomicPolytopes, a -> a instanceof FunctionConvexHull), () -> "getEquivalentAtomicPolytope not implemented yet for products involving simplices.");
+		@SuppressWarnings("unchecked")
+		Collection<FunctionConvexHull> convexHulls = (Collection<FunctionConvexHull>) alreadySimplifiedAtomicPolytopes;
+		var indices = union(functionIterator(convexHulls, FunctionConvexHull::getIndices));
+		var factors = mapIntoList(convexHulls, FunctionConvexHull::getFactor);
+		var factorsProduct = Factor.multiply(factors);
+		return new FunctionConvexHull(indices, factorsProduct);
+	}
+
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
 	
 	@Override
@@ -280,17 +297,17 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	}
 	
 	@Override
+	public int hashCode() {
+		return getPolytopes().hashCode();
+	}
+
+	@Override
 	public boolean equals(Object another) {
 		boolean result =
 				another instanceof ProductPolytope
 				&&
 				((ProductPolytope) another).getPolytopes().equals(getPolytopes());
 		return result;
-	}
-	
-	@Override
-	public int hashCode() {
-		return getPolytopes().hashCode();
 	}
 
 }
