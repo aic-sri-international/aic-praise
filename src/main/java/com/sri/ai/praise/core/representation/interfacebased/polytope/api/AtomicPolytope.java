@@ -51,11 +51,11 @@ public interface AtomicPolytope extends Polytope {
 	 * Some cases in which this should return non-null are:
 	 * <ul>
 	 * <li> the multiplication of simplices on the same variable, which results in the same simplex
-	 * <li> the multiplication of intensional polytopes with indices of the same type.
+	 * <li> the multiplication of function convex hulls with indices of the same type.
 	 * In this case, the indices can be unified and the internal factors multiplied, with the resulting taking as much space as one of the original polytopes.
 	 * </ul>
 	 * <p>
-	 * Products on non-unifiable indices should be kept decoupled for as long as possible (for example, two intensional polytopes of different indices),
+	 * Products on non-unifiable indices should be kept decoupled for as long as possible (for example, two function convex hulls of different indices),
 	 * since an atomic product will be most costly and prevent factorization.
 	 * 
 	 * @param anotherAtomicPolytope

@@ -62,16 +62,24 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpr
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 
 /**
+ * A polytope equal to the convex hull of points provided by a {@link Factor},
+ * of which certain arguments (provided by {@link #getIndices()}) represent the indices of vertices
+ * and the remaining ones (provided by {@link #getFreeVariables()}) represent the dimensions of the vectors
+ * in the polytope.
+ * <p>
+ * More precisely, given factor <code>phi(I,V)</code> where <code>I</code> are the indices and <code>V</code>
+ * are the remaining variables, the represented polytope is the convex hull of <code>{ phi(I,V) }_I</code>.
+ * 
  * @author braz
  *
  */
-public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
+public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
 	
 	private Set<? extends Variable> indices;
 
 	private Factor factor;
 	
-	public IntensionalPolytope(Collection<? extends Variable> indices, Factor factor) {
+	public FunctionConvexHull(Collection<? extends Variable> indices, Factor factor) {
 		Set<Variable> indicesAppearingInFactor = intersection(indices, factor.getVariables());
 		this.indices = indicesAppearingInFactor;
 		this.factor = factor;
@@ -107,8 +115,8 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	@Override
 	public AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope anotherAtomicPolytope) {
 		AtomicPolytope result;
-		if (anotherAtomicPolytope instanceof IntensionalPolytope) {
-			result = multiplyByIntensionalPolytopeIfSameIndicesOrNull(anotherAtomicPolytope);
+		if (anotherAtomicPolytope instanceof FunctionConvexHull) {
+			result = multiplyByFunctionConvexHullIfSameIndicesOrNull(anotherAtomicPolytope);
 		}
 		else {
 			result = null;
@@ -116,19 +124,19 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		return result;
 	}
 
-	private AtomicPolytope multiplyByIntensionalPolytopeIfSameIndicesOrNull(AtomicPolytope another) {
+	private AtomicPolytope multiplyByFunctionConvexHullIfSameIndicesOrNull(AtomicPolytope another) {
 		AtomicPolytope result;
-		IntensionalPolytope anotherIntensionalPolytope = (IntensionalPolytope) another;
-		if (indices.equals(anotherIntensionalPolytope.getIndices())) {
-			Factor productFactor = factor.multiply(anotherIntensionalPolytope.getFactor());
-			result = new IntensionalPolytope(indices, productFactor);
+		FunctionConvexHull anotherFunctionConvexHull = (FunctionConvexHull) another;
+		if (indices.equals(anotherFunctionConvexHull.getIndices())) {
+			Factor productFactor = factor.multiply(anotherFunctionConvexHull.getFactor());
+			result = new FunctionConvexHull(indices, productFactor);
 		}
 		else {
 			result = null;
 		}
 		return result;
 		
-		// We could multiply intensional polytopes with *unifiable* indices, that is,
+		// We could multiply function convex hulls with *unifiable* indices, that is,
 		// indices with the same type but different names.
 		// However whether that is worth it seems to be an empirical question.
 	}
@@ -143,7 +151,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		}
 		else {
 			var newFactor = getFactor().sumOut(listFrom(eliminatedOccurringInPolytope)); // TODO: does Factor.sumOut really need a list? It should work with just a collection.
-			return new IntensionalPolytope(getIndices(), newFactor);
+			return new FunctionConvexHull(getIndices(), newFactor);
 		}
 		// Note that this implementation considers polytopes equivalent modulo normalization.
 		// This plays a role here because sum_V Polytope_on_U for V containing variables other than U will result in their cardinality multiplying the result.
@@ -259,9 +267,9 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		var simplexVariables = collectSimplexVariables(polytopesDependentOnEliminated);
 		// because each simplex has a single variable and all simplices depend on eliminated, all simplex variables are in eliminated.
 		
-		var indicesFromIntensionalPolytopes = collectIndicesFromTheIntensionalPolytopesAmongThese(polytopesDependentOnEliminated);
+		var indicesFromFunctionConvexHulls = collectIndicesFromTheFunctionConvexHullsAmongThese(polytopesDependentOnEliminated);
 		
-		var factors = collectFactorsFromPolytopesThatAreIntensionalPolytopes(polytopesDependentOnEliminated);
+		var factors = collectFactorsFromPolytopesThatAreFunctionConvexHulls(polytopesDependentOnEliminated);
 		
 		var productOfFactors = Factor.multiply(factors);
 		
@@ -269,9 +277,9 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		
 		var summedOutFactor = productOfFactors.sumOut(variablesToBeEliminatedOnceSimplexesAreDealtWith);
 		
-		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromIntensionalPolytopes, simplexVariables);
+		var finalIndices = makeListWithElementsOfTwoCollections(indicesFromFunctionConvexHulls, simplexVariables);
 		
-		return new IntensionalPolytope(finalIndices, summedOutFactor);
+		return new FunctionConvexHull(finalIndices, summedOutFactor);
 	}
 
 	private static List<Variable> collectSimplexVariables(Collection<? extends Polytope> polytopes) {
@@ -282,28 +290,28 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 				.collect(toList());
 	}
 
-	private static List<Variable> collectIndicesFromTheIntensionalPolytopesAmongThese(Collection<? extends Polytope> polytopes) {
+	private static List<Variable> collectIndicesFromTheFunctionConvexHullsAmongThese(Collection<? extends Polytope> polytopes) {
 		return 
 				polytopes.stream()
-				.filter(p -> p instanceof IntensionalPolytope)
-				.flatMap(c -> ((IntensionalPolytope)c).getIndices().stream())
+				.filter(p -> p instanceof FunctionConvexHull)
+				.flatMap(c -> ((FunctionConvexHull)c).getIndices().stream())
 				.collect(toList());
 	}
 
 
-	private static List<Factor> collectFactorsFromPolytopesThatAreIntensionalPolytopes(Collection<? extends Polytope> polytopes) {
+	private static List<Factor> collectFactorsFromPolytopesThatAreFunctionConvexHulls(Collection<? extends Polytope> polytopes) {
 		List<Factor> factors = list();
 		for (Polytope polytope : polytopes) {
-			collectFactorIfIntensionalPolytope(polytope, factors);
+			collectFactorIfFunctionConvexHull(polytope, factors);
 		}
 		return factors;
 	}
 
 
-	private static void collectFactorIfIntensionalPolytope(Polytope polytope, List<Factor> factors) {
-		if (polytope instanceof IntensionalPolytope) {
-			IntensionalPolytope intensionalPolytope = (IntensionalPolytope) polytope;
-			factors.add(intensionalPolytope.getFactor());
+	private static void collectFactorIfFunctionConvexHull(Polytope polytope, List<Factor> factors) {
+		if (polytope instanceof FunctionConvexHull) {
+			FunctionConvexHull functionConvexHull = (FunctionConvexHull) polytope;
+			factors.add(functionConvexHull.getFactor());
 		}
 	}
 	
@@ -323,7 +331,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		}
 		else {
 			// variable is required to be in polytope
-			throw new Error("IntensionalPolytope has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
+			throw new Error("FunctionConvexHull has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
 		}
 	}	
 
@@ -353,26 +361,26 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		return result;
 	}
 
-	private static IntensionalPolytope makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
+	private static FunctionConvexHull makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
 		@SuppressWarnings("unchecked")
-		Collection<? extends IntensionalPolytope> intensionalPolytopes = (Collection<? extends IntensionalPolytope>) nonSimplexAtomicPolytopes;
-		// The only non-simplex atomic polytopes in this implementation are intensional polytopes.
+		Collection<? extends FunctionConvexHull> functionConvexHulls = (Collection<? extends FunctionConvexHull>) nonSimplexAtomicPolytopes;
+		// The only non-simplex atomic polytopes in this implementation are function convex hulls.
 		
-		List<Variable> indicesFromIntensionalPolytopes = collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(intensionalPolytopes);
-		Factor productOfFactors = makeProductOfFactorsOf(intensionalPolytopes);
-		return new IntensionalPolytope(indicesFromIntensionalPolytopes, productOfFactors);
+		List<Variable> indicesFromFunctionConvexHulls = collectIndicesFromFunctionConvexHullsGivenTheyAreAllFunctionConvexHulls(functionConvexHulls);
+		Factor productOfFactors = makeProductOfFactorsOf(functionConvexHulls);
+		return new FunctionConvexHull(indicesFromFunctionConvexHulls, productOfFactors);
 	}
 
-	private static List<Variable> collectIndicesFromIntensionalPolytopesGivenTheyAreAllIntensionalPolytopes(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
+	private static List<Variable> collectIndicesFromFunctionConvexHullsGivenTheyAreAllFunctionConvexHulls(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		List<Variable> indices = list();
-		for (IntensionalPolytope intensionalPolytope : intensionalPolytopes) {
-			indices.addAll(intensionalPolytope.getIndices());
+		for (FunctionConvexHull functionConvexHull : functionConvexHulls) {
+			indices.addAll(functionConvexHull.getIndices());
 		}
 		return indices;
 	}
 
-	private static Factor makeProductOfFactorsOf(Collection<? extends IntensionalPolytope> intensionalPolytopes) {
-		List<Factor> factors = mapIntoList(intensionalPolytopes, IntensionalPolytope::getFactor);
+	private static Factor makeProductOfFactorsOf(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+		List<Factor> factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		return Factor.multiply(factors);
 	}
 
@@ -388,11 +396,11 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	@Override
 	public boolean equals(Object another) {
 		boolean result =
-				another instanceof IntensionalPolytope
+				another instanceof FunctionConvexHull
 				&&
-				((IntensionalPolytope) another).getIndices().equals(getIndices())
+				((FunctionConvexHull) another).getIndices().equals(getIndices())
 				&&
-				((IntensionalPolytope) another).getFactor().equals(getFactor());
+				((FunctionConvexHull) another).getFactor().equals(getFactor());
 		return result;
 	}
 	

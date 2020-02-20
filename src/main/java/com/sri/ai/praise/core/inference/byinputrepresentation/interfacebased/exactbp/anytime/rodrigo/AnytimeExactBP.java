@@ -52,7 +52,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -168,14 +168,14 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 
 	private void addFactorAtRootPolytope(List<Polytope> polytopesToMultiply) {
-		IntensionalPolytope singletonIntensionalPolytopeAtRoot = getFactorAtRootPolytope();
-		polytopesToMultiply.add(singletonIntensionalPolytopeAtRoot);
+		FunctionConvexHull singletonFunctionConvexHullAtRoot = getFactorAtRootPolytope();
+		polytopesToMultiply.add(singletonFunctionConvexHullAtRoot);
 	}
 
-	private IntensionalPolytope getFactorAtRootPolytope() {
+	private FunctionConvexHull getFactorAtRootPolytope() {
 		Factor factorAtRoot = Factor.multiply(getBase().getFactorsAtRoot());
-		IntensionalPolytope singletonIntensionalPolytopeAtRoot = new IntensionalPolytope(list(), factorAtRoot);
-		return singletonIntensionalPolytopeAtRoot;
+		FunctionConvexHull singletonFunctionConvexHullAtRoot = new FunctionConvexHull(list(), factorAtRoot);
+		return singletonFunctionConvexHullAtRoot;
 	}
 
 	@Override

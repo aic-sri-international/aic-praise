@@ -15,7 +15,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.BoxUtil;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.IntensionalPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information
@@ -184,9 +184,9 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 
 	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
 		if(isRootAFactor()) {
-			IntensionalPolytope singletonIntensionalPolytopeAtRoot = 
-					new IntensionalPolytope(list(),(Factor) this.getRoot());
-			polytopesToMultiply.add(singletonIntensionalPolytopeAtRoot);
+			FunctionConvexHull singletonFunctionConvexHullAtRoot = 
+					new FunctionConvexHull(list(),(Factor) this.getRoot());
+			polytopesToMultiply.add(singletonFunctionConvexHullAtRoot);
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
 			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));
