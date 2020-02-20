@@ -59,7 +59,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 
 	/////////////////////// ABSTRACT METHODS
 	
-	public abstract FunctionConvexHull simplify();
+	public abstract AbstractFunctionConvexHull simplify();
 
 	@Override
 	public abstract AbstractFunctionConvexHull newInstance(Collection<? extends Variable> indices, Factor factor);
@@ -128,6 +128,8 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 		if (indices.equals(anotherFunctionConvexHull.getIndices())) {
 			Factor productFactor = factor.multiply(anotherFunctionConvexHull.getFactor());
 			result = newInstance(indices, productFactor);
+			// no need to simplify because we still have the same number of vertices as before,
+			// but if they were normalized, this is no longer the case.
 		}
 		else {
 			result = null;
@@ -150,6 +152,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 		else {
 			var newFactor = getFactor().sumOut(listFrom(eliminatedOccurringInPolytope)); // TODO: does Factor.sumOut really need a list? It should work with just a collection.
 			return newInstance(getIndices(), newFactor);
+			// no need to simplify because the number of vertices (indices) remains unchanged
 		}
 		// Note that this implementation considers polytopes equivalent modulo normalization.
 		// This plays a role here because sum_V Polytope_on_U for V containing variables other than U will result in their cardinality multiplying the result.
@@ -202,11 +205,11 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	 * @return
 	 */
 	@Override
-	public AbstractFunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+	public FunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var indices = union(functionIterator(functionConvexHulls, FunctionConvexHull::getIndices));
 		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		var factorsProduct = Factor.multiply(factors);
-		return newInstance(indices, factorsProduct);
+		return newInstance(indices, factorsProduct).simplify();
 	}
 
 	//////////////////////// ANCILLARY

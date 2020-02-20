@@ -366,6 +366,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
 		var someFunctionConvexHull = atomicFunctionConvexHullsProduct; // just taking a representative of the FunctionConvexHull interface being used in order to use "overridable constructor"
 		var result = someFunctionConvexHull.newInstance(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
+		// we do not simplify this new instance because atomicFunctionConvexHullsProduct was already simplified.
 		
 		return result;
 	}
