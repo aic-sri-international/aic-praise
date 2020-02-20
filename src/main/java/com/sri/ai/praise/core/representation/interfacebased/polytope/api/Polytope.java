@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;

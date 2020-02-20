@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
 import static java.util.Collections.emptyList;
 

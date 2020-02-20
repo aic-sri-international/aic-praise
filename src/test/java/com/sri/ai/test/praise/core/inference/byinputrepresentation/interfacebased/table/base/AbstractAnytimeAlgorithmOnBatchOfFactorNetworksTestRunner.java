@@ -11,8 +11,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;

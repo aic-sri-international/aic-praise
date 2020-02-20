@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
@@ -57,9 +57,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.AbstractAtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.ProductPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
 
 /**
  * A polytope equal to the convex hull of points provided by a {@link Factor},

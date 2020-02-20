@@ -3,7 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.ProductPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 
 /**
  * An atomic polytope that is not a simplex.

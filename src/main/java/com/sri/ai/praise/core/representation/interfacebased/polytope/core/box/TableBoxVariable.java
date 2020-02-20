@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core.box;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 

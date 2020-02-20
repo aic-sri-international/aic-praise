@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.redouane;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -19,8 +19,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;

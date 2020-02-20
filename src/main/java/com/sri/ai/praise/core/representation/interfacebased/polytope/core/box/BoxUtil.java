@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core.box;
 
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.list;
@@ -9,7 +9,7 @@ import java.util.List;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
 
 public class BoxUtil {
 

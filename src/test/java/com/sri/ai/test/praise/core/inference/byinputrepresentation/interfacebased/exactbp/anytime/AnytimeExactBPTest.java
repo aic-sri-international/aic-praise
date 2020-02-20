@@ -39,7 +39,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
 import com.sri.ai.util.base.IdentityWrapper;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 

@@ -39,7 +39,7 @@ package com.sri.ai.test.praise.core.representation.interfacebased.polytope;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope.multiply;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -55,8 +55,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 
 public class PolytopeTest {
 

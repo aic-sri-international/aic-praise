@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.gabriel.aebptree;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
@@ -13,9 +13,9 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.Simplex;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.box.BoxUtil;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.intensional.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.box.BoxUtil;
 
 public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBPTreeNode<RootNode, ParentNode>{
 	//Node information

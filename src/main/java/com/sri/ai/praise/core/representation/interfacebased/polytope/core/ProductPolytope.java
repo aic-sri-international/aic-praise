@@ -35,9 +35,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.byexpressiveness.base.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
