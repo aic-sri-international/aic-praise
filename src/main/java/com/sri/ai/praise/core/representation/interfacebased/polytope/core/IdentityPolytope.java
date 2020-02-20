@@ -42,11 +42,6 @@ public class IdentityPolytope implements Polytope {
 	}
 
 	@Override
-	public AtomicPolytope getEquivalentAtomicPolytope() {
-		throw new Error("makeEquivalentAtomicPolytope is not valid for IdentityPolytope");
-	}
-
-	@Override
 	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
 		throw new Error("getEquivalentAtomicPolytopeOn is not valid for IdentityPolytope");
 	}

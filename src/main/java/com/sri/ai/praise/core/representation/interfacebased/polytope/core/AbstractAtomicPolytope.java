@@ -88,11 +88,6 @@ public abstract class AbstractAtomicPolytope extends AbstractPolytope implements
 	}
 	
 	@Override
-	public AtomicPolytope getEquivalentAtomicPolytope() {
-		return this;
-	}
-
-	@Override
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
 		return list(this);
 	}

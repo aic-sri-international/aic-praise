@@ -74,13 +74,9 @@ public interface Polytope extends Approximation<Factor> {
 
 	Polytope sumOut(Collection<? extends Variable> eliminated);
 	
-	AtomicPolytope getEquivalentAtomicPolytope();
-	
 	/**
 	 * Takes a polytope in which the only free variable is a given variable,
 	 * and returns a single equivalent {@link AtomicPolytope}.
-	 * 
-	 * 
 	 */
 	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable);
 	// TODO: this is a suspicious method, a bit too specific... It may be better to identify what is done with its result, and implement that instead.

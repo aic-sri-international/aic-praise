@@ -37,17 +37,15 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes;
-import static com.sri.ai.util.Util.collect;
-import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
-import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.union;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,8 +54,8 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.util.Util;
 
 /**
  * A polytope equal to the convex hull of points provided by a {@link Factor},
@@ -72,7 +70,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
  *
  */
 	
-public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSimplexAtomicPolytope {
+public class FunctionConvexHull extends AbstractAtomicPolytope implements AtomicPolytope {
 	private Set<? extends Variable> indices;
 
 	private Factor factor;
@@ -87,14 +85,14 @@ public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSim
 		return indices;
 	}
 
-	private List<Variable> free;
+	private List<Variable> freeVariables;
 	@Override
 	public Collection<? extends Variable> getFreeVariables() {
-		if (free == null) {
+		if (freeVariables == null) {
 			List<? extends Variable> all = factor.getVariables();
-			free = subtract(all, getIndices());
+			freeVariables = subtract(all, getIndices());
 		}
-		return free;
+		return freeVariables;
 	}
 
 	public Factor getFactor() {
@@ -156,145 +154,6 @@ public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSim
 		// If we want to represent that, we must rely on the specific polytope implementation used.
 	}
 
-	/**
-	 * Method for summing out a set of variables from a product polytope.
-	 * This is implemented at this class because {@link ProductPolytope} is a generic class that does not know the representation details of the polytopes it multiplies,
-	 * so it delegates to the class implementing non-simplex atomic polytopes.
-
-	 * <pre>
-	 * The problem is as follows:
-	 * 
-	 * sum_V polytope
-	 * 
-	 * A polytope may be of three types: atomic polytopes simplex and intensional convex hull, and products of polytopes.
-	 * 
-	 * We break product of polytopes into their atomic component and obtain the form:
-	 * 
-	 * sum_V CH_1...CH_m S_1 ... S_n
-	 * 
-	 * where
-	 * CH_i = {(on U_i) phi_i } is an intensional convex hull, and
-	 * S_j is a simplex on variable W_j.
-	 * 
-	 * We can easily factor out polytopes whose free variables do not intersect with V,
-	 * and assume the form above in which free variables always intersect with V.
-	 * Then we have:
-	 * 
-	* sum_V { (on U_1) phi_1 }...{ (on U_m) phi_m }   S_1 ... S_n
-	 * 
-	 * =
-	 * 
-	 * Union_{W_1,...,W_n} sum_{V \ {W_1,...,W_n}} {(on U_1) phi_1 }...{(on U_m) phi_m } 
-	 * 
-	 * =
-	 * 
-	 * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m }
-	 *  
-	 * =
-	 * 
-	 * {(on W_1,...,W_n, U_1...U_m) sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m } 
-	 *  
-	 * =
-	 * 
-	 * {(on W_1,...,W_n, U_1...U_m) phi' } 
-	 * 
-	 * which is an intensional convex hull representing the result.
-	 * 
-	 * The result can be further simplified by eliminating indices that do no appear in phi',
-	 * and by considering {(on ) 1} a multiplication identity polytope that can be eliminated from products.
-	 * 
-	 * Examples:
-	 *
-	 * Example 1:
-	 * 
-	 * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K S_M
-	 * =
-	 * S_M * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K
-	 * =
-	 * S_M * Union_K sum_I {(on J) if I = K and I = M then 1 else 0}
-	 * =
-	 * S_M * Union_{J,K} { sum_I if I = K and I = M then 1 else 0 }
-	 * =
-	 * S_M * Union_{J,K} { phi(K,M) }  for some phi
-	 * =
-	 * S_M * {(on J,K) phi(K,M) }
-	 * =
-	 * S_M * {(on K) phi(K,M) }
-	 * 
-	 * 
-	 * Example 2: m = 0.
-	 * 
-	 * sum_{I,J,K} S_K S_M
-	 * =
-	 * S_M * sum_{I,J,K} S_K
-	 * =
-	 * S_M * Union_K { sum_{I,J} 1 }
-	 * =
-	 * S_M * Union_K { 1 }
-	 * =
-	 * S_M * {(on K) 1 }
-	 * =
-	 * S_M
-	 * </pre>
-	 *
-	 * 
-	 * Example 3:
-	 * 
-	 * sum_{I,J,K} phi(I,K) S_K S_M
-	 * =
-	 * sum_{I,J,K} {(on ) phi(I,K)} S_K S_M
-	 * =
-	 * S_M * sum_{I,J,K} {(on ) phi(I,K)} S_K
-	 * =
-	 * S_M * Union_K { sum_{I,J} phi(I,K) }
-	 * =
-	 * S_M * Union_K { phi'(K) }
-	 * =
-	 * S_M * {(on K) phi'(K) }
-	 * </pre>
-
-	 * @author braz
-	 *
-	 */
-	@Override
-	public Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends AtomicPolytope> polytopesDependentOnEliminated) {
-
-		// 1. separate simplices and convex hulls
-		// 2. atomicConvexHull = compute atomic convex hull equivalent to the product of the convex hulls
-		// 3. sum out (eliminated - simplex variables) from atomicConvexHull
-		// 4. add simplices indices to result
-		// Note that line 2. is crucial because it is at forming an atomic polytope that convex hull representation might be simplified.
-		// Note that one intuition is that turning the product of polytopes into an atomic one and invoking sumOut would suffice,
-		// but it is not true. That would create a convex hull with the simplex free variables that are also to be eliminated
-		// as indices of the resulting convex hull,
-		// and then try to sum out those same variables from the convex hull with them as indices.
-		// This requires special care because the eliminated variables must be free variables in the polytopes and the indices
-		// are not free variables.
-		// This would still be well-defined because indices are a new scope so they could just be standardized apart,
-		// but the method sumOut does not attempt to standardize apart all the time as that would be expensive.
-		// To use sumOut without having to worry about standardizing apart, we instead use a technique
-		// that takes care of the simplices separately, and explicitly uses the fact that this is a summation.
-		
-		List<AtomicPolytope> simplices = list();
-		List<AtomicPolytope> functionConvexHulls = list();
-		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplices, functionConvexHulls);
-
-		@SuppressWarnings("unchecked")
-		var simplexVariables = mapIntoList((List<? extends Simplex>) simplices, Simplex::getVariable);
-
-		var functionConvexHullsProduct = makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(functionConvexHulls);
-		var atomicFunctionConvexHullsProduct = (FunctionConvexHull) functionConvexHullsProduct.getEquivalentAtomicPolytope();
-		
-		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
-		var atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables = (FunctionConvexHull) 
-				atomicFunctionConvexHullsProduct.sumOut(eliminatedMinusSimplexVariables);
-
-		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
-		var result = new FunctionConvexHull(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
-		
-		return result;
-	}
-
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
 	
 	@Override
@@ -315,55 +174,37 @@ public class FunctionConvexHull extends AbstractAtomicPolytope implements NonSim
 		}
 	}	
 
-	@Override
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Collection<? extends AtomicPolytope> atomicPolytopes) {
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> isSimplexOn(p, variable));
-		
-		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
-		
-		AtomicPolytope result;
-		if (thereIsSimplexOnQuerySoItDominates) {
-			result = simplexOnVariableIfAny;
+	//////////////////////// MULTIPLY INTO A SINGLE FUNCTION CONVEX HULL
+	
+	/**
+	 * Multiplies a {@link FunctionConvexHull} from a non-empty collection of {@link FunctionConvexHull}s.
+	 * This simply delegates to {@link FunctionConvexHull#multiplyIntoSingleFunctionConvexHull(Collection)} of the first element for convenient.
+	 * The reason we have a non-static method is so it can be overridden.
+	 * @param functionConvexHulls
+	 * @return
+	 */
+	public static FunctionConvexHull staticMultiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+		var first = Util.getFirstOrNull(functionConvexHulls);
+		if (first == null) {
+			throw new Error(FunctionConvexHull.class + ".staticGetEquivalentAtomicPolytope should not receive empty argument.");
 		}
 		else {
-			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(atomicPolytopes);
+			return first.multiplyIntoSingleFunctionConvexHull(functionConvexHulls);
 		}
-		
-		return result;
 	}
 
-	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
-		boolean result = 
-				atomicPolytope instanceof Simplex
-				&&
-				((Simplex)atomicPolytope).getVariable().equals(variable);
-		return result;
+	/**
+	 * Multiplies {@link FunctionConvexHull} from a non-empty collection of {@link FunctionConvexHull}s.
+	 * All other methods should perform such multiplications through this method so that overridden versions take effect.
+	 * @param functionConvexHulls
+	 * @return
+	 */
+	protected FunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+		var indices = union(functionIterator(functionConvexHulls, FunctionConvexHull::getIndices));
+		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
+		var factorsProduct = Factor.multiply(factors);
+		return new FunctionConvexHull(indices, factorsProduct);
 	}
-
-	private static FunctionConvexHull makeAtomicPolytopeEquivalentToProductOfNonSimplexAtomicPolytopes(Collection<? extends AtomicPolytope> nonSimplexAtomicPolytopes) {
-		@SuppressWarnings("unchecked")
-		Collection<? extends FunctionConvexHull> functionConvexHulls = (Collection<? extends FunctionConvexHull>) nonSimplexAtomicPolytopes;
-		// The only non-simplex atomic polytopes in this implementation are function convex hulls.
-		
-		List<Variable> indicesFromFunctionConvexHulls = collectIndicesFromFunctionConvexHullsGivenTheyAreAllFunctionConvexHulls(functionConvexHulls);
-		Factor productOfFactors = makeProductOfFactorsOf(functionConvexHulls);
-		return new FunctionConvexHull(indicesFromFunctionConvexHulls, productOfFactors);
-	}
-
-	private static List<Variable> collectIndicesFromFunctionConvexHullsGivenTheyAreAllFunctionConvexHulls(Collection<? extends FunctionConvexHull> functionConvexHulls) {
-		List<Variable> indices = list();
-		for (FunctionConvexHull functionConvexHull : functionConvexHulls) {
-			indices.addAll(functionConvexHull.getIndices());
-		}
-		return indices;
-	}
-
-	private static Factor makeProductOfFactorsOf(Collection<? extends FunctionConvexHull> functionConvexHulls) {
-		List<Factor> factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
-		return Factor.multiply(factors);
-	}
-
 	//////////////////////// ANCILLARY
 	
 	@Override

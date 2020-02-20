@@ -37,17 +37,18 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
-import static com.sri.ai.util.Util.union;
+import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
-import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -55,10 +56,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.NonSimplexAtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.Util;
 
@@ -80,8 +79,8 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	 */
 	ProductPolytope(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
 		super();
-		myAssert(alreadySimplifiedAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, use makeProductFromAlreadySimplifiedAtomicPolytopes (if the polytopes satisfy the condition in the name), or create an IdentityPolytope (if you know you have zero polytopes), or use the more general static Polytope.multiply which checks everything for you.");
-		myAssert(alreadySimplifiedAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element.  Instead, use makeProductFromAlreadySimplifiedAtomicPolytopes if you know for sure there will be just one atomic polytope, or general static Polytope.multiply which checks everything for you.");
+		myAssert(alreadySimplifiedAtomicPolytopes.size() != 0, () -> "Cannot define product on an empty set of polytopes. Instead, use makePolytopeEquivalentToProductOfAtomicPolytopes (if the polytopes satisfy the condition in the name), or create an IdentityPolytope (if you know you have zero polytopes), or use the more general static Polytope.multiply which checks everything for you.");
+		myAssert(alreadySimplifiedAtomicPolytopes.size() != 1, () -> "Cannot define product on a single element.  Instead, use makePolytopeEquivalentToProductOfAtomicPolytopes if you know for sure there will be just one atomic polytope, or general static Polytope.multiply which checks everything for you.");
 		this.alreadySimplifiedAtomicPolytopes = new LinkedList<>(alreadySimplifiedAtomicPolytopes);
 	}
 	
@@ -91,23 +90,20 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	 * @param alreadySimplifiedAtomicPolytopes
 	 * @return
 	 */
-	public static Polytope makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
-		
+	public static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
+		Polytope result;
 		if (alreadySimplifiedAtomicPolytopes.isEmpty()) {
-			return identityPolytope();
+			result = identityPolytope();
 		}
 		else if (alreadySimplifiedAtomicPolytopes.size() == 1) {
-			return getFirst(alreadySimplifiedAtomicPolytopes);
+			result = getFirst(alreadySimplifiedAtomicPolytopes);
 		}
 		else {
-			return new ProductPolytope(alreadySimplifiedAtomicPolytopes);
+			result = new ProductPolytope(alreadySimplifiedAtomicPolytopes);
 		}
+		return result;
 	}
 
-	public Collection<? extends Polytope> getPolytopes() {
-		return alreadySimplifiedAtomicPolytopes;
-	}
-	
 	@Override
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
 		return alreadySimplifiedAtomicPolytopes;
@@ -138,12 +134,12 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			result = this;
 		}
 		else if (another instanceof ProductPolytope) {
-			Collection<? extends Polytope> anotherSubPolytopes = ((ProductPolytope)another).getPolytopes();
+			Collection<? extends Polytope> anotherSubPolytopes = ((ProductPolytope)another).getAtomicPolytopes();
 			result = accumulate(anotherSubPolytopes, Polytope::multiply, this);
 		}
 		else {
 			AtomicPolytope anotherAtomicPolytope = (AtomicPolytope) another;
-			result = ProductPolytope.multiplyListOfAlreadySimplifiedAtomicPolytopesWithANewOne(alreadySimplifiedAtomicPolytopes, anotherAtomicPolytope);
+			result = multiplyListOfAlreadySimplifiedAtomicPolytopesWithANewOne(alreadySimplifiedAtomicPolytopes, anotherAtomicPolytope);
 		}
 		return result;
 	}
@@ -193,20 +189,6 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			resultAtomicPolytopes.add(anotherAtomicPolytope);
 		}
 	}
-
-	private static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(List<? extends AtomicPolytope> resultAtomicPolytopes) {
-		Polytope result;
-		if (resultAtomicPolytopes.isEmpty()) {
-			result = identityPolytope();
-		}
-		else if (resultAtomicPolytopes.size() == 1) {
-			result = getFirst(resultAtomicPolytopes);
-		}
-		else {
-			result = new ProductPolytope(resultAtomicPolytopes);
-		}
-		return result;
-	}
 	
 	//////////////////// SUMMING OUT
 	
@@ -226,7 +208,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 		List<AtomicPolytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
 		allAtomicPolytopesInResult.addAll(summedOutFromDependents.getAtomicPolytopes());
-		Polytope result = makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(allAtomicPolytopesInResult);
+		Polytope result = makePolytopeEquivalentToProductOfAtomicPolytopes(allAtomicPolytopesInResult);
 
 		return result;
 	}
@@ -244,25 +226,147 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		var allAreSimplices = nonSimplex == null;
 
 		if (allAreSimplices) {
-			return makeProductPolytopeFromAlreadySimplifiedAtomicPolytopes(dependentAtomicPolytopes);
+			return makePolytopeEquivalentToProductOfAtomicPolytopes(dependentAtomicPolytopes);
 		}
 		else {
-			return ((NonSimplexAtomicPolytope) nonSimplex).sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
+			return sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
 		}
 	}
 
+	/**
+	 * Method for summing out a set of variables from a product polytope.
+
+	 * <pre>
+	 * The problem is as follows:
+	 * 
+	 * sum_V polytope
+	 * 
+	 * A polytope may be of three types: atomic polytopes simplex and intensional convex hull, and products of polytopes.
+	 * 
+	 * We break product of polytopes into their atomic component and obtain the form:
+	 * 
+	 * sum_V CH_1...CH_m S_1 ... S_n
+	 * 
+	 * where
+	 * CH_i = {(on U_i) phi_i } is an intensional convex hull, and
+	 * S_j is a simplex on variable W_j.
+	 * 
+	 * We can easily factor out polytopes whose free variables do not intersect with V,
+	 * and assume the form above in which free variables always intersect with V.
+	 * Then we have:
+	 * 
+	 * sum_V { (on U_1) phi_1 }...{ (on U_m) phi_m }   S_1 ... S_n
+	 * 
+	 * =
+	 * 
+	 * Union_{W_1,...,W_n} sum_{V \ {W_1,...,W_n}} {(on U_1) phi_1 }...{(on U_m) phi_m } 
+	 * 
+	 * =
+	 * 
+	 * Union_{W_1,...,W_n, U_1...U_m} { sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m }
+	 *  
+	 * =
+	 * 
+	 * {(on W_1,...,W_n, U_1...U_m) sum_{V \ ({W_1,...,W_n} union Union_I U_i)} phi_1...phi_m } 
+	 *  
+	 * =
+	 * 
+	 * {(on W_1,...,W_n, U_1...U_m) phi' } 
+	 * 
+	 * which is an intensional convex hull representing the result.
+	 * 
+	 * The result can be further simplified by eliminating indices that do no appear in phi',
+	 * and by considering {(on ) 1} a multiplication identity polytope that can be eliminated from products.
+	 * 
+	 * Examples:
+	 *
+	 * Example 1:
+	 * 
+	 * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K S_M
+	 * =
+	 * S_M * sum_{I,K} {(on J) if I = K and I = M then 1 else 0} S_K
+	 * =
+	 * S_M * Union_K sum_I {(on J) if I = K and I = M then 1 else 0}
+	 * =
+	 * S_M * Union_{J,K} { sum_I if I = K and I = M then 1 else 0 }
+	 * =
+	 * S_M * Union_{J,K} { phi(K,M) }  for some phi
+	 * =
+	 * S_M * {(on J,K) phi(K,M) }
+	 * =
+	 * S_M * {(on K) phi(K,M) }
+	 * 
+	 * 
+	 * Example 2: m = 0.
+	 * 
+	 * sum_{I,J,K} S_K S_M
+	 * =
+	 * S_M * sum_{I,J,K} S_K
+	 * =
+	 * S_M * Union_K { sum_{I,J} 1 }
+	 * =
+	 * S_M * Union_K { 1 }
+	 * =
+	 * S_M * {(on K) 1 }
+	 * =
+	 * S_M
+	 * </pre>
+	 *
+	 * 
+	 * Example 3:
+	 * 
+	 * sum_{I,J,K} phi(I,K) S_K S_M
+	 * =
+	 * sum_{I,J,K} {(on ) phi(I,K)} S_K S_M
+	 * =
+	 * S_M * sum_{I,J,K} {(on ) phi(I,K)} S_K
+	 * =
+	 * S_M * Union_K { sum_{I,J} phi(I,K) }
+	 * =
+	 * S_M * Union_K { phi'(K) }
+	 * =
+	 * S_M * {(on K) phi'(K) }
+	 * </pre>
+
+	 * @author braz
+	 *
+	 */
+	private static Polytope sumOutFromDependentAtomicPolytopes(Collection<? extends Variable> eliminated, Collection<? extends AtomicPolytope> polytopesDependentOnEliminated) {
 	
-	//////////////////////// GET SINGLE ATOMIC POLYTOPE
+		// 1. separate simplices and convex hulls
+		// 2. atomicConvexHull = compute atomic convex hull equivalent to the product of the convex hulls
+		// 3. sum out (eliminated - simplex variables) from atomicConvexHull
+		// 4. add simplices indices to result
+		// Note that line 2. is crucial because it is at forming an atomic polytope that convex hull representation might be simplified.
+		// Note that one intuition is that turning the product of polytopes into an atomic one and invoking sumOut would suffice,
+		// but it is not true. That would create a convex hull with the simplex free variables that are also to be eliminated
+		// as indices of the resulting convex hull,
+		// and then try to sum out those same variables from the convex hull with them as indices.
+		// This requires special care because the eliminated variables must be free variables in the polytopes and the indices
+		// are not free variables.
+		// This would still be well-defined because indices are a new scope so they could just be standardized apart,
+		// but the method sumOut does not attempt to standardize apart all the time as that would be expensive.
+		// To use sumOut without having to worry about standardizing apart, we instead use a technique
+		// that takes care of the simplices separately, and explicitly uses the fact that this is a summation.
+		
+		List<AtomicPolytope> simplices = list();
+		List<AtomicPolytope> functionConvexHulls = list();
+		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplices, functionConvexHulls);
 	
-	@Override
-	public AtomicPolytope getEquivalentAtomicPolytope() {
-		myAssert(Util.forAll(alreadySimplifiedAtomicPolytopes, a -> a instanceof FunctionConvexHull), () -> "getEquivalentAtomicPolytope not implemented yet for products involving simplices.");
 		@SuppressWarnings("unchecked")
-		Collection<FunctionConvexHull> convexHulls = (Collection<FunctionConvexHull>) alreadySimplifiedAtomicPolytopes;
-		var indices = union(functionIterator(convexHulls, FunctionConvexHull::getIndices));
-		var factors = mapIntoList(convexHulls, FunctionConvexHull::getFactor);
-		var factorsProduct = Factor.multiply(factors);
-		return new FunctionConvexHull(indices, factorsProduct);
+		var simplexVariables = mapIntoList((List<? extends Simplex>) simplices, Simplex::getVariable);
+	
+		@SuppressWarnings("unchecked")
+		var atomicFunctionConvexHullsProduct = FunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) functionConvexHulls);
+		
+		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
+		var atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables = (FunctionConvexHull) 
+				atomicFunctionConvexHullsProduct.sumOut(eliminatedMinusSimplexVariables);
+	
+		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
+		var result = new FunctionConvexHull(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
+		
+		return result;
 	}
 
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
@@ -283,11 +387,36 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			}
 		}
 		else {
-			return ((NonSimplexAtomicPolytope) nonSimplex).getEquivalentAtomicPolytopeOn(variable, getAtomicPolytopes());
+			return getEquivalentAtomicPolytopeOn(variable, getAtomicPolytopes());
 		}
-		
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Collection<? extends AtomicPolytope> atomicPolytopes) {
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> isSimplexOn(p, variable));
+		
+		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
+		
+		AtomicPolytope result;
+		if (thereIsSimplexOnQuerySoItDominates) {
+			result = simplexOnVariableIfAny;
+		}
+		else {
+			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
+			result = staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) atomicPolytopes);
+		}
+		
+		return result;
+	}
+
+	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
+		boolean result = 
+				atomicPolytope instanceof Simplex
+				&&
+				((Simplex)atomicPolytope).getVariable().equals(variable);
+		return result;
+	}
+
 	////////////////// ANCILLARY
 
 	@Override
@@ -298,7 +427,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	
 	@Override
 	public int hashCode() {
-		return getPolytopes().hashCode();
+		return getAtomicPolytopes().hashCode();
 	}
 
 	@Override
@@ -306,7 +435,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		boolean result =
 				another instanceof ProductPolytope
 				&&
-				((ProductPolytope) another).getPolytopes().equals(getPolytopes());
+				((ProductPolytope) another).getAtomicPolytopes().equals(getAtomicPolytopes());
 		return result;
 	}
 
