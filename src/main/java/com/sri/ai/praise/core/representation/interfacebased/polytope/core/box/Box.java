@@ -8,6 +8,7 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -18,12 +19,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
 
-public class Box extends FunctionConvexHull{
+public class Box extends AbstractFunctionConvexHull {
 	
 	public Box(BoxVariable boxVariable,Factor boxUnderTheFormOfAFactor) {
 		super(list(boxVariable), boxUnderTheFormOfAFactor);
@@ -73,16 +75,6 @@ public class Box extends FunctionConvexHull{
 		List<ArrayTableFactor> result = Util.mapIntoList(nonNormalizedFactors, f->f.normalize());
 		return result;
 	}
-
-	//private static List<TableFactor> listOfFactorsRepresentedByThePolytope(FunctionConvexHull polytope) {
-		//List<Box> boxesGeneratedByInstantiatingNonBoxVariablesInTheFunctionConvexHull = instantiateAllEdgesOfAICHOF(polytope);
-		//List<TableFactor> nonNormalizedFactors = new LinkedList<>();
-		//for(Box b : boxesGeneratedByInstantiatingNonBoxVariablesInTheFunctionConvexHull) {
-			//nonNormalizedFactors.addAll(instantiateAllEdgesOfABox(b));
-		//}
-		//List<TableFactor> nonNormalizedFactors = instantiateAllEdgesOfAICHOF(polytope);
-		//return nonNormalizedFactors;
-//	}
 
 	private static List<ArrayTableFactor> instantiateAllEdgesOfAICHOF(FunctionConvexHull polytope) {
 		ArrayTableFactor factor = (ArrayTableFactor) polytope.getFactor();
@@ -179,6 +171,16 @@ public class Box extends FunctionConvexHull{
 		ArrayTableFactor tableFactor = (ArrayTableFactor) this.getFactor();
 		ArrayTableFactor result = tableFactor.slice(list(TABLE_BOX_VARIABLE), list(0));
 		return result;
+	}
+
+	@Override
+	public Box simplify() {
+		return this;
+	}
+
+	@Override
+	public Box newInstance(Collection<? extends Variable> indices, Factor factor) {
+		throw new Error("newInstance not implemented for " + Box.class);
 	}
 
 	/*public Box(Factor phiMin, Factor phiMax, BoxFactorFactory factory) {

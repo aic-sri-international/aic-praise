@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
@@ -357,14 +357,15 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		var simplexVariables = mapIntoList((List<? extends Simplex>) simplices, Simplex::getVariable);
 	
 		@SuppressWarnings("unchecked")
-		var atomicFunctionConvexHullsProduct = FunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) functionConvexHulls);
+		var atomicFunctionConvexHullsProduct = AbstractFunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends AbstractFunctionConvexHull>) functionConvexHulls);
 		
 		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
 		var atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables = (FunctionConvexHull) 
 				atomicFunctionConvexHullsProduct.sumOut(eliminatedMinusSimplexVariables);
 	
 		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
-		var result = new FunctionConvexHull(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
+		var someFunctionConvexHull = atomicFunctionConvexHullsProduct; // just taking a representative of the FunctionConvexHull interface being used in order to use "overridable constructor"
+		var result = someFunctionConvexHull.newInstance(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
 		
 		return result;
 	}

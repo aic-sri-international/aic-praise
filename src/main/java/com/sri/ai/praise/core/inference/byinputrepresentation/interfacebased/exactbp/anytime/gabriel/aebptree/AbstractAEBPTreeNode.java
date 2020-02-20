@@ -13,6 +13,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.box.BoxUtil;
@@ -184,9 +185,9 @@ public abstract class AbstractAEBPTreeNode<RootNode, ParentNode> implements AEBP
 
 	public void addSimplexOrFactortoTheListOfProducts(List<Polytope> polytopesToMultiply) {
 		if(isRootAFactor()) {
-			FunctionConvexHull singletonFunctionConvexHullAtRoot = 
-					new FunctionConvexHull(list(),(Factor) this.getRoot());
-			polytopesToMultiply.add(singletonFunctionConvexHullAtRoot);
+			FunctionConvexHull singletonDefaultFunctionConvexHullAtRoot = 
+					new DefaultFunctionConvexHull(list(),(Factor) this.getRoot());
+			polytopesToMultiply.add(singletonDefaultFunctionConvexHullAtRoot);
 		}
 		else if (!isExhausted.apply((Variable) this.getRoot())) {
 			polytopesToMultiply.add(new Simplex((Variable) this.getRoot()));

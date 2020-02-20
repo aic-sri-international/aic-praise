@@ -51,6 +51,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exa
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
@@ -168,14 +169,14 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 
 	private void addFactorAtRootPolytope(List<Polytope> polytopesToMultiply) {
-		FunctionConvexHull singletonFunctionConvexHullAtRoot = getFactorAtRootPolytope();
-		polytopesToMultiply.add(singletonFunctionConvexHullAtRoot);
+		FunctionConvexHull singletonDefaultFunctionConvexHullAtRoot = getFactorAtRootPolytope();
+		polytopesToMultiply.add(singletonDefaultFunctionConvexHullAtRoot);
 	}
 
 	private FunctionConvexHull getFactorAtRootPolytope() {
 		Factor factorAtRoot = Factor.multiply(getBase().getFactorsAtRoot());
-		FunctionConvexHull singletonFunctionConvexHullAtRoot = new FunctionConvexHull(list(), factorAtRoot);
-		return singletonFunctionConvexHullAtRoot;
+		FunctionConvexHull singletonDefaultFunctionConvexHullAtRoot = new DefaultFunctionConvexHull(list(), factorAtRoot);
+		return singletonDefaultFunctionConvexHullAtRoot;
 	}
 
 	@Override
