@@ -108,7 +108,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 	public AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope anotherAtomicPolytope) {
 		AtomicPolytope result;
 		if (anotherAtomicPolytope instanceof IntensionalPolytope) {
-			result = multiplyByIntensionalPolytope(anotherAtomicPolytope);
+			result = multiplyByIntensionalPolytopeIfSameIndicesOrNull(anotherAtomicPolytope);
 		}
 		else {
 			result = null;
@@ -116,7 +116,7 @@ public class IntensionalPolytope extends AbstractAtomicPolytope implements NonSi
 		return result;
 	}
 
-	private AtomicPolytope multiplyByIntensionalPolytope(AtomicPolytope another) {
+	private AtomicPolytope multiplyByIntensionalPolytopeIfSameIndicesOrNull(AtomicPolytope another) {
 		AtomicPolytope result;
 		IntensionalPolytope anotherIntensionalPolytope = (IntensionalPolytope) another;
 		if (indices.equals(anotherIntensionalPolytope.getIndices())) {
