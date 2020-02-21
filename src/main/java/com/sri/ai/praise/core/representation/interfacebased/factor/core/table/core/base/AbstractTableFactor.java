@@ -309,7 +309,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 		// type of variable V it applies to, so the parameter of this method would be
 		// List<? extends V>.
 		@SuppressWarnings("unchecked")
-		List<TableVariable> eliminatedTableVariables = new LinkedList<>((List<TableVariable>) eliminated);
+		List<TableVariable> eliminatedTableVariables = new LinkedList<>((Collection<TableVariable>) eliminated);
 		
 		var remaining = setDifference(getVariables(), eliminatedTableVariables, arrayList());
 		

@@ -18,6 +18,7 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 /**
  * A polytope equal to the convex hull of points provided by a {@link Factor},
@@ -59,7 +60,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	/////////////////////// ABSTRACT METHODS
 	
 	@Override
-	public abstract FunctionConvexHull simplify();
+	public abstract Polytope simplify();
 
 	/**
 	 * An "overridable" constructor so that extending classes create instances of their own
@@ -221,8 +222,8 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	 * @param functionConvexHulls
 	 * @return
 	 */
-	public static FunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
-		return multiplyIntoSingleFunctionConvexHull(functionConvexHulls).simplify();
+	public static Polytope multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+		return multiplyIntoSingleFunctionConvexHullWithoutSimplifying(functionConvexHulls).simplify();
 	}
 
 	/**
@@ -240,6 +241,13 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		var factorsProduct = Factor.multiply(factors);
 		return newInstance(indices, factorsProduct);
+	}
+
+	////////////////// NORMALIZATION
+
+	@Override
+	public FunctionConvexHull normalize(Collection<? extends Variable> variables) {
+		return newInstance(getIndices(), getFactor().normalize(variables));
 	}
 
 	//////////////////////// ANCILLARY

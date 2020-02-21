@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,5 +31,9 @@ public interface TableFactor extends Factor {
 	void setEntryFor(ArrayList<Integer> values, Double newParameterValue);
 
 	int numberOfEntries();
+	
+	@Override
+	TableFactor sumOut(Collection<? extends Variable> variablesToSumOut);
+
 	
 }

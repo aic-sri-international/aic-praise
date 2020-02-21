@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 public interface FunctionConvexHull extends AtomicPolytope {
 
@@ -27,6 +28,8 @@ public interface FunctionConvexHull extends AtomicPolytope {
 	 */
 	FunctionConvexHull addIndices(Collection<? extends Variable> newIndices);
 
-	FunctionConvexHull simplify();
+	Polytope simplify();
+
+	FunctionConvexHull normalize(Collection<? extends Variable> variables);
 
 }

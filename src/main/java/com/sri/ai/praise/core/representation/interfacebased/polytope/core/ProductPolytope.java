@@ -373,9 +373,9 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 						simplexVariables, 
 						productOfConvexHullsAfterSummingOut.getFreeVariables());
 		
-		var result = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
+		var resultBeforeSimplifying = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
 		
-		result = result.simplify();
+		Polytope result = resultBeforeSimplifying.simplify();
 		
 		return result;
 	}
