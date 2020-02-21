@@ -69,7 +69,7 @@ public interface Factor {
 	Factor multiply(Factor another);
 	
 	/** Sums a variable out of factor up to a constant. */
-	Factor sumOut(List<? extends Variable> variablesToSumOut);
+	Factor sumOut(Collection<? extends Variable> variablesToSumOut);
 	
 	default Factor sumOut(Variable variableToSumOut) {
 		return sumOut(list(variableToSumOut));

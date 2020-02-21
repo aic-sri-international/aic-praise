@@ -139,7 +139,7 @@ public class ConstantFactor implements Factor {
 
 	// sums up to a multiplicative constant
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+	public Factor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		return this;
 	}
 

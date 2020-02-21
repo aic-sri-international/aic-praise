@@ -54,20 +54,13 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 		super(indices, factor);
 	}
 	
-	/**
-	 * An "overridable" constructor so that extending classes create instances of their own
-	 * when when relying on methods written at the level of {@link AbstractFunctionConvexHull}.
-	 * @param indices
-	 * @param factor
-	 * @return
-	 */
 	@Override
 	public DefaultFunctionConvexHull newInstance(Collection<? extends Variable> indices, Factor factor) {
 		return new DefaultFunctionConvexHull(indices, factor);
 	}
 	
 	@Override
-	public DefaultFunctionConvexHull simplify() {
+	public FunctionConvexHull simplify() {
 		return this;
 	}
 

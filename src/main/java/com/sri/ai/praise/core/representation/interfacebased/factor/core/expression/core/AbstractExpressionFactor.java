@@ -147,7 +147,7 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	}
 
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+	public Factor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		Expression sum = makeSum(variablesToSumOut);
 		Factor result = evaluateAsFactor(sum);
 		return result;
@@ -159,14 +159,14 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 		return result;
 	}
 
-	private Expression makeSum(List<? extends Variable> variablesToSumOut) {
+	private Expression makeSum(Collection<? extends Variable> variablesToSumOut) {
 		Expression set = makeIntensionalMultiSet(variablesToSumOut);
 		Expression sum = apply(SUM, set);
 		return sum;
 	}
 
-	private Expression makeIntensionalMultiSet(List<? extends Variable> variablesToSumOut) {
-		List<Expression> variableExpressionsToSumOut = mapIntoList(variablesToSumOut, v -> (ExpressionVariable) v);
+	private Expression makeIntensionalMultiSet(Collection<? extends Variable> variablesToSumOut) {
+		Collection<Expression> variableExpressionsToSumOut = mapIntoList(variablesToSumOut, v -> (ExpressionVariable) v);
 		// TODO: should have been able to just cast variablesToSumOut to List<ExpressionVariable>, but expresso incorrectly assumes them to be Symbols
 		// We should be able to correct that and have expresso accept any expression of syntactic form "Symbol".
 		Expression set = intensionalMultiSet(variableExpressionsToSumOut, this, getContext());

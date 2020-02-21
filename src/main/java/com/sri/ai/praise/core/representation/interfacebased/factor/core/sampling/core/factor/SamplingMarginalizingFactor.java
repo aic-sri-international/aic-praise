@@ -7,6 +7,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -17,17 +18,17 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 
 public class SamplingMarginalizingFactor extends AbstractSamplingFactor {
 
-	private List<? extends Variable> marginalizedVariables;
+	private Collection<? extends Variable> marginalizedVariables;
 	
 	private SamplingFactor marginalizedFactor;
 	
-	public SamplingMarginalizingFactor(List<? extends Variable> marginalizedVariables, SamplingFactor marginalizedFactor, Random random) {
+	public SamplingMarginalizingFactor(Collection<? extends Variable> marginalizedVariables, SamplingFactor marginalizedFactor, Random random) {
 		super(subtract(marginalizedFactor.getVariables(), marginalizedVariables), random);
 		this.marginalizedVariables = marginalizedVariables;
 		this.marginalizedFactor = marginalizedFactor;
 	}
 
-	public List<? extends Variable> getMarginalizedVariables() {
+	public Collection<? extends Variable> getMarginalizedVariables() {
 		return marginalizedVariables;
 	}
 

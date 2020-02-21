@@ -228,7 +228,7 @@ public abstract class AbstractConditionedFactor implements Factor {
 	}
 
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+	public Factor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		Factor summedOutFactor = factor.sumOut(variablesToSumOut);
 		Factor result = getConditionedFactor(conditioningSample, summedOutFactor);
 		return result;

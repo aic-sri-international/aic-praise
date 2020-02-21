@@ -280,7 +280,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public TableFactor sumOut(List<? extends Variable> eliminated) {
+	public TableFactor sumOut(Collection<? extends Variable> eliminated) {
 		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
 		return sumOut(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
 	}

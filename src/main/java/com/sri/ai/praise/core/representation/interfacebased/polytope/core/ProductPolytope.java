@@ -37,14 +37,14 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.makeListWithElementsOfTwoCollections;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
@@ -349,24 +349,33 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		// To use sumOut without having to worry about standardizing apart, we instead use a technique
 		// that takes care of the simplices separately, and explicitly uses the fact that this is a summation.
 		
-		List<AtomicPolytope> simplices = list();
-		List<AtomicPolytope> functionConvexHulls = list();
-		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplices, functionConvexHulls);
+		List<AtomicPolytope> simplexPolytopes = list();
+		List<AtomicPolytope> functionConvexHullPolytopes = list();
+		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplexPolytopes, functionConvexHullPolytopes);
 	
 		@SuppressWarnings("unchecked")
-		var simplexVariables = mapIntoList((List<? extends Simplex>) simplices, Simplex::getVariable);
+		List<? extends Simplex> simplices = (List<? extends Simplex>) simplexPolytopes;
+
+		var simplexVariables = mapIntoList(simplices, Simplex::getVariable);
 	
 		@SuppressWarnings("unchecked")
-		var atomicFunctionConvexHullsProduct = AbstractFunctionConvexHull.staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends AbstractFunctionConvexHull>) functionConvexHulls);
+		var functionConvexHulls = (Collection<? extends FunctionConvexHull>) functionConvexHullPolytopes;
+		
+		// it's important to wait for simplification until the end because simplification will often depend
+		// on the indices and we want a polytope equivalent to the one with all the simplex variables as indices.
+		var productOfConvexHulls = multiplyIntoSingleFunctionConvexHullWithoutSimplifying(functionConvexHulls);
 		
 		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
-		var atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables = (FunctionConvexHull) 
-				atomicFunctionConvexHullsProduct.sumOut(eliminatedMinusSimplexVariables);
+		var productOfConvexHullsAfterSummingOut = productOfConvexHulls.sumOut(eliminatedMinusSimplexVariables);
 	
-		var finalIndices = makeListWithElementsOfTwoCollections(atomicFunctionConvexHullsProduct.getIndices(), simplexVariables);
-		var someFunctionConvexHull = atomicFunctionConvexHullsProduct; // just taking a representative of the FunctionConvexHull interface being used in order to use "overridable constructor"
-		var result = someFunctionConvexHull.newInstance(finalIndices, atomicFunctionConvexHullsProductWithoutEliminatedMinusSimplexVariables.getFactor());
-		// we do not simplify this new instance because atomicFunctionConvexHullsProduct was already simplified.
+		var indicesToAdd = 
+				intersection(
+						simplexVariables, 
+						productOfConvexHullsAfterSummingOut.getFreeVariables());
+		
+		var result = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
+		
+		result = result.simplify();
 		
 		return result;
 	}
@@ -405,7 +414,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 		else {
 			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = staticMultiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) atomicPolytopes);
+			result = multiplyIntoSingleFunctionConvexHullWithoutSimplifying((Collection<? extends FunctionConvexHull>) atomicPolytopes);
 		}
 		
 		return result;

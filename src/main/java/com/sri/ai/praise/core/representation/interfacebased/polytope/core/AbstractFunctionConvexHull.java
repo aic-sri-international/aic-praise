@@ -18,7 +18,6 @@ import java.util.Set;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 /**
  * A polytope equal to the convex hull of points provided by a {@link Factor},
@@ -59,8 +58,16 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 
 	/////////////////////// ABSTRACT METHODS
 	
-	public abstract AbstractFunctionConvexHull simplify();
+	@Override
+	public abstract FunctionConvexHull simplify();
 
+	/**
+	 * An "overridable" constructor so that extending classes create instances of their own
+	 * when when relying on methods written at the level of {@link AbstractFunctionConvexHull}.
+	 * @param indices
+	 * @param factor
+	 * @return
+	 */
 	@Override
 	public abstract AbstractFunctionConvexHull newInstance(Collection<? extends Variable> indices, Factor factor);
 
@@ -107,6 +114,11 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 				factor.isIdentity();
 		return result;
 	}
+	
+	@Override
+	public FunctionConvexHull addIndices(Collection<? extends Variable> newIndices) {
+		return newInstance(union(list(newIndices, getIndices())), getFactor());
+	}
 
 	/////////////////////// MULTIPLICATION
 	
@@ -144,7 +156,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	/////////////////////////////// SUMMING OUT
 
 	@Override
-	public Polytope sumOut(Collection<? extends Variable> eliminated) {
+	public FunctionConvexHull sumOut(Collection<? extends Variable> eliminated) {
 		var eliminatedOccurringInPolytope = intersection(eliminated, getFreeVariables());
 		if (eliminatedOccurringInPolytope.isEmpty()) {
 			return this;
@@ -170,7 +182,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 			}
 			else {
 				// sum the other ones out
-				return (AtomicPolytope) sumOut(setDifference(getFreeVariables(), list(variable)));
+				return sumOut(setDifference(getFreeVariables(), list(variable)));
 			}
 		}
 		else {
@@ -182,34 +194,52 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	//////////////////////// MULTIPLY INTO A SINGLE FUNCTION CONVEX HULL
 
 	/**
-	 * Computes the product of a non-empty collection of {@link FunctionConvexHull}s.
-	 * This simply delegates to {@link FunctionConvexHull#multiplyIntoSingleFunctionConvexHull(Collection)} 
+	 * Computes the product of a non-empty collection of {@link FunctionConvexHull}s,
+	 * <i>without</i> simplifying it according to the {@link #simplify()} method.
+	 * Typically we do want the simplified version, so this method is provided as a package method
+	 * for specialized, internal manipulations.
+	 * This simply delegates to {@link FunctionConvexHull#dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection)} 
 	 * of the first element for convenient. The reason we have a non-static method is so it can be overridden.
 	 * @param functionConvexHulls
 	 * @return
 	 */
-	public static FunctionConvexHull staticMultiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+	static FunctionConvexHull multiplyIntoSingleFunctionConvexHullWithoutSimplifying(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var first = getFirstOrNull(functionConvexHulls);
 		if (first == null) {
 			throw new Error(AbstractFunctionConvexHull.class + ".staticGetEquivalentAtomicPolytope should not receive empty argument.");
 		}
 		else {
-			return first.multiplyIntoSingleFunctionConvexHull(functionConvexHulls);
+			return first.dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(functionConvexHulls);
 		}
+	}
+
+	/**
+	 * Computes the product of a non-empty collection of {@link FunctionConvexHull}s,
+	 * returning a simplified version according to the {@link #simplify()} method.
+	 * This simply delegates to {@link FunctionConvexHull#dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection)} 
+	 * of the first element for convenient. The reason we have a non-static method is so it can be overridden.
+	 * @param functionConvexHulls
+	 * @return
+	 */
+	public static FunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+		return multiplyIntoSingleFunctionConvexHull(functionConvexHulls).simplify();
 	}
 
 	/**
 	 * Multiplies {@link AbstractFunctionConvexHull} from a non-empty collection of {@link FunctionConvexHull}s.
 	 * All other methods should perform such multiplications through this method so that overridden versions take effect.
+	 * IMPORTANT: if an index appears in more than one given convex hull, it will appear only once in the result.
+	 * This is fine as in end-user contexts indices will be standardized apart.
+	 * However, this is actually also relied upon in {@link ProductPolytope}'s summing out method (see comments there).
 	 * @param functionConvexHulls
 	 * @return
 	 */
 	@Override
-	public FunctionConvexHull multiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+	public FunctionConvexHull dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var indices = union(functionIterator(functionConvexHulls, FunctionConvexHull::getIndices));
 		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		var factorsProduct = Factor.multiply(factors);
-		return newInstance(indices, factorsProduct).simplify();
+		return newInstance(indices, factorsProduct);
 	}
 
 	//////////////////////// ANCILLARY

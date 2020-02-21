@@ -348,7 +348,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 	
 	@Override
-	public ArrayTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+	public ArrayTableFactor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		return (ArrayTableFactor) super.sumOut(variablesToSumOut);
 	}
 

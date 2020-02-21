@@ -266,7 +266,7 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public NDArrayTableFactor sumOut(List<? extends Variable> variablesToSumOut) {
+	public NDArrayTableFactor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		return (NDArrayTableFactor) super.sumOut(variablesToSumOut);
 	}
 

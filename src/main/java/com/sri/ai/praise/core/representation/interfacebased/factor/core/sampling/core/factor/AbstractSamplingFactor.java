@@ -85,7 +85,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
-	public Factor sumOut(List<? extends Variable> variablesToSumOut) {
+	public Factor sumOut(Collection<? extends Variable> variablesToSumOut) {
 		Factor result;
 		if (variablesToSumOut.isEmpty()) {
 			result = this;
