@@ -9,9 +9,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.AnytimeExactBPSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.FromExactToAnytimeSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.base.AnytimeAlgorithmsOnRandomTableFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations.LargeProblems;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations.LargestProblems;
@@ -23,6 +25,7 @@ class AnytimeAlgorithmsOnRandomTableFactorNetworksTest {
 
 	static List<Pair<String, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>>>> algorithms =
 			list( 
+					pair("VE", new FromExactToAnytimeSolver(new VariableEliminationSolver())),
 					pair("Anytime EBP", new AnytimeExactBPSolver())
 //					pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
 //					,
@@ -35,11 +38,11 @@ class AnytimeAlgorithmsOnRandomTableFactorNetworksTest {
 
 	@Test
 	void test() {
-		new AnytimeAlgorithmsOnRandomTableFactorNetworksTestRunner<Approximation<Factor>>(new LargeProblems<>(algorithms)).run();
+		new AnytimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargeProblems<>(algorithms)).run();
 	}
 
 	public static void main(String[] args) {
-		new AnytimeAlgorithmsOnRandomTableFactorNetworksTestRunner<Approximation<Factor>>(new LargestProblems<>(algorithms)).run();
+		new AnytimeAlgorithmsOnRandomTableFactorNetworksTestRunner(new LargestProblems<>(algorithms)).run();
 	}
 
 }

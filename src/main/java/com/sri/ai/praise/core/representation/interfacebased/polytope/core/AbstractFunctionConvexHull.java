@@ -6,18 +6,22 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.sum;
 import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 /**
@@ -163,7 +167,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 			return this;
 		}
 		else {
-			var newFactor = getFactor().sumOut(listFrom(eliminatedOccurringInPolytope)); // TODO: does Factor.sumOut really need a list? It should work with just a collection.
+			var newFactor = getFactor().sumOut(listFrom(eliminatedOccurringInPolytope));
 			return newInstance(getIndices(), newFactor);
 			// no need to simplify because the number of vertices (indices) remains unchanged
 		}
@@ -238,9 +242,16 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	@Override
 	public FunctionConvexHull dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var indices = union(functionIterator(functionConvexHulls, FunctionConvexHull::getIndices));
+		//checkForOverlappingIndices(functionConvexHulls, indices);
 		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		var factorsProduct = Factor.multiply(factors);
 		return newInstance(indices, factorsProduct);
+	}
+
+	@SuppressWarnings("unused")
+	private void checkForOverlappingIndices(Collection<? extends FunctionConvexHull> functionConvexHulls, LinkedHashSet<? extends Variable> indices) {
+		int numberOfOriginalIndices = sum(functionIterator(functionConvexHulls, f -> f.getIndices().size())).intValue();
+		myAssert(indices.size() == numberOfOriginalIndices, () -> "Multiplying factors with overlapping indices: " + mapIntoList(functionConvexHulls, FunctionConvexHull::getIndices));
 	}
 
 	////////////////// NORMALIZATION

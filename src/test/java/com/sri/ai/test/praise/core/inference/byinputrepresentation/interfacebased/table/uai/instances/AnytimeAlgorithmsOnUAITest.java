@@ -27,7 +27,7 @@ public class AnytimeAlgorithmsOnUAITest {
 
 	@Test
 	void test() {
-		new AnytimeAlgorithmsOnUAITestRunner<Approximation<Factor>>(
+		new AnytimeAlgorithmsOnUAITestRunner(
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
@@ -38,7 +38,7 @@ public class AnytimeAlgorithmsOnUAITest {
 	}
 
 	public static void main(String[] args) {
-		new AnytimeAlgorithmsOnUAITestRunner<Approximation<Factor>>(
+		new AnytimeAlgorithmsOnUAITestRunner(
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 

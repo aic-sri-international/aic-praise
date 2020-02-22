@@ -148,7 +148,12 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected String parametersString() {
-		return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
+		if (numberOfEntries() > 100) {
+			return "[greater than 100 entries]";
+		}
+		else {
+			return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
+		}
 	}
 	
 	private double parametersAggregate(BinaryDoubleOperator operator, double initialValue) {
@@ -365,8 +370,14 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	@Override
 	protected ArrayTableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
 
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.sumOut summation cost: " + summationCost());
+		
 		var resultAndTime = Timer.getResultAndTime(() -> aggregate((a, v) -> a + v, 0, eliminated, remaining));
 
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.sumOut done, time: " + resultAndTime.second + " ms.") ;
+		
 		var result = resultAndTime.first;
 		long time = resultAndTime.second;
 		
@@ -446,7 +457,12 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
-		return aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining);
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.MIN summation cost: " + summationCost());
+		var result = Timer.getResultAndTime(() -> aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining));
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.MIN done, time: " + result.second + " ms");
+		return result.first;
 	}
 
 	private ArrayTableFactor aggregate(BinaryDoubleOperator operator, double initialValue, List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
@@ -512,7 +528,15 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 		// TODO: it's odd that sum takes a List and normalize takes a Collection, forcing us here to create a new list.
 		
-		return divideByTableFactor(sumOut(listFrom(variablesToNormalize)));
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.NORMALIZATION summation cost: " + summationCost());
+
+		var resultAndTime = Timer.getResultAndTime(() -> divideByTableFactor(sumOut(listFrom(variablesToNormalize))));
+
+		if (summationCost() > 1000000)
+			println("ArrayTableFactor.NORMALIZATION done, time: " + resultAndTime.second + " ms.") ;
+
+		return resultAndTime.first;
 		
 		// I wonder if reducing normalization to a division by a sum is as efficient
 		// as writing dedicated code.

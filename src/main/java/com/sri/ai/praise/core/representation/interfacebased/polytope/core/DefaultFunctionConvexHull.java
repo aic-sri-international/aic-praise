@@ -41,6 +41,7 @@ import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 
 /**
  * A default implementation of {@link AbstractFunctionConvexHull} that does not perform any simplification.

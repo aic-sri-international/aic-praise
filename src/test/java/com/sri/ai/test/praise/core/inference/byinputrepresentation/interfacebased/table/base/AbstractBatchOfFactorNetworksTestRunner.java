@@ -44,7 +44,7 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 			FactorNetwork factorNetwork,
 			Pair<Result, Long> resultAndTime);
 
-	protected abstract void compareResults(ArrayList<Pair<Result, Long>> resultsAndTimes);
+	protected abstract void compareResults(ArrayList<Pair<Result, Long>> resultsAndTimes, Variable query, FactorNetwork factorNetwork);
 
 	//////////////////// DATA MEMBER
 	
@@ -84,7 +84,7 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 		
 		printResults(resultsAndTimes);
 		
-		compareResults(resultsAndTimes);
+		compareResults(resultsAndTimes, query, factorNetwork);
 
 		println("Done!\n");
 	}

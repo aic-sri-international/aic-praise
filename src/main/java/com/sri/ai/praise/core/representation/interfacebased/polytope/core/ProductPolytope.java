@@ -58,6 +58,7 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.Util;
 
@@ -416,6 +417,10 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
 			result = multiplyIntoSingleFunctionConvexHullWithoutSimplifying((Collection<? extends FunctionConvexHull>) atomicPolytopes);
 		}
+		// It would be natural to use simplification here but simplify may return non-atomic polytopes.
+		// What we really want is to sum out all other variables, which guarantees query is alone and simplify returns an atomic polytope then,
+		// and cast, although if we sum other variables out we may be able to simply get rid of this method altogether
+		// and use sumOut instead.
 		
 		return result;
 	}

@@ -1,11 +1,9 @@
-package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
+package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
 import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 public interface FunctionConvexHull extends AtomicPolytope {
 

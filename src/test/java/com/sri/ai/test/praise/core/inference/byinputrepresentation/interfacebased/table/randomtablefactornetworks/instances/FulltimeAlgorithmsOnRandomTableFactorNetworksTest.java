@@ -21,7 +21,7 @@ import com.sri.ai.util.base.Pair;
 
 class FulltimeAlgorithmsOnRandomTableFactorNetworksTest {
 
-	static List<Pair<String,BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms =
+	static List<Pair<String, BinaryFunction<Variable, FactorNetwork, Factor>>> algorithms =
 			list( 
 					pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
 					,

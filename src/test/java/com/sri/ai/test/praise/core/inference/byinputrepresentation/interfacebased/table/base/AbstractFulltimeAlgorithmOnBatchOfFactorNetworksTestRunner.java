@@ -45,7 +45,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Factor, Configuration> {
 	}
 
 	@Override
-	protected void compareResults(ArrayList<Pair<Factor, Long>> resultsAndTimes) {
+	protected void compareResults(ArrayList<Pair<Factor, Long>> resultsAndTimes, Variable query, FactorNetwork factorNetwork) {
 		for (int i = 0; i != getAlgorithms().size() - 1; i++) {
 			var name1 = getAlgorithms().get(i).first;
 			var name2 = getAlgorithms().get(i + 1).first;

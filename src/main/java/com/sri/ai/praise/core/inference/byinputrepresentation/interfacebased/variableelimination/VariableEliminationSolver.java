@@ -12,13 +12,26 @@ public class VariableEliminationSolver implements BinaryFunction<Variable, Facto
 
 	private EliminationOrdering eliminationOrdering;
 	
+	public VariableEliminationSolver() {
+		this.eliminationOrdering = null;
+	}
+	
 	public VariableEliminationSolver(EliminationOrdering eliminationOrdering) {
 		this.eliminationOrdering = eliminationOrdering;
 	}
 	
 	@Override
 	public Factor apply(Variable query, FactorNetwork factorNetwork) {
-		return new VariableElimination(query, factorNetwork, eliminationOrdering).apply();
+		return makeVariableElimination(query, factorNetwork).apply();
+	}
+
+	private VariableElimination makeVariableElimination(Variable query, FactorNetwork factorNetwork) {
+		if (eliminationOrdering == null) {
+			return new VariableElimination(query, factorNetwork);
+		}
+		else {
+			return new VariableElimination(query, factorNetwork, eliminationOrdering);
+		}
 	}
 
 }
