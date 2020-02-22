@@ -95,7 +95,7 @@ public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,
 	public TreeComputationEvaluator<Factor> makeNewEvaluator() {
 		return new LazyExactBPNodeFromFactorToVariableEvaluator(
 				this::getFactorsAtRoot, 
-				this::determinedVariablesToBeSummedOut, 
+				this::variablesToBeSummedOut, 
 				(variablesToBeSummedOut, product) -> sumOutWithBookkeeping(variablesToBeSummedOut, product));
 	}
 }

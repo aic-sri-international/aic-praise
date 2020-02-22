@@ -59,14 +59,16 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	Variable getMessageVariable();
 	
 	/**
-	 * Given the product of incoming messages and factor at root,
-	 * returns a list of indices being summed out at the root level,
-	 * based on the overall tree computation constructed so far
-	 * (this determines which indices are external cutset indices and which ones are internal ones,
-	 * which in turn determines which ones must be summed out).
-	 * @return
+	 * Given the variables in the summand (the product of incoming messages and factor at root),
+	 * returns the variables that must be summed out at the root level.
 	 */
-	List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> allFreeVariablesInSummand);
+	List<? extends Variable> variablesToBeSummedOut(Collection<? extends Variable> allVariablesInSummand);
+	
+	/**
+	 * Indicates whether a variable is free according to this node (that is, this node's result may depend on an external assignment to it),
+	 * by checking whether it is equal to the root or its parent, whether it is pre-defined as a parameter, or whether it appears in external factors.
+	 */
+	boolean isFreeVariable(Variable variable);
 	
 	/**
 	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.

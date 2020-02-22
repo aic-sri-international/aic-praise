@@ -128,10 +128,11 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	final protected LiveSet<Factor> excludedFactors;
 	final protected RedirectingLiveSet<Factor> includedFactors;
 	// we must use redirecting live sets for included factor nodes because they initially are just the root factor (if the root is a factor),
-	// but then later must be changed to include the union of sub-ExactBPs.
-	// However, the same instance must be kept because the parent's included and excluded factor nodes live sets
-	// are wired to it.
-	// The solution is to have a redirecting live set instance that can be redirected.
+	// but then later must be updated to a live set defined as the union of sub-ExactBPs live sets
+	// (defining it right away as this union is not possible because at first these sub-live sets have not been created yet).
+	// Because live sets are immutable Java objects, this would mean setting this data member to a new live set instance.
+	// However, this would break the parent's live set, which is defined in terms of the original includedFactor instance.
+	// The solution is to have a redirecting live set instance that is always the same but that that can be redirected to a new instance when needed.
 	
 	protected FactorNetwork factorNetwork;
 	
@@ -172,8 +173,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	}
 
 	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(ArrayList<? extends SubRootType> subsRoots) {
-		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors =
-				mapIntoArrayList(subsRoots, s -> makeInitialSubIncludedFactors(s));
+		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = mapIntoArrayList(subsRoots, this::makeInitialSubIncludedFactors);
 		redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(subsIncludedFactors);
 		return subsIncludedFactors;
 	}
@@ -219,13 +219,19 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		return result;
 	}
 
+	/**
+	 * Given the variables in the summand (the product of incoming messages and factor at root),
+	 * returns the variables that must be summed out at the root level,
+	 * computed as those not considered free according to {@link #isFreeVariable(Variable)}.
+	 */
 	@Override
-	public List<? extends Variable> determinedVariablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
+	public List<? extends Variable> variablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
 		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable(n));
 		return variablesToBeSummedOut;
 	}
 
-	private boolean isFreeVariable(Variable variable) {
+	@Override
+	public boolean isFreeVariable(Variable variable) {
 		boolean result = 
 				isEqualToRoot(variable)
 				||

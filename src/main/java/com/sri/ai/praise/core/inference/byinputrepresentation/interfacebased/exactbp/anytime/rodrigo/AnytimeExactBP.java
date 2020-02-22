@@ -83,47 +83,46 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		super(base, new Simplex(base.getMessageVariable()));
 	}
 
-	private Iterator<? extends AnytimeExactBP<SubRootType,RootType>> subIteratorForRefinement;
+	private Iterator<? extends AnytimeExactBP<SubRootType,RootType>> subRoundRobinIterator;
 
 	@Override
 	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
 		super.makeSubsAndIterateThemToTheirFirstApproximation();
-		subIteratorForRefinement = getSubs().iterator();
+		subRoundRobinIterator = getSubs().iterator();
 	}
 
 	@Override
-	protected AnytimeExactBP<SubRootType,RootType> pickNextSubToIterate() {
+	protected AnytimeExactBP<SubRootType, RootType> pickNextSubToIterate() {
 		
 		if (getSubs().isEmpty()) {
 			return null;
 		}
 		
-		AnytimeExactBP<SubRootType,RootType> selected = null; 
-
-		boolean hitTheInitialOneAgain = false;
-		AnytimeExactBP<SubRootType,RootType> initialSub = getNextSubCircularly(); 
-		AnytimeExactBP<SubRootType,RootType> currentSub = initialSub; 
+		AnytimeExactBP<SubRootType, RootType> subWeStartedWith = getNextInSubRoundRobin();
 		
+		AnytimeExactBP<SubRootType, RootType> nextSubThatCanBeRefined = null; 
+		AnytimeExactBP<SubRootType, RootType> currentSub = subWeStartedWith; 
+		boolean cameBackToTheOneWeStartedWith = false;
 		do {
 			if (currentSub.hasNext()) {
-				selected = currentSub;
+				nextSubThatCanBeRefined = currentSub;
 			}
 			else {
-				currentSub = getNextSubCircularly();
-				if (currentSub == initialSub) {
-					hitTheInitialOneAgain = true;
+				currentSub = getNextInSubRoundRobin();
+				if (currentSub == subWeStartedWith) {
+					cameBackToTheOneWeStartedWith = true;
 				}
 			}
-		} while (selected == null && !hitTheInitialOneAgain);
+		} while (nextSubThatCanBeRefined == null && !cameBackToTheOneWeStartedWith);
 		
-		return selected;
+		return nextSubThatCanBeRefined;
 	}
 
-	private AnytimeExactBP<SubRootType, RootType> getNextSubCircularly() {
-		if (!subIteratorForRefinement.hasNext()) {
-			subIteratorForRefinement = getSubs().iterator();
+	private AnytimeExactBP<SubRootType, RootType> getNextInSubRoundRobin() {
+		if (!subRoundRobinIterator.hasNext()) {
+			subRoundRobinIterator = getSubs().iterator();
 		}
-		AnytimeExactBP<SubRootType, RootType> result = subIteratorForRefinement.next();
+		AnytimeExactBP<SubRootType, RootType> result = subRoundRobinIterator.next();
 		return result;
 	}
 
@@ -151,7 +150,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().determinedVariablesToBeSummedOut(freeVariables);
+		List<? extends Variable> variablesSummedOut = getBase().variablesToBeSummedOut(freeVariables);
 		Approximation<Factor> result = product.sumOut(variablesSummedOut);
 		return result;
 	}

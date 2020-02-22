@@ -15,6 +15,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
@@ -103,7 +104,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	}
 
 	private FunctionConvexHull getFunctionConvexHull(Approximation<Factor> current, Variable query) {
-		return (FunctionConvexHull) ((FunctionConvexHull) current).getEquivalentAtomicPolytopeOn(query);
+		return (FunctionConvexHull) ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
 	}
 
 }
