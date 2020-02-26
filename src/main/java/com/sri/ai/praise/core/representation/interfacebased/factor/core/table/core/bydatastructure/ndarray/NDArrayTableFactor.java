@@ -353,4 +353,8 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 		throw new Error("Minimization not yet implemented for NDArrayTableFactor");
 	}
 
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		throw new Error("mathematicallyEquals not supported for " + NDArrayTableFactor.class);
+	}
 }

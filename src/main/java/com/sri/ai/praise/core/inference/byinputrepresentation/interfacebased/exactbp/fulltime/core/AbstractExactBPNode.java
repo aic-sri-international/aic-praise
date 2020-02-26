@@ -41,6 +41,7 @@ import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.notNullAndEquals;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
@@ -52,6 +53,7 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.Union.unionOfAllButT
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -61,6 +63,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -90,17 +93,15 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 
 	public static boolean debug = false;
 
-	@Override
-	public
-	Factor apply() {
-		return
-				explanationBlock("Computing message to ", getRoot(), code(() -> {
-					return ExactBPNode.super.apply();
-				}), "Message to ", getRoot(), " is ", RESULT);
-	}
+	////////////////////////////// ABSTRACT METHODS
 	
 	@Override
 	public abstract List<? extends Factor> getFactorsAtRoot();
+
+	/**
+	 * An abstract method for extensions to define what are their sub's roots.
+	 */
+	protected abstract ArrayList<? extends SubRootType> makeSubsRoots();
 
 	/**
 	 * An abstract method for extensions to define how to create their subs.
@@ -109,17 +110,15 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	 * @param subIncludedFactors
 	 * @return
 	 */
-	protected abstract ExactBPNode<SubRootType,RootType> 
+	protected abstract 
+	ExactBPNode<SubRootType,RootType> 
 	makeSubExactBP(
 			SubRootType subRoot, 
 			LiveSet<Factor> subExcludedFactors, 
 			RedirectingLiveSet<Factor> subIncludedFactors);
 
-	/**
-	 * An abstract method for extensions to define what are their sub's roots.
-	 */
-	protected abstract ArrayList<? extends SubRootType> makeSubsRoots();
-
+	/////////////////////// DATA MEMBERS
+	
 	protected RootType root;
 	protected SubRootType parent;
 	
@@ -138,6 +137,8 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	
 	protected Predicate<Variable> isParameterPredicate;
 	
+	///////////////////// CONSTRUCTOR
+	
 	protected AbstractExactBPNode(
 			RootType root, 
 			SubRootType parent, 
@@ -153,6 +154,66 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		this.includedFactors = includedFactors;
 		this.factorNetwork = factorNetwork;
 		this.isParameterPredicate = isParameterPredicate;
+	}
+
+	//////////////////// APPLY
+	
+	@Override
+	public Factor apply() {
+		return
+				explanationBlock("Computing message to ", getRoot(), code(() -> {
+					return ExactBPNode.super.apply();
+				}), "Message to ", getRoot(), " is ", RESULT);
+	}
+	
+	//////////////////// GETTERS
+	
+	@Override
+	public LiveSet<Factor> getExcludedFactors() {
+		return excludedFactors;
+	}
+	
+	@Override
+	public RedirectingLiveSet<Factor> getIncludedFactors() {
+		return includedFactors;
+	}
+	
+	//////////////////// TEMPORARY DEBUGGING AND SCRATCH
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Iterator<? extends Factor> getFactorsSoFar() {
+		List<Object> nestedListOfFactors = list();
+		if (root instanceof Factor) {
+			nestedListOfFactors.add(root);
+		}
+		if (hasMadeSubsYet()) {
+			nestedListOfFactors.addAll(mapIntoList(getSubs(), s -> (NullaryFunction) () -> s.getFactorsSoFar()));
+		}
+		return new NestedIterator(nestedListOfFactors);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Iterator<? extends Variable> getVariablesSoFar() {
+		List<Object> nestedListOfVariables = list();
+		if (root instanceof Variable) {
+			nestedListOfVariables.add(root);
+		}
+		if (hasMadeSubsYet()) {
+			nestedListOfVariables.addAll(mapIntoList(getSubs(), s -> (NullaryFunction) () -> s.getVariablesSoFar()));
+		}
+		return new NestedIterator(nestedListOfVariables);
+	}
+
+	//////////////////// IMPLEMENTATION OF REQUIRED METHODS
+	
+	/**
+	 * Provides a way of checking if subs have been made yet, without triggering their constructions as would
+	 * happen if {@link #getSubs()} were invoked.
+	 */
+	public boolean hasMadeSubsYet() {
+		return subs != null;
 	}
 	
 	@Override

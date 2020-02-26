@@ -20,6 +20,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
@@ -186,6 +187,11 @@ public class Box extends AbstractFunctionConvexHull {
 	@Override
 	public FunctionConvexHull addIndices(Collection<? extends Variable> newIndices) {
 		throw new Error("addIndices not implemented for " + Box.class);
+	}
+
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		throw new Error("mathematicallyEquals not implemented for " + Box.class);
 	}
 
 	/*public Box(Factor phiMin, Factor phiMax, BoxFactorFactory factory) {

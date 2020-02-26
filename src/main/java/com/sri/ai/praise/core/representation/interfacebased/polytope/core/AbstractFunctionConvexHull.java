@@ -6,7 +6,6 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.sum;
@@ -242,16 +241,18 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	@Override
 	public FunctionConvexHull dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var indices = union(functionIterator(functionConvexHulls, FunctionConvexHull::getIndices));
-		//checkForOverlappingIndices(functionConvexHulls, indices);
+		checkForOverlappingIndices(functionConvexHulls, indices);
 		var factors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
 		var factorsProduct = Factor.multiply(factors);
 		return newInstance(indices, factorsProduct);
 	}
 
-	@SuppressWarnings("unused")
 	private void checkForOverlappingIndices(Collection<? extends FunctionConvexHull> functionConvexHulls, LinkedHashSet<? extends Variable> indices) {
 		int numberOfOriginalIndices = sum(functionIterator(functionConvexHulls, f -> f.getIndices().size())).intValue();
-		myAssert(indices.size() == numberOfOriginalIndices, () -> "Multiplying factors with overlapping indices: " + mapIntoList(functionConvexHulls, FunctionConvexHull::getIndices));
+//		if (indices.size() != numberOfOriginalIndices) {
+//			println("\AbstractFunctionConvexHull: Multiplying convex hulls with overlapping indices: " + join("\n", functionConvexHulls));
+//			println("indices per hull per line:\n" + join("\n", mapIntoList(functionConvexHulls, FunctionConvexHull::getIndices)));
+//		}
 	}
 
 	////////////////// NORMALIZATION

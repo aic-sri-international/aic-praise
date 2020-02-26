@@ -115,4 +115,6 @@ public interface Factor {
 	ExplanationTree getExplanation();
 	
 	void setExplanation(ExplanationTree explanation);
+	
+	boolean mathematicallyEquals(Factor another);
 }

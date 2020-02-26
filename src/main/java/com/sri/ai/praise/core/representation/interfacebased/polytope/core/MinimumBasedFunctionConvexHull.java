@@ -174,4 +174,10 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 		var newVariables = Util.makeListWithElementsOfTwoCollections(indexVariables, tableFactor.getVariables());
 		return new ArrayTableFactor(newVariables, newArray);
 	}
+	
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		throw new Error("mathematicallyEquals not implemented for " + MinimumBasedFunctionConvexHull.class);
+	}
+
 }

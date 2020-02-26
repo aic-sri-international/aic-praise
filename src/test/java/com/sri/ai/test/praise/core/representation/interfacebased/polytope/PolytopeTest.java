@@ -43,6 +43,8 @@ import static com.sri.ai.praise.core.representation.interfacebased.polytope.core
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -53,9 +55,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 
 public class PolytopeTest {
@@ -208,6 +213,165 @@ public class PolytopeTest {
 		println(expected.toString());
 		println(actual.toString());
 		assertEquals(expected.toString(), actual.toString()); // factor are compared by reference, not value
+	}
+	
+	@Test
+	public void testMathematicalEquivalence() {
+
+		TableVariable u = new TableVariable("U", 2);
+		TableVariable v = new TableVariable("V", 2);
+		TableVariable x = new TableVariable("X", 2);
+		TableVariable y = new TableVariable("Y", 2);
+		TableVariable z = new TableVariable("Z", 2);
+		
+		Polytope p1;
+		Polytope p2;
+		
+		p1 = new Simplex(x);
+		p2 = new Simplex(y);
+		assertTrue(p1.equalsModuloPermutations(p1));
+		assertFalse(p1.equalsModuloPermutations(p2));
+		
+		// Note: Factor.mathematicallyEquals is tested more extensively in {@link TableFactorTest}.
+		
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(u,v), new double[] {0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(u,v), new double[] {1., 0., 0., 0., }));
+		assertTrue(p1.equalsModuloPermutations(p1));
+		assertFalse(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(y, x), // inverse order
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		assertTrue(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(),
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		assertTrue(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(),
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		assertFalse(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(
+						list(x,y,z), 
+						new double[] {1., 2., 3., 4., 5., 6., 7., 8., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(x, y),
+				new ArrayTableFactor(
+						list(z,x,y) /* permutation*/, 
+						new double[] {1., 3., 5., 7., 2., 4., 6., 8., }));
+		assertTrue(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		assertTrue(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(u),
+				new Simplex(v)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		assertTrue(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(v)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		assertFalse(p1.equalsModuloPermutations(p2));
+		
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(v),
+				new DefaultFunctionConvexHull(
+						list(x), 
+						new ArrayTableFactor(
+								list(z), 
+								new double[] {1., 2.}))
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x), 
+						new ArrayTableFactor(
+								list(z), 
+								new double[] {1., 2.})),
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		assertTrue(p1.equalsModuloPermutations(p2));
 	}
 
 }

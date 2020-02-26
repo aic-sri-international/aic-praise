@@ -178,4 +178,9 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	public int summationCost() {
 		throw new Error("Summation cost not yet implemented for sampling factors.");
 	}
+	
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		throw new Error("mathematicallyEquals not supported for " + AbstractSamplingFactor.class);
+	}
 }

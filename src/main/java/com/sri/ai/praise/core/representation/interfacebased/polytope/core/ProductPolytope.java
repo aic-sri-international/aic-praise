@@ -46,10 +46,12 @@ import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,6 +105,10 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			result = new ProductPolytope(alreadySimplifiedAtomicPolytopes);
 		}
 		return result;
+	}
+	
+	public static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(AtomicPolytope... atomicPolytopes) {
+		return makePolytopeEquivalentToProductOfAtomicPolytopes(Arrays.asList(atomicPolytopes));
 	}
 
 	@Override
@@ -378,6 +384,18 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		
 		Polytope result = resultBeforeSimplifying.simplify();
 		
+//		println("\nProductPolytope:");
+//		println("eliminated: " + join(eliminated));
+//		println("initial polytopes: " + join(polytopesDependentOnEliminated));
+//		println("simplices: " + join(simplices));
+//		println("convex hulls:\n" + join("\n", simplices));
+//		println("product of hulls: " + productOfConvexHulls);
+//		println("eliminated minus simplex variables: " + eliminatedMinusSimplexVariables);
+//		println("product of hulls after eliminating above: " + productOfConvexHullsAfterSummingOut);
+//		println("indices to add: " + indicesToAdd);
+//		println("result before simplifying: " + resultBeforeSimplifying);
+//		println("result                   : " + result);
+		
 		return result;
 	}
 
@@ -455,4 +473,27 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		return result;
 	}
 
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		
+		List<AtomicPolytope> simplices1 = list();
+		List<AtomicPolytope> hulls1 = list();
+		collect(getAtomicPolytopes(), a -> a instanceof Simplex, simplices1, hulls1);
+
+		List<AtomicPolytope> simplices2 = list();
+		List<AtomicPolytope> hulls2 = list();
+		collect(another.getAtomicPolytopes(), a -> a instanceof Simplex, simplices2, hulls2);
+
+		var simplexVariables1 = mapIntoSet(simplices1, a -> ((Simplex)a).getVariable());
+		var simplexVariables2 = mapIntoSet(simplices2, a -> ((Simplex)a).getVariable());
+		
+		var simplicesAreEqual = simplexVariables1.equals(simplexVariables2);
+		
+		if (simplicesAreEqual) {
+			return Util.thereIsAOneToOneMatching(hulls1, hulls2, Polytope::equalsModuloPermutations);
+		}
+		else {
+			return false;
+		}
+	}
 }

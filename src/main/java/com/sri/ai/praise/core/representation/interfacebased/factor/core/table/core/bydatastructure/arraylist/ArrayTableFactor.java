@@ -2,6 +2,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.c
 
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
+import static com.sri.ai.util.Util.ratioisInOnePlusOrMinusEpsilon;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.listFrom;
@@ -11,6 +12,7 @@ import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.toIntArray;
+import static com.sri.ai.util.Util.unorderedEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -51,6 +53,8 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DATA MEMBERS ////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static int maximumNumberOfEntriesToShow = 5;
 	
 	private final MixedRadixNumber parameterIndexRadix; // null if number of variables is 0.
 
@@ -148,8 +152,8 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	
 	@Override
 	protected String parametersString() {
-		if (numberOfEntries() > 100) {
-			return "[greater than 100 entries]";
+		if (numberOfEntries() > maximumNumberOfEntriesToShow) {
+			return "[greater than " + maximumNumberOfEntriesToShow + " entries]";
 		}
 		else {
 			return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
@@ -297,7 +301,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		
 		ArrayIndex exclusive1Values = makeArrayIndex(exclusive1, this);
  		ArrayIndex exclusive2Values = makeArrayIndex(exclusive2, anotherArrayTableFactor);
-		ArrayIndex commonValuesInThis = makeArrayIndex(common, this); // these two could be combined into an ArrayIndex on multiple sets of strides
+		ArrayIndex commonValuesInThis = makeArrayIndex(common, this); // this and the one below could be combined into an ArrayIndex on multiple sets of strides
 		ArrayIndex commonValuesInAnother = makeArrayIndex(common, anotherArrayTableFactor);
 
 		int offsetInResult = 0;
@@ -370,13 +374,13 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	@Override
 	protected ArrayTableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
 
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.sumOut summation cost: " + summationCost());
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.sumOut summation cost: " + summationCost());
 		
 		var resultAndTime = Timer.getResultAndTime(() -> aggregate((a, v) -> a + v, 0, eliminated, remaining));
 
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.sumOut done, time: " + resultAndTime.second + " ms.") ;
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.sumOut done, time: " + resultAndTime.second + " ms.") ;
 		
 		var result = resultAndTime.first;
 		long time = resultAndTime.second;
@@ -457,11 +461,11 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.MIN summation cost: " + summationCost());
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.MIN summation cost: " + summationCost());
 		var result = Timer.getResultAndTime(() -> aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining));
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.MIN done, time: " + result.second + " ms");
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.MIN done, time: " + result.second + " ms");
 		return result.first;
 	}
 
@@ -528,13 +532,13 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 		// TODO: it's odd that sum takes a List and normalize takes a Collection, forcing us here to create a new list.
 		
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.NORMALIZATION summation cost: " + summationCost());
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.NORMALIZATION summation cost: " + summationCost());
 
 		var resultAndTime = Timer.getResultAndTime(() -> divideByTableFactor(sumOut(listFrom(variablesToNormalize))));
 
-		if (summationCost() > 1000000)
-			println("ArrayTableFactor.NORMALIZATION done, time: " + resultAndTime.second + " ms.") ;
+//		if (summationCost() > 1000000)
+//			println("ArrayTableFactor.NORMALIZATION done, time: " + resultAndTime.second + " ms.") ;
 
 		return resultAndTime.first;
 		
@@ -659,6 +663,64 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		else {
 			return parameterIndexRadix.getValueFor(values).intValue();
 		}
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// MATHEMATICALLY EQUALS ////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final double MATHEMATICALLY_EQUALS_EPSILON = 0.0001;
+
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		if (another instanceof ArrayTableFactor) {
+			return mathematicallyEqualsAnotherArrayTableFactor((ArrayTableFactor) another);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private boolean mathematicallyEqualsAnotherArrayTableFactor(ArrayTableFactor anotherArrayTableFactor) {
+		if (haveSameVariables(anotherArrayTableFactor)) {
+			return mathematicallyEqualsAnotherArrayTableFactorWithTheSameVariables(anotherArrayTableFactor);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private boolean haveSameVariables(ArrayTableFactor anotherArrayTableFactor) {
+		return unorderedEquals(getVariables(), anotherArrayTableFactor.getVariables());
+	}
+
+	private boolean mathematicallyEqualsAnotherArrayTableFactorWithTheSameVariables(ArrayTableFactor anotherArrayTableFactor) {
+		ArrayIndex index1 = makeArrayIndex(getVariables(), this);
+		ArrayIndex index2 = makeArrayIndex(getVariables(), anotherArrayTableFactor);
+		// note that we use the getVariables() for both to use the same assignment order.
+		
+		boolean equalSoFar = true;
+		do {
+			equalSoFar = equalSoFar && nextPositionsAreEqual(this, index1, anotherArrayTableFactor, index2);
+			index2.incrementIfPossible();
+		} while (equalSoFar && index1.incrementIfPossible());
+		
+		return equalSoFar;
+	}
+
+	private static boolean nextPositionsAreEqual(
+			ArrayTableFactor arrayTableFactor1,
+			ArrayIndex index1,
+			ArrayTableFactor arrayTableFactor2,
+			ArrayIndex index2) {
+		
+		double value1 = arrayTableFactor1.get(index1.offset());
+		double value2 = arrayTableFactor2.get(index2.offset());
+		return compare(value1, value2);
+	}
+
+	private static boolean compare(double value1, double value2) {
+		return ratioisInOnePlusOrMinusEpsilon(value1, value2, MATHEMATICALLY_EQUALS_EPSILON);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -5,9 +5,12 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
@@ -23,6 +26,12 @@ import com.sri.ai.util.Util;
  */
 public class TableFactorTest {
 
+	@BeforeAll
+	public static void setUp() {
+		ArrayTableFactor.maximumNumberOfEntriesToShow = 100;
+		println(ArrayTableFactor.class.getSimpleName() + " will only show tables with up to " + ArrayTableFactor.maximumNumberOfEntriesToShow + " elements.");
+	}
+	
 	// CREATE TABLES TO TEST //////////////////////////////////////////////////////////////////////////////////////////
 	
 	TableVariable V1 = new TableVariable("V1", 2);
@@ -445,6 +454,44 @@ public class TableFactorTest {
 		assertEquals(arrayList(1.0, 1.0, 1.0, 1.0,1.0, 1.0), normalizedF2OnNoVariables.getEntries());
 		
 		println();
+	}
+	
+	@Test
+	public void testMathematicallyEquivalent() {
+		TableVariable x = new TableVariable("x", 2);
+		TableVariable y = new TableVariable("y", 2);
+		TableVariable z = new TableVariable("z", 2);
+		
+		ArrayTableFactor f1;
+		ArrayTableFactor f2;
+		
+		f1 = new ArrayTableFactor(list(), new double[] {1});
+		f2 = new ArrayTableFactor(list(), new double[] {1});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(), new double[] {1});
+		f2 = new ArrayTableFactor(list(x), new double[] {1, 2});
+		assertFalse(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x), new double[] {1, 2});
+		f2 = new ArrayTableFactor(list(), new double[] {1});
+		assertFalse(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x), new double[] {1, 3, 2, 4});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x), new double[] {1000, 3, 2, 4});
+		assertFalse(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4});
+		assertFalse(f1.mathematicallyEquals(f2));
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

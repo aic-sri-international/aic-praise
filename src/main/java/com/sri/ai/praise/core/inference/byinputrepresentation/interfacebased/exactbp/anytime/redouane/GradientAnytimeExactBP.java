@@ -357,5 +357,10 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		return polytopesToMultiply;
 	}
 
+	@Override
+	public void updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself() {
+		throw new Error("updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself not implemented for " + getClass());
+	}
+
 	
 }

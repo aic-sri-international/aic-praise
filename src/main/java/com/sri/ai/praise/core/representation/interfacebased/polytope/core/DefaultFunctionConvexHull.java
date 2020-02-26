@@ -42,6 +42,8 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.util.Util;
 
 /**
  * A default implementation of {@link AbstractFunctionConvexHull} that does not perform any simplification.
@@ -63,6 +65,25 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 	@Override
 	public FunctionConvexHull simplify() {
 		return this;
+	}
+
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		if (another instanceof FunctionConvexHull) {
+			return mathematicallyEqualsToAnotherFunctionConvexHull((FunctionConvexHull) another);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private boolean mathematicallyEqualsToAnotherFunctionConvexHull(FunctionConvexHull another) {
+		Collection<? extends Variable> c1 = getIndices();
+		Collection<? extends Variable> c2 = another.getIndices();
+		return
+				Util.unorderedEquals(c1, c2) 
+				&&
+				getFactor().mathematicallyEquals(another.getFactor());
 	}
 
 }

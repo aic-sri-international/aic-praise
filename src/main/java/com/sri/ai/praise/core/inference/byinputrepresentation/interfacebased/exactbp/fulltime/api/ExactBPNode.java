@@ -39,11 +39,14 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
+import com.sri.ai.util.livesets.api.LiveSet;
+import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
@@ -70,6 +73,10 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	 */
 	boolean isFreeVariable(Variable variable);
 	
+	RedirectingLiveSet<Factor> getIncludedFactors();
+
+	LiveSet<Factor> getExcludedFactors();
+
 	/**
 	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
 	 */
@@ -80,4 +87,9 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	@Override
 	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
 
+	/////////////////// DEBUGGING FOR NOW
+	
+	Iterator<? extends Factor> getFactorsSoFar();
+
+	Iterator<? extends Variable> getVariablesSoFar();
 }

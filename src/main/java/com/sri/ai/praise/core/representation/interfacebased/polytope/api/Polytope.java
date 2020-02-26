@@ -67,7 +67,7 @@ public interface Polytope extends Approximation<Factor> {
 	 */
 	Collection<? extends AtomicPolytope> getAtomicPolytopes();
 	
-	public static Polytope multiply(Collection<? extends Polytope> polytopes) {
+	static Polytope multiply(Collection<? extends Polytope> polytopes) {
 		Polytope result = accumulate(polytopes, Polytope::multiply, identityPolytope());
 		return result;
 	}
@@ -78,7 +78,11 @@ public interface Polytope extends Approximation<Factor> {
 	 * Takes a polytope in which the only free variable is a given variable,
 	 * and returns a single equivalent {@link AtomicPolytope}.
 	 */
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable);
+	AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable);
 	// TODO: this is a suspicious method, a bit too specific... It may be better to identify what is done with its result, and implement that instead.
 
+	/**
+	 * Decides whether this polytope is equal to another one minus permutations in indices, variables, and multiplication factors.
+	 */
+	boolean equalsModuloPermutations(Polytope another);
 }

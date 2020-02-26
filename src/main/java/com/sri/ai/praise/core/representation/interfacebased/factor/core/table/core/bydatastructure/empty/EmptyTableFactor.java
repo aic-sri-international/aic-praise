@@ -1,11 +1,14 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty;
 
+import static com.sri.ai.util.Util.setFrom;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
@@ -223,4 +226,19 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	private void indicateLackOfData(String methodName) {
 		throw new Error(getClass().getSimpleName() + " cannot answer queries about data since it does not hold any, but had its method " + methodName + " invoked.");
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	// MATHEMATICALLY EQUALS ////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		if (another instanceof EmptyTableFactor) {
+			return setFrom(getVariables()).equals(setFrom(((EmptyTableFactor) another).getVariables()));
+		}
+		else {
+			return false;
+		}
+	}
+	
 }

@@ -14,11 +14,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
+import com.sri.ai.util.Util;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -62,11 +64,17 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 		while (anytimeIterator.hasNext()) {
 			//println();
 			current = anytimeIterator.next();
-			if (current instanceof Simplex) {
+			AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
+			
+			if (atomicPolytope.getFreeVariables().size() > 1) {
+				println("AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: " + Util.removeNonDestructively(atomicPolytope.getFreeVariables(), query));
+			}
+			
+			if (atomicPolytope instanceof Simplex) {
 				println("Simplex bound");
 			}
 			else {
-				FunctionConvexHull hull = getFunctionConvexHull(current, query); 
+				FunctionConvexHull hull = getFunctionConvexHull(atomicPolytope, query); 
 
 				var normalizedHullFactor = hull.getFactor().normalize(list(query));
 				var allButQuery = setDifference(normalizedHullFactor.getVariables(), list(query));
@@ -104,7 +112,8 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	}
 
 	private FunctionConvexHull getFunctionConvexHull(Approximation<Factor> current, Variable query) {
-		return (FunctionConvexHull) ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
+		AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
+		return (FunctionConvexHull) atomicPolytope;
 	}
 
 }

@@ -132,4 +132,12 @@ public class Simplex extends AbstractAtomicPolytope {
 		return getVariable().hashCode();
 	}
 
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		return 
+				another instanceof Simplex 
+				&& 
+				getVariable().equals(((Simplex) another).getVariable());
+	}
+
 }

@@ -263,4 +263,14 @@ public class ConstantFactor implements Factor {
 	public int summationCost() {
 		return 0; // costs constant time to sum over
 	}
+
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		if (another instanceof ConstantFactor) {
+			return constant.equals(((ConstantFactor) another).constant);
+		}
+		else {
+			return false;
+		}
+	}
 }

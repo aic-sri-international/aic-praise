@@ -278,4 +278,9 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 	public int summationCost() {
 		throw new Error("Summation cost not yet implemented for " + getClass() + ".");
 	}
+
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		throw new Error("mathematicallyEquals not supported for " + AbstractExpressionFactor.class);
+	}
 }

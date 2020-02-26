@@ -46,4 +46,9 @@ public class IdentityPolytope implements Polytope {
 		throw new Error("getEquivalentAtomicPolytopeOn is not valid for IdentityPolytope");
 	}
 
+	@Override
+	public boolean equalsModuloPermutations(Polytope another) {
+		return another instanceof IdentityPolytope;
+	}
+
 }

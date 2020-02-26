@@ -184,4 +184,8 @@ public class ConditionedSamplingFactor extends AbstractConditionedFactor impleme
 				getFactor().nestedString(level + 1, showSamplingRules);
 	}
 
+	@Override
+	public boolean mathematicallyEquals(Factor another) {
+		throw new Error("mathematicallyEquals not supported for " + ConditionedSamplingFactor.class);
+	}
 }

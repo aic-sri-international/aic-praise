@@ -73,7 +73,16 @@ public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,
 
 	@Override
 	protected ArrayList<? extends Variable> makeSubsRoots() {
+//		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable(n));
 		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
+//		ArrayList<? extends Variable> result2 = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable(n));
+//		if (!result2.equals(result)) {
+//			println("Exact BP node: " + this);
+//			println("Original subs: " + result);
+//			println("Non-free subs: " + result2);
+//			println("Free variables: " + union(getExcludedFactors().getCurrentElements(), Factor::getVariables));
+//			System.exit(-1);
+//		}
 		return result;
 	}
 
