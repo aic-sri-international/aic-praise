@@ -58,17 +58,18 @@ public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variabl
 	protected ExactBPNodeFromVariableToFactor(
 			Variable root, 
 			Factor parent, 
+			ExactBPNode<Factor, Variable> parentNode,
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
 			FactorNetwork factorNetwork, 
 			Predicate<Variable> isParameterPredicate) {
 		
-		super(root, parent, excludedFactors, includedFactors, factorNetwork, isParameterPredicate);
+		super(root, parent, parentNode, excludedFactors, includedFactors, factorNetwork, isParameterPredicate);
 	}
 
 	@Override
 	protected ExactBPNode<Factor,Variable> makeSubExactBP(Factor subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
+		return new ExactBPNodeFromFactorToVariable(subRoot, getRoot(), this, subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
 	}
 	
 	@Override
@@ -95,7 +96,7 @@ public class ExactBPNodeFromVariableToFactor extends AbstractExactBPNode<Variabl
 	public TreeComputationEvaluator<Factor> makeNewEvaluator() {
 		return new EagerExactBPNodeEvaluator(
 				this::getFactorsAtRoot, 
-				this::variablesToBeSummedOut, 
+				this::variablesToBeSummedOutAmong, 
 				(variablesToBeSummedOut, product) -> sumOutWithBookkeeping(variablesToBeSummedOut, product));
 	}
 }

@@ -7,11 +7,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.MinFillEliminationOrdering;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.base.FulltimeAlgorithmsOnRandomTableFactorNetworksTestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations.LargeProblems;
@@ -25,10 +27,10 @@ class FulltimeAlgorithmsOnRandomTableFactorNetworksTest {
 			list( 
 					pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
 					,
-					pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering())))
+					pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering()))),
 					//,
 					// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
-					//				pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver())),
+					pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver()))
 					//				pair("  EBP_ND", new NDArraySolver(new ExactBPSolver()))
 					);
 

@@ -6,6 +6,7 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.sum;
@@ -60,6 +61,8 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
  */
 public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope implements FunctionConvexHull {
 
+	private static final boolean debug = false;
+	
 	/////////////////////// ABSTRACT METHODS
 	
 	@Override
@@ -200,14 +203,12 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	/**
 	 * Computes the product of a non-empty collection of {@link FunctionConvexHull}s,
 	 * <i>without</i> simplifying it according to the {@link #simplify()} method.
-	 * Typically we do want the simplified version, so this method is provided as a package method
-	 * for specialized, internal manipulations.
 	 * This simply delegates to {@link FunctionConvexHull#dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection)} 
 	 * of the first element for convenient. The reason we have a non-static method is so it can be overridden.
 	 * @param functionConvexHulls
 	 * @return
 	 */
-	static FunctionConvexHull multiplyIntoSingleFunctionConvexHullWithoutSimplifying(Collection<? extends FunctionConvexHull> functionConvexHulls) {
+	public static FunctionConvexHull multiplyIntoSingleFunctionConvexHullWithoutSimplifying(Collection<? extends FunctionConvexHull> functionConvexHulls) {
 		var first = getFirstOrNull(functionConvexHulls);
 		if (first == null) {
 			throw new Error(AbstractFunctionConvexHull.class + ".staticGetEquivalentAtomicPolytope should not receive empty argument.");
@@ -248,11 +249,13 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	}
 
 	private void checkForOverlappingIndices(Collection<? extends FunctionConvexHull> functionConvexHulls, LinkedHashSet<? extends Variable> indices) {
-		int numberOfOriginalIndices = sum(functionIterator(functionConvexHulls, f -> f.getIndices().size())).intValue();
-//		if (indices.size() != numberOfOriginalIndices) {
-//			println("\AbstractFunctionConvexHull: Multiplying convex hulls with overlapping indices: " + join("\n", functionConvexHulls));
-//			println("indices per hull per line:\n" + join("\n", mapIntoList(functionConvexHulls, FunctionConvexHull::getIndices)));
-//		}
+		if (debug) {
+			int numberOfOriginalIndices = sum(functionIterator(functionConvexHulls, f -> f.getIndices().size())).intValue();
+			if (indices.size() != numberOfOriginalIndices) {
+				println("\nAbstractFunctionConvexHull: Multiplying convex hulls with overlapping indices: " + join("\n", functionConvexHulls));
+				println("indices per hull per line:\n" + join("\n", mapIntoList(functionConvexHulls, FunctionConvexHull::getIndices)));
+			}
+		}
 	}
 
 	////////////////// NORMALIZATION

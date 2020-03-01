@@ -70,10 +70,10 @@ public class TableFactorTest {
 		assertEquals("f0[]: [1.0]", f0.toString());
 		
 		println(f1);
-		assertEquals("f1[{V1:card=2}, {V2:card=3}, {V3:card=4}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, "
+		assertEquals("f1[V1, V2, V3]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, "
 															   + "1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", f1.toString());
 		println(f2);
-		assertEquals("f2[{V2:card=3}, {V4:card=2}]: [11.0, 12.0, 21.0, 22.0, 31.0, 32.0]", f2.toString());
+		assertEquals("f2[V2, V4]: [11.0, 12.0, 21.0, 22.0, 31.0, 32.0]", f2.toString());
 
 		println();
 	}
@@ -89,7 +89,7 @@ public class TableFactorTest {
 		f0f1.setName("f1f2");
 		
 		println(f0f1);
-		assertEquals("f1f2[{V1:card=2}, {V2:card=3}, {V3:card=4}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
+		assertEquals("f1f2[V1, V2, V3]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]",
 				   f0f1.toString());
 		println();
 	}
@@ -106,7 +106,7 @@ public class TableFactorTest {
 		
 		println(f1f2);
 		assertEquals(
-				"f1f2[{V1:card=2}, {V3:card=4}, {V4:card=2}, {V2:card=3}]: [11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0]",
+				"f1f2[V1, V3, V4, V2]: [11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0]",
 				f1f2.toString());
 		println();
 	}
@@ -123,7 +123,7 @@ public class TableFactorTest {
 
 		println(f2f1);
 		assertEquals(
-				"f2f1[{V4:card=2}, {V1:card=2}, {V3:card=4}, {V2:card=3}]: [11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0]", 
+				"f2f1[V4, V1, V3, V2]: [11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 11.0, 21.0, 31.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0, 12.0, 22.0, 32.0]", 
 				f2f1.toString());
 		println();
 	}
@@ -157,7 +157,7 @@ public class TableFactorTest {
 		f1SumOutV1.setName("f1SumOutV1");
 		
 		println(f1SumOutV1);
-		assertEquals("f1SumOutV1[{V2:card=3}, {V3:card=4}]: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]", f1SumOutV1.toString());
+		assertEquals("f1SumOutV1[V2, V3]: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]", f1SumOutV1.toString());
 		
 		println();
 	}
@@ -174,7 +174,7 @@ public class TableFactorTest {
 		f1SumOutV2.setName("f1SumOutV2");
 		
 		println(f1SumOutV2);
-		assertEquals("f1SumOutV2[{V1:card=2}, {V3:card=4}]: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]", f1SumOutV2.toString());
+		assertEquals("f1SumOutV2[V1, V3]: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]", f1SumOutV2.toString());
 		
 		println();
 	}
@@ -191,7 +191,7 @@ public class TableFactorTest {
 		f1SumOutV3.setName("f1SumOutV3");
 		
 		println(f1SumOutV3);
-		assertEquals("f1SumOutV3[{V1:card=2}, {V2:card=3}]: [4.0, 4.0, 4.0, 4.0, 4.0, 4.0]", f1SumOutV3.toString());
+		assertEquals("f1SumOutV3[V1, V2]: [4.0, 4.0, 4.0, 4.0, 4.0, 4.0]", f1SumOutV3.toString());
 		
 		println();
 	}
@@ -207,7 +207,7 @@ public class TableFactorTest {
 		f2SumOutV2.setName("f2SumOutV2");
 		
 		println(f2SumOutV2);
-		assertEquals("f2SumOutV2[{V4:card=2}]: [63.0, 66.0]", f2SumOutV2.toString());
+		assertEquals("f2SumOutV2[V4]: [63.0, 66.0]", f2SumOutV2.toString());
 		
 		println();
 	}
@@ -223,7 +223,7 @@ public class TableFactorTest {
 		f2SumOutV4.setName("f2SumOutV4");
 		
 		println(f2SumOutV4);
-		assertEquals("f2SumOutV4[{V4:card=2}]: [13.0, 23.0, 33.0]", f2SumOutV4.toString());
+		assertEquals("f2SumOutV4[V4]: [13.0, 23.0, 33.0]", f2SumOutV4.toString());
 		
 		println();
 	}
@@ -242,7 +242,7 @@ public class TableFactorTest {
 		f1SumOutV1V2.setName("f1SumOutV1V2");
 		
 		println(f1SumOutV1V2);
-		assertEquals("f1SumOutV1V2[{V3:card=4}]: [6.0, 6.0, 6.0, 6.0]", f1SumOutV1V2.toString());
+		assertEquals("f1SumOutV1V2[V3]: [6.0, 6.0, 6.0, 6.0]", f1SumOutV1V2.toString());
 		
 		println();
 	}
@@ -259,7 +259,7 @@ public class TableFactorTest {
 		f1SumOutV1V3.setName("f1SumOutV1V3");
 		
 		println(f1SumOutV1V3);
-		assertEquals("f1SumOutV1V3[{V2:card=3}]: [8.0, 8.0, 8.0]", f1SumOutV1V3.toString());
+		assertEquals("f1SumOutV1V3[V2]: [8.0, 8.0, 8.0]", f1SumOutV1V3.toString());
 		
 		println();
 	}
@@ -276,7 +276,7 @@ public class TableFactorTest {
 		f1SumOutV2V3.setName("f1SumOutV2V3");
 		
 		println(f1SumOutV2V3);
-		assertEquals("f1SumOutV2V3[{V1:card=2}]: [12.0, 12.0]", f1SumOutV2V3.toString());
+		assertEquals("f1SumOutV2V3[V1]: [12.0, 12.0]", f1SumOutV2V3.toString());
 		
 		println();
 	}
@@ -332,7 +332,7 @@ public class TableFactorTest {
 		
 		println(f2f1SumOutV1);
 		assertEquals(
-				"f2f1SumOutV1[{V4:card=2}, {V3:card=4}, {V2:card=3}]: [22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0]", 
+				"f2f1SumOutV1[V4, V3, V2]: [22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 22.0, 42.0, 62.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0, 24.0, 44.0, 64.0]", 
 				f2f1SumOutV1.toString());
 		
 		println();
@@ -350,7 +350,7 @@ public class TableFactorTest {
 		f2f1SumOutV1V2.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2);
-		assertEquals("f2f1SumOutV1V2[{V4:card=2}, {V3:card=4}]: [126.0, 126.0, 126.0, 126.0, 132.0, 132.0, 132.0, 132.0]", f2f1SumOutV1V2.toString());
+		assertEquals("f2f1SumOutV1V2[V4, V3]: [126.0, 126.0, 126.0, 126.0, 132.0, 132.0, 132.0, 132.0]", f2f1SumOutV1V2.toString());
 		
 		println();
 	}
@@ -367,7 +367,7 @@ public class TableFactorTest {
 		f2f1SumOutV1V2V3.setName("f2f1SumOutV1V2");
 		
 		println(f2f1SumOutV1V2V3);
-		assertEquals("f2f1SumOutV1V2[{V4:card=2}]: [504.0, 528.0]", f2f1SumOutV1V2V3.toString());
+		assertEquals("f2f1SumOutV1V2[V4]: [504.0, 528.0]", f2f1SumOutV1V2V3.toString());
 		
 		println();
 	}
@@ -404,7 +404,7 @@ public class TableFactorTest {
 		
 		println(normalizedF2);
 		assertEquals(
-				"normalizedF2[{V2:card=3}, {V4:card=2}]: [0.08527131782945736, 0.09302325581395349, 0.16279069767441862, 0.17054263565891473, 0.24031007751937986, 0.24806201550387597]", 
+				"normalizedF2[V2, V4]: [0.08527131782945736, 0.09302325581395349, 0.16279069767441862, 0.17054263565891473, 0.24031007751937986, 0.24806201550387597]", 
 				normalizedF2.toString());
 		
 		assertEquals(1.0, normalizedF2.sumOut(normalizedF2.getVariables()).getEntries().get(0), 0.0001);
@@ -426,7 +426,7 @@ public class TableFactorTest {
 		
 		println(normalizedF2OnV2);
 		assertEquals(
-				"normalizedF2OnV2[{V2:card=3}, {V4:card=2}]: [0.1746031746031746, 0.18181818181818182, 0.3333333333333333, 0.3333333333333333, 0.49206349206349204, 0.48484848484848486]", 
+				"normalizedF2OnV2[V2, V4]: [0.1746031746031746, 0.18181818181818182, 0.3333333333333333, 0.3333333333333333, 0.49206349206349204, 0.48484848484848486]", 
 				normalizedF2OnV2.toString());
 		
 		assertEquals(arrayList(1.0, 1.0), normalizedF2OnV2.sumOut(list(V2)).getEntries());
@@ -448,7 +448,7 @@ public class TableFactorTest {
 		
 		println(normalizedF2OnNoVariables);
 		assertEquals(
-				"normalizedF2OnNoVariables[{V2:card=3}, {V4:card=2}]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", 
+				"normalizedF2OnNoVariables[V2, V4]: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]", 
 				normalizedF2OnNoVariables.toString());
 		
 		assertEquals(arrayList(1.0, 1.0, 1.0, 1.0,1.0, 1.0), normalizedF2OnNoVariables.getEntries());

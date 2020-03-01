@@ -46,6 +46,7 @@ import static com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet.r
 
 import java.util.function.Predicate;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
@@ -82,6 +83,7 @@ public class ExactBP extends ExactBPNodeFromVariableToFactor {
 		super(
 				query,
 				makeParent(),
+				makeParentNode(),
 				makeExcludedFactors(),
 				makeIncludedFactors(),
 				factorNetwork,
@@ -89,6 +91,10 @@ public class ExactBP extends ExactBPNodeFromVariableToFactor {
 	}
 
 	private static Factor makeParent() {
+		return null;  // there is none, as the message on the query is the final computation
+	}
+	
+	private static ExactBPNode<Factor, Variable> makeParentNode() {
 		return null;  // there is none, as the message on the query is the final computation
 	}
 	

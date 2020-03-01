@@ -42,7 +42,9 @@ import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.notNullAndEquals;
+import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
+import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.RESULT;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.code;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explanationBlock;
@@ -64,6 +66,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.NestedIterator;
+import com.sri.ai.util.collect.PredicateIterator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
@@ -91,6 +94,13 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  */
 public abstract class AbstractExactBPNode<RootType,SubRootType> implements ExactBPNode<RootType,SubRootType> {
 
+	// Some definitions:
+	// Excluded factor: factor appearing outside this branch
+	// External variable: a variable appearing outside this branch (even if it also appears inside)
+	// Free variable: a variable that is either external to this branch or its root if it is a variable.
+	// Included variable: a variable that appears in this branch as either a node or in a factor node.
+	// Blanket: the set of included variables that are free.
+	
 	public static boolean debug = false;
 
 	////////////////////////////// ABSTRACT METHODS
@@ -121,6 +131,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	
 	protected RootType root;
 	protected SubRootType parent;
+	protected ExactBPNode<SubRootType, RootType> parentNode;
 	
 	protected ArrayList<ExactBPNode<SubRootType,RootType>> subs;
 
@@ -141,7 +152,8 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	
 	protected AbstractExactBPNode(
 			RootType root, 
-			SubRootType parent, 
+			SubRootType parent, // TODO: redundant now that we have parentNode, remove it
+			ExactBPNode<SubRootType, RootType> parentNode,
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
 			FactorNetwork factorNetwork, 
@@ -149,6 +161,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		
 		this.root = root;
 		this.parent = parent;
+		this.parentNode = parentNode;
 		this.subs = null;
 		this.excludedFactors = excludedFactors;
 		this.includedFactors = includedFactors;
@@ -166,52 +179,72 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 				}), "Message to ", getRoot(), " is ", RESULT);
 	}
 	
-	//////////////////// GETTERS
+	//////////////////// ACCESS TO FACTORS
 	
 	@Override
 	public LiveSet<Factor> getExcludedFactors() {
 		return excludedFactors;
 	}
 	
-	@Override
-	public RedirectingLiveSet<Factor> getIncludedFactors() {
-		return includedFactors;
-	}
-	
-	//////////////////// TEMPORARY DEBUGGING AND SCRATCH
-	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Iterator<? extends Factor> getFactorsSoFar() {
+	public Iterator<? extends Factor> getIncludedFactors() {
 		List<Object> nestedListOfFactors = list();
 		if (root instanceof Factor) {
 			nestedListOfFactors.add(root);
 		}
 		if (hasMadeSubsYet()) {
-			nestedListOfFactors.addAll(mapIntoList(getSubs(), s -> (NullaryFunction) () -> s.getFactorsSoFar()));
+			nestedListOfFactors.addAll(mapIntoList(getSubs(), s -> (NullaryFunction) () -> s.getIncludedFactors()));
 		}
 		return new NestedIterator(nestedListOfFactors);
 	}
 
+	//////////////////// ACCESS TO VARIABLES
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Iterator<? extends Variable> getVariablesSoFar() {
-		List<Object> nestedListOfVariables = list();
-		if (root instanceof Variable) {
-			nestedListOfVariables.add(root);
-		}
-		if (hasMadeSubsYet()) {
-			nestedListOfVariables.addAll(mapIntoList(getSubs(), s -> (NullaryFunction) () -> s.getVariablesSoFar()));
-		}
-		return new NestedIterator(nestedListOfVariables);
+	public Iterator<? extends Variable> getIncludedVariables() {
+		return new NestedIterator(list(
+				getRoot() instanceof Variable? getRoot() : list(),
+				functionIterator(getIncludedFactors(), f -> f.getVariables())));
 	}
 
-	//////////////////// IMPLEMENTATION OF REQUIRED METHODS
+	@SuppressWarnings("unchecked")
+	@Override
+	public Iterator<? extends Variable> getVariablesThatAreRootOfNodesExternalTo(ExactBPNode sub) {
+		myAssert(hasMadeSubsYet(), () -> "getVariablesThatAreRootOfNodesExternalTo is supposed to be invoked on nodes that have made their subs already.");
+		return new NestedIterator(list(
+				getRoot() instanceof Variable? getRoot() : list(),
+				variablesThatAreRootOfNodesInAllOtherSubs(sub),
+				getParentNode() != null? getParentNode().getVariablesThatAreRootOfNodesExternalTo(this) : list()
+				));
+	}
+
+	private Iterator<?> variablesThatAreRootOfNodesInAllOtherSubs(ExactBPNode sub) {
+		return functionIterator(allSubsBut(sub), ExactBPNode::getVariablesThatAreRootOfNodes);
+	}
+
+	private PredicateIterator<ExactBPNode<SubRootType, RootType>> allSubsBut(ExactBPNode sub) {
+		return predicateIterator(getSubs(), s -> s != sub);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Iterator<? extends Variable> getVariablesThatAreRootOfNodes() {
+		return new NestedIterator(list(
+				getRoot() instanceof Variable? getRoot() : list(),
+				hasMadeSubsYet()? functionIterator(getSubs(), ExactBPNode::getVariablesThatAreRootOfNodes) : list()
+				));
+		
+	}
+	
+	//////////////////// SUBS MANIPULATION
 	
 	/**
 	 * Provides a way of checking if subs have been made yet, without triggering their constructions as would
 	 * happen if {@link #getSubs()} were invoked.
 	 */
+	@Override
 	public boolean hasMadeSubsYet() {
 		return subs != null;
 	}
@@ -254,6 +287,7 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	private void redirectRootIncludedFactorsToUnionOfSubsIncludedFactorsAndFactorsAtRoot(List<RedirectingLiveSet<Factor>> subsIncludedFactors) {
 		LiveSet<Factor> unionOfSubsIncludedFactorsAndFactorsAtRoot = union(subsIncludedFactors).union(getFactorsAtRoot());
 		includedFactors.redirectTo(unionOfSubsIncludedFactorsAndFactorsAtRoot);
+		// TODO: for some reason, removing field includedFactors and the above line breaks the program, even though includedFactors is apparently never used!
 	}
 
 	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends SubRootType> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
@@ -280,13 +314,15 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		return result;
 	}
 
+	///////////////////////////// VARIABLES SUMMING OUT
+	
 	/**
 	 * Given the variables in the summand (the product of incoming messages and factor at root),
 	 * returns the variables that must be summed out at the root level,
 	 * computed as those not considered free according to {@link #isFreeVariable(Variable)}.
 	 */
 	@Override
-	public List<? extends Variable> variablesToBeSummedOut(Collection<? extends Variable> variablesInSummand) {
+	public List<? extends Variable> variablesToBeSummedOutAmong(Collection<? extends Variable> variablesInSummand) {
 		List<? extends Variable> variablesToBeSummedOut = collectToList(variablesInSummand, n -> ! isFreeVariable(n));
 		return variablesToBeSummedOut;
 	}
@@ -296,11 +332,9 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		boolean result = 
 				isEqualToRoot(variable)
 				||
-				isEqualToParentIfThereIsOne(variable)
+				isExternalVariable(variable)
 				||
-				isParameter(variable)
-				||
-				isInExternalFactors(variable);
+				isParameter(variable);
 		return result;
 	}
 
@@ -309,17 +343,15 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		return result;
 	}
 
-	private boolean isEqualToParentIfThereIsOne(Variable variable) {
-		boolean result = notNullAndEquals(getParent(), variable);
-		return result;
-	}
-
 	private boolean isParameter(Variable variable) {
 		return isParameterPredicate.test(variable);
 	}
 
-	private boolean isInExternalFactors(Variable variable) {
-		boolean result = excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable));
+	private boolean isExternalVariable(Variable variable) {
+		boolean result =
+				(getParent() != null && getParent().equals(variable)) // covers the case in which there are no external factors and parent is variable
+				||
+				excludedFactors.thereIsAnElementSatisfying(f -> f.contains(variable)); // all other external variables will be in an external factor.
 		return result;
 	}
 
@@ -368,6 +400,8 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		}
 	}
 
+	/////////////////////////// GETTERS AND OTHER BASIC METHODS
+	
 	@Override
 	public RootType getRoot() {
 		return root;
@@ -376,6 +410,11 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	@Override
 	public SubRootType getParent() {
 		return parent;
+	}
+
+	@Override
+	public ExactBPNode<SubRootType, RootType> getParentNode() {
+		return parentNode;
 	}
 
 	public FactorNetwork getFactorNetwork() {

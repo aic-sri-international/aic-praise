@@ -83,7 +83,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
 		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		Collection<? extends Variable> summandVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().variablesToBeSummedOut(summandVariables);
+		List<? extends Variable> variablesSummedOut = getBase().variablesToBeSummedOutAmong(summandVariables);
 		Approximation<Factor> result = product.sumOut(variablesSummedOut);
 		return result;
 	}
@@ -334,7 +334,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		List<Approximation<Factor>> subsApproximations = getSubsApproximation();
 		Polytope product = getProductOfAllIncomingPolytopesButOneAndFactorAtRoot(sub, subsApproximations);
 		Collection<? extends Variable> freeVariables = product.getFreeVariables();
-		List<? extends Variable> variablesSummedOut = getBase().variablesToBeSummedOut(freeVariables);
+		List<? extends Variable> variablesSummedOut = getBase().variablesToBeSummedOutAmong(freeVariables);
 		Polytope result = product.sumOut(variablesSummedOut);
 		return result;
 	}

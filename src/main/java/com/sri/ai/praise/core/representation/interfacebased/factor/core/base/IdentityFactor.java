@@ -79,9 +79,9 @@ public class IdentityFactor extends ConstantFactor {
 	public Factor invert() {
 		return this;
 	}
+	
 	@Override
 	public Factor normalize() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 }

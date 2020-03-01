@@ -25,7 +25,8 @@ public class TableVariable implements Variable {
 	
 	@Override
 	public String toString() {
-		return "{" + this.name + ":card=" + this.cardinality + "}";
+		return name;
+//		return "{" + this.name + ":card=" + this.cardinality + "}";
 	}
 	
 	@Override

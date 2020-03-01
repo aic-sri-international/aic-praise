@@ -26,14 +26,8 @@ class AnytimeAlgorithmsOnRandomTableFactorNetworksTest {
 	static List<Pair<String, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>>>> algorithms =
 			list( 
 					pair("VE", new FromExactToAnytimeSolver(new VariableEliminationSolver())),
+					//pair("EBP_AL", new FromExactToAnytimeSolver(new ExactBPSolver())), // TODO: not working, not sure why
 					pair("Anytime EBP", new AnytimeExactBPSolver())
-//					pair("VE_MI_AL", new VariableEliminationSolver(new MinFillEliminationOrdering()))
-//					,
-//					pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering())))
-//					//,
-//					// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
-//					//				pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver())),
-//					//				pair("  EBP_ND", new NDArraySolver(new ExactBPSolver()))
 					);
 
 	@Test

@@ -37,11 +37,20 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.setFrom;
+import static com.sri.ai.util.Util.sortByString;
+import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
 
 import java.util.ArrayList;
@@ -58,8 +67,10 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Functio
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Polytopes;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputation;
@@ -77,6 +88,8 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  *
  */
 public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputation<Factor> {
+	
+	private static final boolean debug = false;
 
 	///////////////// DATA MEMBERS
 	
@@ -133,16 +146,14 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		if (!subRoundRobinIterator.hasNext()) {
 			subRoundRobinIterator = getSubs().iterator();
 		}
-		AnytimeExactBP<SubRootType, RootType> result = subRoundRobinIterator.next();
-		return result;
+		return subRoundRobinIterator.next();
 	}
 
 	@Override
 	protected Anytime<Factor> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
 		@SuppressWarnings("unchecked")
-		ExactBPNode<SubRootType, RootType> baseExactBP = (ExactBPNode<SubRootType, RootType>) baseSub;
-		AnytimeExactBP<SubRootType, RootType> result = new AnytimeExactBP<SubRootType,RootType>(baseExactBP);
-		return result;
+		var baseExactBP = (ExactBPNode<SubRootType, RootType>) baseSub;
+		return new AnytimeExactBP<SubRootType,RootType>(baseExactBP);
 	}
 
 	@Override
@@ -160,71 +171,50 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	@Override
 	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
 		
-//		var initialExcludedVariables = getCurrentlyExcludedVariables_DEBUG();
+		var productPolytope = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
+		var summandVariables = productPolytope.getFreeVariables();
+		var variablesToBeSummedOut = getBase().variablesToBeSummedOutAmong(summandVariables);
 		
-		Polytope product = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
-		Collection<? extends Variable> summandVariables = product.getFreeVariables();
-		List<? extends Variable> variablesToBeSummedOut = getBase().variablesToBeSummedOut(summandVariables);
+		Approximation<Factor> result = productPolytope.sumOut(variablesToBeSummedOut);
 		
-//		println("AnytimeExactBP: computing which of these should be summed out: " + summandVariables);
-//		println("AnytimeExactBP: These are the ones that should be summed out : " + variablesToBeSummedOut);
-//		println("AnytimeExactBP: summand : " + product);
-//		println("AnytimeExactBP: excludedVariables : " + getCurrentlyExcludedVariables_DEBUG());
-		
-		Approximation<Factor> result = product.sumOut(variablesToBeSummedOut);
+		if (debug) {
+			println("\nAnytimeExactBP:");
+			println("Subs roots:\n" + join("\n", mapIntoList(getSubs(), sub -> sub.getBase().getRoot())));
+			println("\nSubs approximations:\n" + join("\n", mapIntoList(getSubs(), sub -> sub.getCurrentApproximation())));
+			println("Summand (product of all factors):", productPolytope);
+			println("Summand variables              :", join(summandVariables));
+			println("Free variables in summand      :", join(collectToList(summandVariables, getBase()::isFreeVariable)));
+			println("Summed out variables in summand:", join(variablesToBeSummedOut));
+			println("Result of summing out : " + result);
 
-//		var finalExcludedVariables = getCurrentlyExcludedVariables_DEBUG();
-//		
-//		Variable indexThatShouldBeFree = violatingIndex_DEBUG(result);
-//		
-//		if (indexThatShouldBeFree != null) {
-//			println("AnytimeExactBP: found index that is free variable but is in polytope's index: " + indexThatShouldBeFree);
-//			println("Initial excluded variables: " + initialExcludedVariables);
-//			println("Final   excluded variables: " + finalExcludedVariables);
-//			println("Excluded variables remained the same: " + (initialExcludedVariables.equals(finalExcludedVariables)));
-//			println("Polytope: "  + result);
-//			System.exit(-1);
-//		}
-		
+			Variable indexThatShouldBeFreeInPolytope = violatingIndex_DEBUG(result);
+
+			if (indexThatShouldBeFreeInPolytope != null) {
+				println("AnytimeExactBP: found index that is free variable but is in polytope's index: " + indexThatShouldBeFreeInPolytope);
+				println("Polytope: "  + result);
+				System.exit(-1);
+			}
+		}
+
 		return result;
 	}
 
 	@Override
 	protected Approximation<Factor> getCurrentApproximationForSub(Anytime<Factor> sub) {
 		
-//		var excludedVariablesBeforeSub = getCurrentlyExcludedVariables_DEBUG();
-//		
-//		println("AnytimeExactBP.getCurrentApproximationForSub: going to compute sub " + sub);
 		Approximation<Factor> subCurrentApproximation = super.getCurrentApproximationForSub(sub);
-//		println("AnytimeExactBP.getCurrentApproximationForSub: done computing sub, result = " + subCurrentApproximation);
-//		
-//		var excludedVariablesAfterSub = getCurrentlyExcludedVariables_DEBUG();
-//
-//		Variable indexThatShouldBeFree = violatingIndex_DEBUG(subCurrentApproximation);
-//		
-//		if (indexThatShouldBeFree != null) {
-//			println("AnytimeExactBP.getCurrentApproximationForSub: found index that is free variable but is in sub's result's index: " + indexThatShouldBeFree);
-//			println("Sub: " + sub);
-//			println("Excluded variables before sub: " + excludedVariablesBeforeSub);
-//			println("Excluded variables after  sub: " + excludedVariablesAfterSub);
-//			println("Excluded variables remained the same: " + (excludedVariablesBeforeSub.equals(excludedVariablesAfterSub)));
-//			println("Sub's result: "  + subCurrentApproximation);
-//			System.exit(-1);
-//		}
+		
+		if (debug) {
+			var indexThatShouldBeFree = violatingIndex_DEBUG(subCurrentApproximation);
+			if (indexThatShouldBeFree != null) {
+				println("AnytimeExactBP.getCurrentApproximationForSub: found index that is free variable but is in sub's result's index: " + indexThatShouldBeFree);
+				println("Sub: " + sub);
+				println("Sub's result: "  + subCurrentApproximation);
+				System.exit(-1);
+			}
+		}
 		
 		return subCurrentApproximation;
-	}
-
-	private Set<? extends Variable> getCurrentlyExcludedVariables_DEBUG() {
-		return union(getBase().getExcludedFactors().getCurrentElements(), Factor::getVariables);
-	}
-
-	private Variable violatingIndex_DEBUG(Approximation<Factor> approximation) {
-		return getFirst(getIndices_DEBUG((Polytope)approximation), getBase()::isFreeVariable);
-	}
-	
-	private Collection<? extends Variable> getIndices_DEBUG(Polytope polytope) {
-		return union(mapIntoList(polytope.getAtomicPolytopes(), a -> a instanceof Simplex? list() : ((FunctionConvexHull)a).getIndices()));
 	}
 
 	private Polytope getProductOfAllIncomingPolytopesAndFactorAtRoot(List<Approximation<Factor>> subsApproximations) {
@@ -252,34 +242,165 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 
 	@Override
 	public void updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself() {
-		// The external context is the excluded factors, whose variables must be considered free variables in this {@link AnytimeExactBP} object.
-		// If a variable V was not free when the current approximation was computed, there are three possible cases:
-		// 1) it has either not been reached so far by this branch,
-		// 2) it has but became irrelevant for the current bound, or
-		// 3) it has and is an index in one of the function convex hulls present in the current approximation.
-		// If either of the two first cases is true, the current approximation remains valid.
-		// If 3) is true, the current approximation can be incrementally used to compute the updated one by simple removing the newly free variable
-		// from indices. It will then be present in the function convex hull's factor as a free variable.
 
 		Polytope polytope = (Polytope) getCurrentApproximation();
-		Polytope updated = Polytopes.mapAtomicPolytopes(polytope, this::removeNewlyFreeIndices);
 		
-		setCurrentApproximation(updated);
-//		
-//		if ( ! polytope.toString().equals(updated.toString())) {
-//			println();
-//			println("Excluded: " + getCurrentlyExcludedVariables_DEBUG());
-//			println("Original: " + polytope);
-//			println(" Updated: " + updated);
-//		}
-	}
+		var indices = union(polytope.getAtomicPolytopes(), a -> a instanceof FunctionConvexHull? ((FunctionConvexHull)a).getIndices() : list());
+		var newlyFreeIndices = collectToList(indices, getBase()::isFreeVariable);
+		
+		Polytope updatedPolytope;
+		
+		if (newlyFreeIndices.isEmpty()) {
+			updatedPolytope = polytope; 
+		}
+		else {
+			// We "unsum" the newly free variables by removing them from indices and re-creating their simplices
+			// This is based on the fact that indices always result from summing out a simplex variable
+			// Also not that summed-out non-simplex variables never become free because they never become externally free.
+			// To see this, consider that at the time of their summing out, they were not simplex variables (or they would have become indices).
+			// They were also not the root variable, or they would be free and therefore not summed out.
+			// If they were neither simplex variables not the root variable, all their factor neighbors were already included in this branch.
+			// Therefore their factor neighbors were not in any other branch.
+			// Since only their neighbor factors have any information about them and were not in external branches, the variable itself
+			// might not appear in an external branch, so it is never made free by expanding them.
+			List<AtomicPolytope> updatedAtomicPolytopes = list();
+			mapIntoList(newlyFreeIndices, i -> new Simplex(i), updatedAtomicPolytopes);
+			mapIntoList(polytope.getAtomicPolytopes(), this::removeNewlyFreeIndices, updatedAtomicPolytopes);
+			updatedPolytope = makePolytopeEquivalentToProductOfAtomicPolytopes(updatedAtomicPolytopes);
 
+			if (debug) {
+				println();
+				println("AnytimeExactBP: Updated current approximation for node with root " + getBase().getRoot());
+				println("Indices           :", join(indices));
+				println("Newly free indices:", join(newlyFreeIndices));
+				println("Previous approximation:", polytope);
+				println("Updated  approximation:", updatedPolytope);
+			}
+		}
+		
+		setCurrentApproximation(updatedPolytope);
+
+	}
+	
 	private AtomicPolytope removeNewlyFreeIndices(AtomicPolytope atomicPolytope) {
 		return Polytopes.removeIndicesSatisfying(atomicPolytope, getBase()::isFreeVariable);
 	}
 
 	@Override
+	public void setCurrentApproximation(Approximation<Factor> newCurrentApproximation) {
+		
+		if (debug) {
+			check_DEBUG(newCurrentApproximation);
+		}
+		
+		super.setCurrentApproximation(newCurrentApproximation);
+	}
+
+	
+	@Override
 	public String toString() {
 		return "Anytime " + getBase();
 	}
+	
+	//////////////////////////////// DEBUGGING METHODS
+
+	private Variable violatingIndex_DEBUG(Approximation<Factor> approximation) {
+		return getFirst(getIndices_DEBUG((Polytope)approximation), getBase()::isFreeVariable);
+	}
+	
+	private Collection<? extends Variable> getIndices_DEBUG(Polytope polytope) {
+		return union(mapIntoList(polytope.getAtomicPolytopes(), a -> a instanceof Simplex? list() : ((FunctionConvexHull)a).getIndices()));
+	}
+
+	private void check_DEBUG(Approximation<Factor> newCurrentApproximation) {
+		
+		Polytope actual = (Polytope) newCurrentApproximation;
+		
+		if (getBase().hasMadeSubsYet()) {
+			checkBranchWithMadeSubs_DEBUG(actual);
+		}
+		else {
+			checkCaseWithoutMadeSubs_DEBUG(actual);
+		}
+	}
+
+	private void checkCaseWithoutMadeSubs_DEBUG(Polytope actual) {
+		var rootIsVariable = getBase().getRoot() instanceof Variable;
+		var simplexVariable = (Variable) (rootIsVariable? getBase().getRoot() : getBase().getParent());
+		Simplex expected = new Simplex(simplexVariable);
+
+		if (! expected.equalsModuloPermutations(actual)) {
+			println();
+			println("Discrepancy in expected simplex and actual computation");
+			println("Expected: " + expected);
+			println("Actual  : " + actual);
+			System.exit(-1);
+		}
+	}
+
+	private void checkBranchWithMadeSubs_DEBUG(Polytope actual) {
+		
+		Set<Factor> factors = setFrom(getBase().getIncludedFactors());
+
+		var includedVariables = setFrom(getBase().getIncludedVariables());
+		var includedFreeVariables = collectToList(includedVariables, getBase()::isFreeVariable);
+		var summedOutVariables = subtract(includedVariables, includedFreeVariables);
+		var simplexVariables = getSimplexVariables_DEBUG();
+		var summedOutSimplexVariables = subtract(simplexVariables, includedFreeVariables);
+		var nonSummedOutSimplexVariables = subtract(simplexVariables, summedOutSimplexVariables);
+		var summedOutNonSimplexVariables = subtract(summedOutVariables, simplexVariables);
+
+		var allIncludedFactorsProduct = Factor.multiply(factors);
+		var summedOutFactor = allIncludedFactorsProduct.sumOut(summedOutNonSimplexVariables);
+		
+		var simplices = mapIntoList(nonSummedOutSimplexVariables, v -> new Simplex(v));
+		var convexHull = new DefaultFunctionConvexHull(summedOutSimplexVariables, summedOutFactor);
+		@SuppressWarnings("unchecked")
+		List<AtomicPolytope> multiplicands = listFrom(new NestedIterator(simplices, convexHull));
+		var expected = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(multiplicands);
+
+		@SuppressWarnings("unchecked")
+		var actualConvexHulls = (Collection<? extends FunctionConvexHull>) collectToList(actual.getAtomicPolytopes(), a -> a instanceof FunctionConvexHull);
+		var actualSimplices = collectToList(actual.getAtomicPolytopes(), a -> a instanceof Simplex);
+		var actualSingleConvexHull = multiplyIntoSingleFunctionConvexHullWithoutSimplifying(actualConvexHulls);
+		@SuppressWarnings("unchecked")
+		List<AtomicPolytope> actualMultiplicands = listFrom(new NestedIterator(actualSimplices, actualSingleConvexHull));
+		actual = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(actualMultiplicands);
+		
+		if (! expected.equalsModuloPermutations(actual)) {
+			println();
+			println("Discrepancy in expected polytope and actual computation");
+			println("root: " + getBase().getRoot());
+			println();
+			println("Included factors:\n" + join("\n", factors));
+			println();
+			println("All variables                                           : " + join(", ", sortByString(includedVariables)));
+			println("Included free variables                                 : " + join(", ", sortByString(includedFreeVariables)));
+			println("Summed out variables                                    : " + join(", ", sortByString(summedOutVariables)));
+			println("Simplex variables                                       : " + join(", ", sortByString(simplexVariables)));
+			println("Non-summed out simplex variables (to make simplices)    : " + join(", ", sortByString(nonSummedOutSimplexVariables)));
+			println("Summed out simplex variables (to make into indices)     : " + join(", ", sortByString(summedOutSimplexVariables)));
+			println("Summed out non-simplex variables (to remove from factor): " + join(", ", sortByString(summedOutNonSimplexVariables)));
+			println();
+			println("Expected: " + expected);
+			println();
+			println("Actual  : " + actual);
+			System.exit(-1);
+		}
+	}
+
+	private Collection<? extends Variable> getSimplexVariables_DEBUG() {
+		List<Variable> simplexVariables = list();
+		if (getBase().hasMadeSubsYet()) {
+			getSubs().stream().forEach(s -> simplexVariables.addAll(((AnytimeExactBP<SubRootType, RootType>) s).getSimplexVariables_DEBUG()));
+		}
+		else if (getBase().getRoot() instanceof Variable) {
+			simplexVariables.add((Variable) getBase().getRoot());
+		}
+		else {
+			simplexVariables.add((Variable) getBase().getParentNode().getRoot());
+		}
+		return simplexVariables;
+	}
+
 }

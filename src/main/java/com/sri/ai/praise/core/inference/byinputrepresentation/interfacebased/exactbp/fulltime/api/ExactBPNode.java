@@ -46,11 +46,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputation;
 import com.sri.ai.util.livesets.api.LiveSet;
-import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
 
 public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Factor> {
 	
 	SubRootType getParent();
+	
+	ExactBPNode<SubRootType, RootType> getParentNode();
 
 	RootType getRoot();
 	
@@ -65,7 +66,7 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	 * Given the variables in the summand (the product of incoming messages and factor at root),
 	 * returns the variables that must be summed out at the root level.
 	 */
-	List<? extends Variable> variablesToBeSummedOut(Collection<? extends Variable> allVariablesInSummand);
+	List<? extends Variable> variablesToBeSummedOutAmong(Collection<? extends Variable> allVariablesInSummand);
 	
 	/**
 	 * Indicates whether a variable is free according to this node (that is, this node's result may depend on an external assignment to it),
@@ -73,23 +74,34 @@ public interface ExactBPNode<RootType,SubRootType> extends TreeComputation<Facto
 	 */
 	boolean isFreeVariable(Variable variable);
 	
-	RedirectingLiveSet<Factor> getIncludedFactors();
-
 	LiveSet<Factor> getExcludedFactors();
+
+	/**
+	 * Returns an iterator ranging over factors appearing in this node's branch.
+	 */
+	Iterator<? extends Factor> getIncludedFactors();
 
 	/**
 	 * The factors residing at the root; typically the root itself if it is a factor, and an empty list otherwise.
 	 */
 	List<? extends Factor> getFactorsAtRoot();
 
+	/**
+	 * Returns an iterator ranging over variables appearing in this node's branch.
+	 */
+	Iterator<? extends Variable> getIncludedVariables();
+	
+	/**
+	 * Returns an iterator ranging over variables appearing outside a given sub (even if they appear inside the sub, too).
+	 */
+	Iterator<? extends Variable> getVariablesThatAreRootOfNodesExternalTo(ExactBPNode sub);
+
+	Iterator<? extends Variable> getVariablesThatAreRootOfNodes();
+
 	Factor sumOutWithBookkeeping(List<? extends Variable> variablesToBeSummedOut, Factor factor);
+
+	boolean hasMadeSubsYet();
 
 	@Override
 	ArrayList<ExactBPNode<SubRootType,RootType>> getSubs();
-
-	/////////////////// DEBUGGING FOR NOW
-	
-	Iterator<? extends Factor> getFactorsSoFar();
-
-	Iterator<? extends Variable> getVariablesSoFar();
 }

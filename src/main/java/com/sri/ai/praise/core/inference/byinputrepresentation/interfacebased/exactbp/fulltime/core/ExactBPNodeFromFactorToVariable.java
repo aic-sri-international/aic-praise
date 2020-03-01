@@ -39,6 +39,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 
 import static com.sri.ai.util.Util.collectToArrayList;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.thereExists;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +50,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exa
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.util.base.Equals;
 import com.sri.ai.util.computation.treecomputation.api.TreeComputationEvaluator;
 import com.sri.ai.util.livesets.api.LiveSet;
 import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
@@ -57,33 +59,32 @@ public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,
 	
 	protected ExactBPNodeFromFactorToVariable(
 			Factor root, 
-			Variable parent, 
+			Variable parent,
+			ExactBPNode<Variable, Factor> parentNode,
 			LiveSet<Factor> excludedFactors, 
 			RedirectingLiveSet<Factor> includedFactors, 
 			FactorNetwork model, 
 			Predicate<Variable> isParameterPredicate) {
 		
-		super(root, parent, excludedFactors, includedFactors, model, isParameterPredicate);
+		super(root, parent, parentNode, excludedFactors, includedFactors, model, isParameterPredicate);
 	}
 
 	@Override
 	protected ExactBPNode<Variable,Factor> makeSubExactBP(Variable subRoot, LiveSet<Factor> subExcludedFactors, RedirectingLiveSet<Factor> subIncludedFactors) {
-		return new ExactBPNodeFromVariableToFactor(subRoot, getRoot(), subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
+		return new ExactBPNodeFromVariableToFactor(subRoot, getRoot(), this, subExcludedFactors, subIncludedFactors, factorNetwork, isParameterPredicate);
 	}
 
 	@Override
 	protected ArrayList<? extends Variable> makeSubsRoots() {
-//		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable(n));
-		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! n.equals(parent));
-//		ArrayList<? extends Variable> result2 = collectToArrayList(getRootNeighbors(), n -> ! isFreeVariable(n));
-//		if (!result2.equals(result)) {
-//			println("Exact BP node: " + this);
-//			println("Original subs: " + result);
-//			println("Non-free subs: " + result2);
-//			println("Free variables: " + union(getExcludedFactors().getCurrentElements(), Factor::getVariables));
-//			System.exit(-1);
-//		}
+		ArrayList<? extends Variable> result = collectToArrayList(getRootNeighbors(), n -> ! isAlreadyTheRootOfAnExternalNode(n));
 		return result;
+	}
+	
+	private boolean isAlreadyTheRootOfAnExternalNode(Variable variable) {
+		return 
+				getParentNode() != null
+				&&
+				thereExists(getParentNode().getVariablesThatAreRootOfNodesExternalTo(this), new Equals<>(variable));
 	}
 
 	protected Collection<? extends Variable> getRootNeighbors() {
@@ -104,7 +105,7 @@ public class ExactBPNodeFromFactorToVariable extends AbstractExactBPNode<Factor,
 	public TreeComputationEvaluator<Factor> makeNewEvaluator() {
 		return new LazyExactBPNodeFromFactorToVariableEvaluator(
 				this::getFactorsAtRoot, 
-				this::variablesToBeSummedOut, 
+				this::variablesToBeSummedOutAmong, 
 				(variablesToBeSummedOut, product) -> sumOutWithBookkeeping(variablesToBeSummedOut, product));
 	}
 }
