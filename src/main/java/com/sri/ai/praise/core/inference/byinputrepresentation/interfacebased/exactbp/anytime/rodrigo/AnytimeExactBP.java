@@ -39,7 +39,6 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.getFirst;
@@ -66,7 +65,6 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicP
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Polytopes;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
@@ -230,14 +228,13 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 
 	private void addFactorAtRootPolytope(List<Polytope> polytopesToMultiply) {
-		FunctionConvexHull singletonDefaultFunctionConvexHullAtRoot = getFactorAtRootPolytope();
+		var singletonDefaultFunctionConvexHullAtRoot = getFactorAtRootPolytope();
 		polytopesToMultiply.add(singletonDefaultFunctionConvexHullAtRoot);
 	}
 
 	private FunctionConvexHull getFactorAtRootPolytope() {
-		Factor factorAtRoot = Factor.multiply(getBase().getFactorsAtRoot());
-		FunctionConvexHull singletonDefaultFunctionConvexHullAtRoot = new DefaultFunctionConvexHull(list(), factorAtRoot);
-		return singletonDefaultFunctionConvexHullAtRoot;
+		var factorAtRoot = Factor.multiply(getBase().getFactorsAtRoot());
+		return new DefaultFunctionConvexHull(list(), factorAtRoot);
 	}
 
 	@Override
@@ -245,47 +242,22 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 
 		Polytope polytope = (Polytope) getCurrentApproximation();
 		
-		var indices = union(polytope.getAtomicPolytopes(), a -> a instanceof FunctionConvexHull? ((FunctionConvexHull)a).getIndices() : list());
-		var newlyFreeIndices = collectToList(indices, getBase()::isFreeVariable);
-		
-		Polytope updatedPolytope;
-		
-		if (newlyFreeIndices.isEmpty()) {
-			updatedPolytope = polytope; 
-		}
-		else {
-			// We "unsum" the newly free variables by removing them from indices and re-creating their simplices
-			// This is based on the fact that indices always result from summing out a simplex variable
-			// Also not that summed-out non-simplex variables never become free because they never become externally free.
-			// To see this, consider that at the time of their summing out, they were not simplex variables (or they would have become indices).
-			// They were also not the root variable, or they would be free and therefore not summed out.
-			// If they were neither simplex variables not the root variable, all their factor neighbors were already included in this branch.
-			// Therefore their factor neighbors were not in any other branch.
-			// Since only their neighbor factors have any information about them and were not in external branches, the variable itself
-			// might not appear in an external branch, so it is never made free by expanding them.
-			List<AtomicPolytope> updatedAtomicPolytopes = list();
-			mapIntoList(newlyFreeIndices, i -> new Simplex(i), updatedAtomicPolytopes);
-			mapIntoList(polytope.getAtomicPolytopes(), this::removeNewlyFreeIndices, updatedAtomicPolytopes);
-			updatedPolytope = makePolytopeEquivalentToProductOfAtomicPolytopes(updatedAtomicPolytopes);
+		// We "unsum" the newly free variables by removing them from indices and re-creating their simplices
+		// This is based on the fact that indices always result from summing out a simplex variable
+		// Also note that summed-out non-simplex variables never become free because they never become externally free.
+		// To see this, consider that at the time of their summing out, they were not simplex variables (or they would have become indices).
+		// They were also not the root variable, or they would be free and therefore not summed out.
+		// If they were neither simplex variables not the root variable, all their factor neighbors were already included in this branch.
+		// Therefore their factor neighbors were not in any other branch.
+		// Since only their neighbor factors have any information about them and were not in external branches, the variable itself
+		// might not appear in an external branch, so it is never made free by expanding them.
 
-			if (debug) {
-				println();
-				println("AnytimeExactBP: Updated current approximation for node with root " + getBase().getRoot());
-				println("Indices           :", join(indices));
-				println("Newly free indices:", join(newlyFreeIndices));
-				println("Previous approximation:", polytope);
-				println("Updated  approximation:", updatedPolytope);
-			}
-		}
+		Polytope polytopeAfterReversingSummingOutOfNewlyFreeVariables = polytope.unSumOutSimplexVariables(getBase()::isFreeVariable);
 		
-		setCurrentApproximation(updatedPolytope);
+		setCurrentApproximation(polytopeAfterReversingSummingOutOfNewlyFreeVariables);
 
 	}
 	
-	private AtomicPolytope removeNewlyFreeIndices(AtomicPolytope atomicPolytope) {
-		return Polytopes.removeIndicesSatisfying(atomicPolytope, getBase()::isFreeVariable);
-	}
-
 	@Override
 	public void setCurrentApproximation(Approximation<Factor> newCurrentApproximation) {
 		

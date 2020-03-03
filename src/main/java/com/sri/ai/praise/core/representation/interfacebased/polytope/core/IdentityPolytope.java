@@ -4,9 +4,11 @@ import static java.util.Collections.emptyList;
 
 import java.util.Collection;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.util.Enclosing;
 
 public class IdentityPolytope implements Polytope {
 
@@ -39,6 +41,11 @@ public class IdentityPolytope implements Polytope {
 	@Override
 	public Polytope sumOut(Collection<? extends Variable> eliminated) {
 		return this; // modulo a constant!
+	}
+
+	@Override
+	public Polytope unSumOutSimplexVariables(Predicate<? super Variable> shouldNotHaveBeenSummedOut) {
+		throw new Error(IdentityPolytope.class + " does not support " + (new Enclosing()).methodName());
 	}
 
 	@Override

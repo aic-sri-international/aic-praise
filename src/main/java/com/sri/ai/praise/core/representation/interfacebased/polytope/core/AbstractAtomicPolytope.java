@@ -41,6 +41,8 @@ import static com.sri.ai.util.Util.list;
 
 import java.util.Collection;
 
+import com.google.common.base.Predicate;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
@@ -91,5 +93,9 @@ public abstract class AbstractAtomicPolytope extends AbstractPolytope implements
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
 		return list(this);
 	}
-
+	
+	@Override
+	public Polytope unSumOutSimplexVariables(Predicate<? super Variable> shouldNotHaveBeenSummedOut) {
+		return Polytopes.removeIndicesSatisfying(this, shouldNotHaveBeenSummedOut);
+	}
 }

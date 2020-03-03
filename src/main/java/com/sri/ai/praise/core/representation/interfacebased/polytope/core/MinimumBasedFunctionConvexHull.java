@@ -38,7 +38,9 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
@@ -56,6 +58,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Functio
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.Pair;
 
 /**
  * An implementation of {@link AbstractFunctionConvexHull} that 
@@ -91,53 +94,85 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 	
 	@Override
 	public Polytope simplify() {
-		Collection<? extends Variable> variables = getIndices();
-		var summationCostOfIndices = summationCost(variables);
-		var summationCostOfFreeVariables = summationCost(getFreeVariables());
+		return simplify(this);
+	}
+
+	public static FunctionConvexHull simplify(FunctionConvexHull convexHull) {
+		var summationCostOfIndices = summationCost(convexHull.getIndices());
+		var summationCostOfFreeVariables = summationCost(convexHull.getFreeVariables());
 		if (summationCostOfFreeVariables >= summationCostOfIndices) {
-			return this;
+			return convexHull;
 		}
 		
-		println("\nBefore simplification: " + getFactor().summationCost());
-		println("                indices: " + getIndices());
-		println("         free variables: " + getFreeVariables());
+		println("\nBefore simplification: " + convexHull.getFactor().summationCost());
+		println("                indices: " + convexHull.getIndices());
+		println("         free variables: " + convexHull.getFreeVariables());
 		
-		var result = Timer.getResultAndTime(() -> marginSimplex(normalize(getFreeVariables())));
+		var result = Timer.getResultAndTime(() -> makeMarginSimplex(convexHull.normalize(convexHull.getFreeVariables())));
 		
 		println(  "After  simplification: " + result.first.getFactor().summationCost());
 		println(  "              indices: " + result.first.getIndices());
 		println(  "       free variables: " + result.first.getFreeVariables());
 		
 		return result.first;
-//		List<Variable> freeVariablesBuffer = listFrom(getFreeVariables());
-//		var marginSimplices = mapIntoList(getFreeVariables(), v -> getMarginSimplex(v, freeVariablesBuffer));
-//		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
 	}
 
-	private int summationCost(Collection<? extends Variable> variables) {
+	public static int summationCost(Collection<? extends Variable> variables) {
 		return product(functionIterator(variables, v -> ((TableVariable)v).getCardinality())).intValue();
 	}
 
-	FunctionConvexHull getMarginSimplex(Variable v, List<Variable> freeVariablesBuffer) {
+	public static FunctionConvexHull makeMarginSimplex(FunctionConvexHull normalizedConvexHull) {
+		var indicesAndFactor = makeMarginSimplexIndicesAndFactor(normalizedConvexHull);
+		return normalizedConvexHull.newInstance(indicesAndFactor.first, indicesAndFactor.second);
+	}
+
+	/**
+	 * A even more aggressive relaxation that decouples variables; to try later.
+	 * @param normalizedConvexHull
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private Polytope getDecoupledMarginSimplexProduct(FunctionConvexHull normalizedConvexHull) {
+		List<Variable> freeVariablesBuffer = listFrom(getFreeVariables());
+		var marginSimplices = mapIntoList(getFreeVariables(), v -> getMarginSimplexOnSingleVariable(v, freeVariablesBuffer));
+		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
+	}
+	
+	private FunctionConvexHull getMarginSimplexOnSingleVariable(Variable v, List<Variable> freeVariablesBuffer) {
 
 		freeVariablesBuffer.remove(v);
 
 		var otherFreeVariables = freeVariablesBuffer;
 		var projection = MinimumBasedFunctionConvexHull.this.sumOut(otherFreeVariables); 
 		var normalizedProjection = projection.normalize(list(v));
-		var result = marginSimplex(normalizedProjection);
+		var result = makeMarginSimplex(normalizedProjection);
 
 		freeVariablesBuffer.add(v);
 
 		return result;
 	}
 
-	private FunctionConvexHull marginSimplex(FunctionConvexHull normalizedConvexHull) {
+	/**
+	 * Given a normalized function convex hull, determines the minimum probability
+	 * for each assignment to the free variables
+	 * when ranging over all index assignments,
+	 * and then builds the indices and factor for a new normalized convex hull with one vertex per assignment A to free variables,
+	 * equal to the distribution in which A has its maximum probability and all remaining assignments have their minimum probability.
+	 * The maximum probability of A is determined by <code>1 - sum_{A' != A} min P(A')</code>.
+	 * Because the elements of this new convex hull correspond to assignments to free variables,
+	 * its indices are copies of these free variables.
+	 * These copies are present also in the factor (since it must depend on the indices),
+	 * and are placed in the first half of the list of factor variables.
+	 */
+	public static 
+	Pair<? extends List<? extends Variable>, Factor> 
+	makeMarginSimplexIndicesAndFactor(FunctionConvexHull normalizedConvexHull) {
+		
 		var minima = normalizedConvexHull.getFactor().min(normalizedConvexHull.getIndices());
 		var marginSimplexFactor = marginSimplexFactor(minima);
-		int numberOfMarginSimplexIndices = marginSimplexFactor.getVariables().size()/2;
+		var numberOfMarginSimplexIndices = marginSimplexFactor.getVariables().size()/2;
 		var marginSimplexIndices = marginSimplexFactor.getVariables().subList(0, numberOfMarginSimplexIndices);
-		return MinimumBasedFunctionConvexHull.this.newInstance(marginSimplexIndices, marginSimplexFactor);
+		return pair(marginSimplexIndices, marginSimplexFactor);
 	}
 
 	private static int indexIndex = 0;
@@ -154,7 +189,7 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 	 * @param minima
 	 * @return
 	 */
-	private Factor marginSimplexFactor(Factor minima) {
+	private static Factor marginSimplexFactor(Factor minima) {
 		TableFactor tableFactor = (TableFactor) minima;
 		int numberOfAssignments = tableFactor.numberOfEntries();
 		ArrayList<Double> array = tableFactor.getEntries();

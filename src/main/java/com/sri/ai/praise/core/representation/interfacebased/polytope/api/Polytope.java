@@ -42,6 +42,7 @@ import static com.sri.ai.util.Util.accumulate;
 
 import java.util.Collection;
 
+import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -73,6 +74,21 @@ public interface Polytope extends Approximation<Factor> {
 	}
 
 	Polytope sumOut(Collection<? extends Variable> eliminated);
+	
+	/**
+	 * Returns a polytope <code>p</code> such that <code>this == p.sumOut(simplexVariables)</code>
+	 * where each element of <code>simplexVariables</code> satisfies the given predicate.
+	 * <p>
+	 * Intuitively, this is simply a reversal of summing out simplex polytope-factors in a product polytope,
+	 * and is useful when we need to reverse summation after learning that some of the simplex variables
+	 * were ultimately free variables (the motivating application for this is Anytime Exact Belief Propagation).
+	 * <p>
+	 * This assumes that the polytope implementation keeps somehow the relevant information,
+	 * which may be expensive, and is therefore an optional method.
+	 * @param isSimplexVariabledToBeUnSummedOut
+	 * @return
+	 */
+	Polytope unSumOutSimplexVariables(Predicate<? super Variable> isSimplexVariabledToBeUnSummedOut);
 	
 	/**
 	 * Takes a polytope in which the only free variable is a given variable,
