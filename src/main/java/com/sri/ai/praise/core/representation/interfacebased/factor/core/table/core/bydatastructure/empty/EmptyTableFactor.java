@@ -1,6 +1,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty;
 
 import static com.sri.ai.util.Util.setFrom;
+import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.unorderedEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
@@ -234,10 +240,28 @@ public class EmptyTableFactor extends AbstractTableFactor {
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
 		if (another instanceof EmptyTableFactor) {
-			return setFrom(getVariables()).equals(setFrom(((EmptyTableFactor) another).getVariables()));
+			return unorderedEquals(getVariables(),  another.getVariables());
 		}
 		else {
 			return false;
+		}
+	}
+
+	@Override
+	public FactorsEqualityCheck checkEquality(Factor another) {
+		if (another instanceof EmptyTableFactor) {
+			if (unorderedEquals(getVariables(),  another.getVariables())) {
+				return new DefaultFactorsAreEqual<>(this, another);
+			}
+			else {
+				var variablesInFirstButNotInSecond = setFrom(subtract(getVariables(), another.getVariables()));
+				var variablesInSecondButNotInFirst = setFrom(subtract(another.getVariables(), getVariables()));
+				return new DefaultFactorsHaveDifferentVariables<>(
+						this, another, variablesInFirstButNotInSecond, variablesInSecondButNotInFirst);
+			}
+		}
+		else {
+			return new DefaultFactorsAreOfIncomparableClasses<>(this, another);
 		}
 	}
 	

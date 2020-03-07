@@ -22,6 +22,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Functio
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -358,8 +359,8 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	}
 
 	@Override
-	public void updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself() {
-		throw new Error("updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself not implemented for " + getClass());
+	public Polytope computeUpdatedCurrentApproximationGivenThatExternalContextHasChangedWithoutIteratingItself() {
+		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
 	}
 
 	

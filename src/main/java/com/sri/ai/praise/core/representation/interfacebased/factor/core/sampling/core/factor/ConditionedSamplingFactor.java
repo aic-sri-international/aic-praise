@@ -15,6 +15,7 @@ import java.util.Set;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingGoal;
@@ -22,6 +23,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.DefaultSamplingRuleSet;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.SamplingRule;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.schedule.goal.VariableIsDefinedGoal;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Util;
 
 /**
@@ -186,6 +188,11 @@ public class ConditionedSamplingFactor extends AbstractConditionedFactor impleme
 
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
-		throw new Error("mathematicallyEquals not supported for " + ConditionedSamplingFactor.class);
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+	}
+	
+	@Override
+	public FactorsEqualityCheck checkEquality(Factor another) {
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
 	}
 }

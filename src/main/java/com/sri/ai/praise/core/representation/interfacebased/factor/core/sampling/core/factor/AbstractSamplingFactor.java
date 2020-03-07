@@ -11,9 +11,11 @@ import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.schedule.SamplingRuleSet;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
 /**
@@ -181,6 +183,11 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
-		throw new Error("mathematicallyEquals not supported for " + AbstractSamplingFactor.class);
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+	}
+	
+	@Override
+	public FactorsEqualityCheck checkEquality(Factor another) {
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
 	}
 }

@@ -71,7 +71,7 @@ import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
-import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputation;
+import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputationWithLossySimplification;
 
 /**
  * An anytime version of {@link ExactBPNode} algorithms.
@@ -85,9 +85,9 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  * @author braz
  *
  */
-public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputation<Factor> {
+public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputationWithLossySimplification<Factor> {
 	
-	private static final boolean debug = false;
+	public static final boolean debug = false;
 
 	///////////////// DATA MEMBERS
 	
@@ -148,7 +148,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 
 	@Override
-	protected Anytime<Factor> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
+	protected AnytimeExactBP<SubRootType,RootType> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
 		@SuppressWarnings("unchecked")
 		var baseExactBP = (ExactBPNode<SubRootType, RootType>) baseSub;
 		return new AnytimeExactBP<SubRootType,RootType>(baseExactBP);
@@ -167,7 +167,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 	
 	@Override
-	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
+	public Approximation<Factor> functionWithoutSimplification(List<Approximation<Factor>> subsApproximations) {
 		
 		var productPolytope = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		var summandVariables = productPolytope.getFreeVariables();
@@ -177,6 +177,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		
 		if (debug) {
 			println("\nAnytimeExactBP:");
+			println("Root: " + getBase().getRoot());
 			println("Subs roots:\n" + join("\n", mapIntoList(getSubs(), sub -> sub.getBase().getRoot())));
 			println("\nSubs approximations:\n" + join("\n", mapIntoList(getSubs(), sub -> sub.getCurrentApproximation())));
 			println("Summand (product of all factors):", productPolytope);
@@ -188,7 +189,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 			Variable indexThatShouldBeFreeInPolytope = violatingIndex_DEBUG(result);
 
 			if (indexThatShouldBeFreeInPolytope != null) {
-				println("AnytimeExactBP: found index that is free variable but is in polytope's index: " + indexThatShouldBeFreeInPolytope);
+				println("AnytimeExactBP: found assignment that is free variable but is in polytope's assignment: " + indexThatShouldBeFreeInPolytope);
 				println("Polytope: "  + result);
 				System.exit(-1);
 			}
@@ -205,7 +206,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		if (debug) {
 			var indexThatShouldBeFree = violatingIndex_DEBUG(subCurrentApproximation);
 			if (indexThatShouldBeFree != null) {
-				println("AnytimeExactBP.getCurrentApproximationForSub: found index that is free variable but is in sub's result's index: " + indexThatShouldBeFree);
+				println("AnytimeExactBP.getCurrentApproximationForSub: found assignment that is free variable but is in sub's result's assignment: " + indexThatShouldBeFree);
 				println("Sub: " + sub);
 				println("Sub's result: "  + subCurrentApproximation);
 				System.exit(-1);
@@ -238,9 +239,16 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 
 	@Override
-	public void updateCurrentApproximationGivenThatExternalContextHasChangedButWithoutIteratingItself() {
+	protected Approximation<Factor> simplify(Approximation<Factor> approximation) {
+		return approximation;
+	}
 
-		Polytope polytope = (Polytope) getCurrentApproximation();
+	@Override
+	protected 
+	Approximation<Factor> 
+	computeUpdatedApproximationGivenThatExternalContextHasChangedByItself(Approximation<Factor> currentApproximation) {
+		
+		Polytope polytope = (Polytope) currentApproximation;
 		
 		// We "unsum" the newly free variables by removing them from indices and re-creating their simplices
 		// This is based on the fact that indices always result from summing out a simplex variable
@@ -253,9 +261,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		// might not appear in an external branch, so it is never made free by expanding them.
 
 		Polytope polytopeAfterReversingSummingOutOfNewlyFreeVariables = polytope.unSumOutSimplexVariables(getBase()::isFreeVariable);
-		
-		setCurrentApproximation(polytopeAfterReversingSummingOutOfNewlyFreeVariables);
-
+		return polytopeAfterReversingSummingOutOfNewlyFreeVariables;
 	}
 	
 	@Override

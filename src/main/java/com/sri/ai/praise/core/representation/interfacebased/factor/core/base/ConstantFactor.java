@@ -16,6 +16,10 @@ import com.sri.ai.grinder.library.number.Plus;
 import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
@@ -271,6 +275,24 @@ public class ConstantFactor implements Factor {
 		}
 		else {
 			return false;
+		}
+	}
+	
+	@Override
+	public FactorsEqualityCheck<Factor> checkEquality(Factor another) {
+		if (another instanceof ConstantFactor) {
+			double anotherConstant = ((ConstantFactor) another).constant;
+			boolean equals = constant.equals(anotherConstant);
+			if (equals) {
+				return new DefaultFactorsAreEqual<>(this, another);
+			}
+			else {
+				var violatingAssignment = list();
+				return new DefaultFactorsHaveDifferentValues<>(this, another, violatingAssignment, constant, anotherConstant);
+			}
+		}
+		else {
+			return new DefaultFactorsAreOfIncomparableClasses<>(this, another);
 		}
 	}
 }

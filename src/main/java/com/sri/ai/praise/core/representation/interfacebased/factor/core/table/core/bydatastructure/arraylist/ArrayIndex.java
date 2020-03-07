@@ -67,10 +67,22 @@ public class ArrayIndex {
 		return canMoveUp == -1;
 	}
 	
+	/**
+	 * An array with the currently assigned values to each of the given variables in the order their cardinalities were provided.
+	 * @return
+	 */
 	public int[] index() {
 		return index;
 	}
 	
+	/**
+	 * The offset (position in the one-dimensional array) contributed by the current assignment.
+	 * If the array has variables other than the ones provided for this {@link ArrayIndex}, this offset is the contribution
+	 * by this variables to the overall offset, which can be computed by summing this offset with the offset contributed by
+	 * an index of the other variables.
+	 * This offset can also be seen as the position for the element in which all other variables (not kept by this {@link ArrayIndex}
+	 * have assignment 0.
+	 */
 	public int offset() {
 		return offset;
 	}

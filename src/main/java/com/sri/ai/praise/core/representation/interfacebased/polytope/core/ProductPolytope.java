@@ -39,10 +39,8 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.Polytopes.removeIndicesSatisfying;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
-import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
@@ -51,7 +49,6 @@ import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
-import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.Util.unionOfCollections;
 
 import java.util.Arrays;
@@ -400,26 +397,6 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 //		println("result                   : " + result);
 		
 		return result;
-	}
-
-	@Override
-	public Polytope unSumOutSimplexVariables(Predicate<? super Variable> shouldNotHaveBeenSummedOut) {
-		
-		var indices = union(getAtomicPolytopes(), a -> a instanceof FunctionConvexHull? ((FunctionConvexHull)a).getIndices() : list());
-		var newlyFreeIndices = collectToList(indices, shouldNotHaveBeenSummedOut);
-		
-		Polytope updatedPolytope;
-		
-		if (newlyFreeIndices.isEmpty()) {
-			updatedPolytope = this; 
-		}
-		else {
-			List<AtomicPolytope> updatedAtomicPolytopes = list();
-			mapIntoList(newlyFreeIndices, i -> new Simplex(i), updatedAtomicPolytopes);
-			mapIntoList(getAtomicPolytopes(), a -> removeIndicesSatisfying(a, shouldNotHaveBeenSummedOut), updatedAtomicPolytopes);
-			updatedPolytope = makePolytopeEquivalentToProductOfAtomicPolytopes(updatedAtomicPolytopes);
-		}
-		return updatedPolytope;
 	}
 
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE

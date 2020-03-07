@@ -15,6 +15,10 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 
 public class Polytopes {
 
+	/**
+	 * Applies a function to the atomic polytopes of a polytope, and return a polytope equivalent to the product of the results,
+	 * guaranteeing to return the same instance of the original polytope if the function does not change any of its atomic polytopes.
+	 */
 	public static Polytope mapAtomicPolytopes(Polytope polytope, Function<? super AtomicPolytope, ? extends AtomicPolytope> function) {
 		var updatedAtomicPolytopesAndChange = mapIntoListAndTellIfThereWasChange(polytope.getAtomicPolytopes(), function);
 		var mappedAtomicPolytopes = updatedAtomicPolytopesAndChange.first;

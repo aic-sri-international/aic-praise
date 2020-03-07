@@ -1,16 +1,21 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual.factorsAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues.factorsHaveDifferentValues;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
-import static com.sri.ai.util.Util.ratioisInOnePlusOrMinusEpsilon;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.ratioisInOnePlusOrMinusEpsilon;
 import static com.sri.ai.util.Util.setDifference;
+import static com.sri.ai.util.Util.setFrom;
+import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.toIntArray;
 import static com.sri.ai.util.Util.unorderedEquals;
 
@@ -29,12 +34,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.primitives.Ints;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.collect.CartesianProductIterator;
 import com.sri.ai.util.collect.IntegerIterator;
 import com.sri.ai.util.math.MixedRadixNumber;
@@ -669,8 +678,8 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	// MATHEMATICALLY EQUALS ////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final double MATHEMATICALLY_EQUALS_EPSILON = 0.0001;
-
+	public static final double MATHEMATICALLY_EQUALS_RATIO_EPSILON = 0.0001;
+	
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
 		if (another instanceof ArrayTableFactor) {
@@ -695,19 +704,30 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 
 	private boolean mathematicallyEqualsAnotherArrayTableFactorWithTheSameVariables(ArrayTableFactor anotherArrayTableFactor) {
-		ArrayIndex index1 = makeArrayIndex(getVariables(), this);
-		ArrayIndex index2 = makeArrayIndex(getVariables(), anotherArrayTableFactor);
-		// note that we use the getVariables() for both to use the same assignment order.
-		
-		boolean equalSoFar = true;
-		do {
-			equalSoFar = equalSoFar && nextPositionsAreEqual(this, index1, anotherArrayTableFactor, index2);
-			index2.incrementIfPossible();
-		} while (equalSoFar && index1.incrementIfPossible());
-		
-		return equalSoFar;
+		return findEqualityViolatingPairOfArrayIndicesOrderedByVariablesOfThis(anotherArrayTableFactor) == null;
 	}
 
+	/**
+	 * Returns null if other array table factor is the same up to a ratio, or
+	 * a pair of array indices (with indices ordered according to <code>this.getVariables()</code> for which there is a difference.
+	 */
+	private Pair<ArrayIndex, ArrayIndex> findEqualityViolatingPairOfArrayIndicesOrderedByVariablesOfThis(ArrayTableFactor anotherArrayTableFactor) {
+		ArrayIndex index1 = makeArrayIndex(getVariables(), this);
+		ArrayIndex index2 = makeArrayIndex(getVariables(), anotherArrayTableFactor);
+		// note that we use the getVariables() for both so that they go over the same assignment order.
+		
+		do {
+			if (!nextPositionsAreEqual(this, index1, anotherArrayTableFactor, index2)) {
+				return pair(index1, index2);
+				// note that we must immediately either break or return when finding violating pair (as opposing to setting a flag to be checked in 'while' condition),
+				// or otherwise index2 would move on from violating position
+			}
+			index2.incrementIfPossible();
+		} while (index1.incrementIfPossible());
+		
+		return null;
+	}
+	
 	private static boolean nextPositionsAreEqual(
 			ArrayTableFactor arrayTableFactor1,
 			ArrayIndex index1,
@@ -720,7 +740,49 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 
 	private static boolean compare(double value1, double value2) {
-		return ratioisInOnePlusOrMinusEpsilon(value1, value2, MATHEMATICALLY_EQUALS_EPSILON);
+		return ratioisInOnePlusOrMinusEpsilon(value1, value2, MATHEMATICALLY_EQUALS_RATIO_EPSILON);
+	}
+
+	@Override
+	public FactorsEqualityCheck checkEquality(Factor another) {
+		if (another instanceof ArrayTableFactor) {
+			return checkEqualityAgainstAnotherArrayTableFactor((ArrayTableFactor) another);
+		}
+		else {
+			return new DefaultFactorsAreOfIncomparableClasses<>(this, another);
+		}
+	}
+
+	private FactorsEqualityCheck checkEqualityAgainstAnotherArrayTableFactor(ArrayTableFactor anotherArrayTableFactor) {
+		if (haveSameVariables(anotherArrayTableFactor)) {
+			return checkEqualityAgainstAnotherArrayTableFactorWithTheSameVariables(anotherArrayTableFactor);
+		}
+		else {
+			var variablesInFirstButNotInSecond = setFrom(subtract(getVariables(), anotherArrayTableFactor.getVariables()));
+			var variablesInSecondButNotInFirst = setFrom(subtract(anotherArrayTableFactor.getVariables(), getVariables()));
+			return new DefaultFactorsHaveDifferentVariables<>(
+					this, anotherArrayTableFactor, variablesInFirstButNotInSecond, variablesInSecondButNotInFirst);
+		}
+	}
+
+	private FactorsEqualityCheck checkEqualityAgainstAnotherArrayTableFactorWithTheSameVariables(
+			ArrayTableFactor anotherArrayTableFactor) {
+		
+		var violatingPair = findEqualityViolatingPairOfArrayIndicesOrderedByVariablesOfThis(anotherArrayTableFactor);
+		
+		if (violatingPair != null) {
+			var violatingAssignment = listFrom(violatingPair.first.index());
+			var valueInFirst = get(violatingPair.first.offset());
+			var valueInSecond = anotherArrayTableFactor.get(violatingPair.second.offset());
+			return 
+					factorsHaveDifferentValues(
+							this, anotherArrayTableFactor, 
+							violatingAssignment, 
+							valueInFirst, valueInSecond);
+		}
+		else {
+			return factorsAreEqual(this, anotherArrayTableFactor);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

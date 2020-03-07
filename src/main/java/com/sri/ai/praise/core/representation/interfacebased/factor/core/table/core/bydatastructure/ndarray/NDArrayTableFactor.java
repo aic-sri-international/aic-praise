@@ -24,9 +24,11 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Util;
 
 /**
@@ -70,6 +72,10 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	}
 	
 	public NDArrayTableFactor(Collection<? extends TableVariable> variables, ArrayList<Double> parameters) {
+		this("phi", variables, parameters);
+	}
+	
+	public NDArrayTableFactor(Collection<? extends TableVariable> variables, double[] parameters) {
 		this("phi", variables, parameters);
 	}
 	
@@ -355,6 +361,11 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
-		throw new Error("mathematicallyEquals not supported for " + NDArrayTableFactor.class);
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+	}
+	
+	@Override
+	public FactorsEqualityCheck checkEquality(Factor another) {
+		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
 	}
 }

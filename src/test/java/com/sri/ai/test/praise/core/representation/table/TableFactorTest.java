@@ -1,9 +1,14 @@
 package com.sri.ai.test.praise.core.representation.table;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual.factorsAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses.factorsAreOfIncomparableClasses;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues.factorsHaveDifferentValues;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables.factorsHaveDifferentVariables;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.print;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -13,9 +18,11 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.ndarray.NDArrayTableFactor;
 import com.sri.ai.util.Util;
 
 /**
@@ -458,9 +465,14 @@ public class TableFactorTest {
 	
 	@Test
 	public void testMathematicallyEquivalent() {
+		
 		TableVariable x = new TableVariable("x", 2);
 		TableVariable y = new TableVariable("y", 2);
 		TableVariable z = new TableVariable("z", 2);
+		
+		TableVariable u = new TableVariable("u", 1);
+		TableVariable v = new TableVariable("v", 2);
+		TableVariable w = new TableVariable("w", 3);
 		
 		ArrayTableFactor f1;
 		ArrayTableFactor f2;
@@ -485,6 +497,22 @@ public class TableFactorTest {
 		f2 = new ArrayTableFactor(list(y,x), new double[] {1, 3, 2, 4});
 		assertTrue(f1.mathematicallyEquals(f2));
 		
+		f1 = new ArrayTableFactor(list(x,y,z), new double[] {1, 2, 3, 4, 5, 6, 7, 8});
+		f2 = new ArrayTableFactor(list(z,y,x), new double[] {1, 5, 3, 7, 2, 6, 4, 8});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y,z), new double[] {1, 2, 3, 4, 5, 6, 7, 8});
+		f2 = new ArrayTableFactor(list(z,x,y), new double[] {1, 3, 5, 7, 2, 4, 6, 8});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(u,v,w), new double[] {1, 2, 3, 4, 5, 6});
+		f2 = new ArrayTableFactor(list(w,u,v), new double[] {1, 4, 2, 5, 3, 6});
+		assertTrue(f1.mathematicallyEquals(f2));
+		
+		f1 = new ArrayTableFactor(list(u,v,w), new double[] {1, 2, 3, 4, 5, 6});
+		f2 = new ArrayTableFactor(list(w,u,v), new double[] {1, 4, 2000, 5, 3, 6});
+		assertFalse(f1.mathematicallyEquals(f2));
+
 		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
 		f2 = new ArrayTableFactor(list(y,x), new double[] {1000, 3, 2, 4});
 		assertFalse(f1.mathematicallyEquals(f2));
@@ -494,6 +522,82 @@ public class TableFactorTest {
 		assertFalse(f1.mathematicallyEquals(f2));
 	}
 
+	
+	@Test
+	public void testCheckEquality() {
+		
+		TableVariable x = new TableVariable("x", 2);
+		TableVariable y = new TableVariable("y", 2);
+		TableVariable z = new TableVariable("z", 2);
+		
+		TableVariable u = new TableVariable("u", 1);
+		TableVariable v = new TableVariable("v", 2);
+		TableVariable w = new TableVariable("w", 3);
+		
+		Factor f1;
+		Factor f2;
+		
+		f1 = new ArrayTableFactor(list(), new double[] {1});
+		f2 = new ArrayTableFactor(list(), new double[] {1});
+		assertEquals(factorsAreEqual(f1, f2), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(), new double[] {1});
+		f2 = new NDArrayTableFactor(list(), new double[] {1});
+		assertEquals(factorsAreOfIncomparableClasses(f1, f2), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(), new double[] {1});
+		f2 = new ArrayTableFactor(list(x), new double[] {1, 2});
+		assertEquals(factorsHaveDifferentVariables(f1, f2, set(), set(x)), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,z), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,z), new double[] {1, 2, 3, 4});
+		assertEquals(factorsHaveDifferentVariables(f1, f2, set(x), set(y)), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x), new double[] {1, 2});
+		f2 = new ArrayTableFactor(list(), new double[] {1});
+		assertEquals(factorsHaveDifferentVariables(f1, f2, set(x), set()), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		assertEquals(factorsAreEqual(f1, f2), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x), new double[] {1, 3, 2, 4});
+		assertEquals(factorsAreEqual(f1, f2), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x), new double[] {1000, 3, 2, 4});
+		assertEquals(factorsHaveDifferentValues(f1, f2, list(0,0), 1, 1000), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3000, 4});
+		f2 = new ArrayTableFactor(list(y,x), new double[] {1, 3, 2, 4});
+		assertEquals(factorsHaveDifferentValues(f1, f2, list(1,0), 3000, 3), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y,z), new double[] {1, 2, 3, 4, 5, 6, 7, 8});
+		f2 = new ArrayTableFactor(list(z,y,x), new double[] {1, 5, 3, 7000, 2, 6, 4, 8});
+		assertEquals(factorsHaveDifferentValues(f1, f2, list(1,1,0), 7, 7000), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y,z), new double[] {1, 2, 3, 4, 5, 6, 7, 8});
+		f2 = new ArrayTableFactor(list(z,x,y), new double[] {1, 3, 5000, 7, 2, 4, 6, 8});
+		assertEquals(factorsHaveDifferentValues(f1, f2, list(1,0,0), 5, 5000), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(u,v,w), new double[] {1, 2, 3, 4, 5, 6});
+		f2 = new ArrayTableFactor(list(w,u,v), new double[] {1, 4, 2, 5, 3, 6});
+		assertEquals(factorsAreEqual(f1, f2), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(u,v,w), new double[] {1, 2, 3, 4, 5, 6});
+		f2 = new ArrayTableFactor(list(w,u,v), new double[] {1, 4, 2, 5000, 3, 6});
+		assertEquals(factorsHaveDifferentValues(f1, f2, list(0,1,1), 5, 5000), f1.checkEquality(f2));
+		
+		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
+		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4});
+		assertEquals(factorsHaveDifferentVariables(f1, f2, set(), set(z)), f1.checkEquality(f2));
+
+		f1 = new ArrayTableFactor(list(x), new double[] {1, 2});
+		f2 = new ArrayTableFactor(list(), new double[] {1});
+		assertEquals(factorsHaveDifferentVariables(f1, f2, set(x), set()), f1.checkEquality(f2));
+		
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }

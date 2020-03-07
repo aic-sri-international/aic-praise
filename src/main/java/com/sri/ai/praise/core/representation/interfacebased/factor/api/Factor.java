@@ -45,6 +45,7 @@ import static com.sri.ai.util.Util.list;
 import java.util.Collection;
 import java.util.List;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
 import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
@@ -117,4 +118,6 @@ public interface Factor {
 	void setExplanation(ExplanationTree explanation);
 	
 	boolean mathematicallyEquals(Factor another);
+	
+	FactorsEqualityCheck checkEquality(Factor another);
 }
