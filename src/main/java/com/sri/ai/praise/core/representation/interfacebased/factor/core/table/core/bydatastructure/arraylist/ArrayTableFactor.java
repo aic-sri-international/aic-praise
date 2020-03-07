@@ -1,7 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual.factorsAreEqual;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues.factorsHaveDifferentValues;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentValues;
 import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.in;

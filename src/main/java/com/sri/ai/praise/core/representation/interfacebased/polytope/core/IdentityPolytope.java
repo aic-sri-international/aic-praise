@@ -54,7 +54,7 @@ public class IdentityPolytope implements Polytope {
 	}
 
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
+	public boolean equalsModuloPermutations(Object another) {
 		return another instanceof IdentityPolytope;
 	}
 

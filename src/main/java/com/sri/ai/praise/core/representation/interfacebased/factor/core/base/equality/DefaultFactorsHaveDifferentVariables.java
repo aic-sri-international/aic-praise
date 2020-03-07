@@ -10,10 +10,6 @@ public class DefaultFactorsHaveDifferentVariables<F>
 extends AbstractFactorsEqualityCheck<F>
 implements FactorsHaveDifferentVariables<F> {
 	
-	public static <F> DefaultFactorsHaveDifferentVariables factorsHaveDifferentVariables(F first, F second, Set<? extends Variable> variablesInFirstButNotInSecond, Set<? extends Variable> variablesInSecondButNotInFirst) {
-		return new DefaultFactorsHaveDifferentVariables<>(first, second, variablesInFirstButNotInSecond, variablesInSecondButNotInFirst);
-	}
-
 	private Set<? extends Variable> variablesInFirstButNotInSecond;
 	private Set<? extends Variable> variablesInSecondButNotInFirst;
 

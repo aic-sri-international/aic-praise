@@ -6,10 +6,6 @@ public class DefaultFactorsAreOfIncomparableClasses<F>
 extends AbstractFactorsEqualityCheck<F>
 implements FactorsAreOfIncomparableClasses<F> {
 
-	public static <F> DefaultFactorsAreOfIncomparableClasses<F> factorsAreOfIncomparableClasses(F first, F second) {
-		return new DefaultFactorsAreOfIncomparableClasses<F>(first, second);
-	}
-
 	public DefaultFactorsAreOfIncomparableClasses(F first, F second) {
 		super(first, second);
 	}

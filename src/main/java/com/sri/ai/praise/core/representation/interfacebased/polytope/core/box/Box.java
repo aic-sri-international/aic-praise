@@ -20,8 +20,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.CartesianProductIterator;
@@ -190,8 +190,8 @@ public class Box extends AbstractFunctionConvexHull {
 	}
 
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
-		throw new Error("mathematicallyEquals not implemented for " + Box.class);
+	public boolean equalsModuloPermutations(Object another) {
+		throw new Error((new Enclosing()).methodName() + "mathematicallyEquals not implemented for " + Box.class);
 	}
 
 	/*public Box(Factor phiMin, Factor phiMax, BoxFactorFactory factory) {

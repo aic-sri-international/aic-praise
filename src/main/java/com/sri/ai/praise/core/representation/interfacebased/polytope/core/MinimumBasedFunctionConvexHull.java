@@ -56,6 +56,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
@@ -211,8 +212,8 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 	}
 	
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
-		throw new Error("mathematicallyEquals not implemented for " + MinimumBasedFunctionConvexHull.class);
+	public boolean equalsModuloPermutations(Object another) {
+		throw new Error((new Enclosing()).methodName() + " not implemented for " + MinimumBasedFunctionConvexHull.class);
 	}
 
 }

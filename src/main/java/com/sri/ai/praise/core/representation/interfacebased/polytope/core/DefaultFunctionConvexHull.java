@@ -42,7 +42,6 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.Util;
 
 /**
@@ -68,7 +67,7 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 	}
 
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
+	public boolean equalsModuloPermutations(Object another) {
 		if (another instanceof FunctionConvexHull) {
 			return mathematicallyEqualsToAnotherFunctionConvexHull((FunctionConvexHull) another);
 		}

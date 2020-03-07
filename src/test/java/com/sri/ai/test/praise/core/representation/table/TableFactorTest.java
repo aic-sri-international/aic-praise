@@ -1,9 +1,9 @@
 package com.sri.ai.test.praise.core.representation.table;
 
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual.factorsAreEqual;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses.factorsAreOfIncomparableClasses;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues.factorsHaveDifferentValues;
-import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables.factorsHaveDifferentVariables;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreOfIncomparableClasses;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentValues;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentVariables;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.print;

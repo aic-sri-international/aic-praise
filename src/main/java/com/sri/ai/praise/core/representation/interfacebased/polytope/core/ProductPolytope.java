@@ -474,23 +474,31 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	}
 
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
+	public boolean equalsModuloPermutations(Object another) {
 		
-		List<AtomicPolytope> simplices1 = list();
-		List<AtomicPolytope> hulls1 = list();
-		collect(getAtomicPolytopes(), a -> a instanceof Simplex, simplices1, hulls1);
+		if (another instanceof Polytope) {
+			
+			Polytope anotherPolytope = (Polytope) another;
 
-		List<AtomicPolytope> simplices2 = list();
-		List<AtomicPolytope> hulls2 = list();
-		collect(another.getAtomicPolytopes(), a -> a instanceof Simplex, simplices2, hulls2);
+			List<AtomicPolytope> simplices1 = list();
+			List<AtomicPolytope> hulls1 = list();
+			collect(getAtomicPolytopes(), a -> a instanceof Simplex, simplices1, hulls1);
 
-		var simplexVariables1 = mapIntoSet(simplices1, a -> ((Simplex)a).getVariable());
-		var simplexVariables2 = mapIntoSet(simplices2, a -> ((Simplex)a).getVariable());
-		
-		var simplicesAreEqual = simplexVariables1.equals(simplexVariables2);
-		
-		if (simplicesAreEqual) {
-			return Util.thereIsAOneToOneMatching(hulls1, hulls2, Polytope::equalsModuloPermutations);
+			List<AtomicPolytope> simplices2 = list();
+			List<AtomicPolytope> hulls2 = list();
+			collect(anotherPolytope.getAtomicPolytopes(), a -> a instanceof Simplex, simplices2, hulls2);
+
+			var simplexVariables1 = mapIntoSet(simplices1, a -> ((Simplex)a).getVariable());
+			var simplexVariables2 = mapIntoSet(simplices2, a -> ((Simplex)a).getVariable());
+
+			var simplicesAreEqual = simplexVariables1.equals(simplexVariables2);
+
+			if (simplicesAreEqual) {
+				return Util.thereIsAOneToOneMatching(hulls1, hulls2, Polytope::equalsModuloPermutations);
+			}
+			else {
+				return false;
+			}
 		}
 		else {
 			return false;

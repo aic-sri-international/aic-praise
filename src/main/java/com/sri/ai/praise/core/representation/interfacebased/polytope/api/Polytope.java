@@ -100,5 +100,5 @@ public interface Polytope extends Approximation<Factor> {
 	/**
 	 * Decides whether this polytope is equal to another one minus permutations in indices, variables, and multiplication factors.
 	 */
-	boolean equalsModuloPermutations(Polytope another);
+	boolean equalsModuloPermutations(Object another);
 }

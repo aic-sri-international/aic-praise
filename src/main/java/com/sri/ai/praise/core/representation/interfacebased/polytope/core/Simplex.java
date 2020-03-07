@@ -133,7 +133,7 @@ public class Simplex extends AbstractAtomicPolytope {
 	}
 
 	@Override
-	public boolean equalsModuloPermutations(Polytope another) {
+	public boolean equalsModuloPermutations(Object another) {
 		return 
 				another instanceof Simplex 
 				&& 

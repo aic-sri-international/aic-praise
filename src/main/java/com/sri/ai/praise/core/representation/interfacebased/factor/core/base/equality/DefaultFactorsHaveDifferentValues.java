@@ -8,15 +8,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.
 
 public class DefaultFactorsHaveDifferentValues<F extends Factor, V> extends AbstractFactorsAreDifferent<F> implements FactorsHaveDifferentValues<F, V> {
 
-	public static <F extends Factor, V> DefaultFactorsHaveDifferentValues<F, V> factorsHaveDifferentValues(
-			F first, 
-			F second, 
-			List<? extends V> violatingAssignment,
-			double valueOfFirst,
-			double valueOfSecond) {
-		return new DefaultFactorsHaveDifferentValues<F,V>(first, second, violatingAssignment, valueOfFirst, valueOfSecond);
-	}
-	
 	private List<? extends V> violatingAssignment;
 	private double valueOfFirst;
 	private double valueOfSecond;
