@@ -307,11 +307,14 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		var simplexVariable = (Variable) (rootIsVariable? getBase().getRoot() : getBase().getParent());
 		Simplex expected = new Simplex(simplexVariable);
 
-		if (! expected.equalsModuloPermutations(actual)) {
+		var equalityCheck = expected.checkEquality(actual);
+		
+		if (! equalityCheck.areEqual()) {
 			println();
 			println("Discrepancy in expected simplex and actual computation");
 			println("Expected: " + expected);
 			println("Actual  : " + actual);
+			println("Equality check: " + equalityCheck);
 			System.exit(-1);
 		}
 	}
@@ -343,9 +346,11 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 		var actualSingleConvexHull = multiplyIntoSingleFunctionConvexHullWithoutSimplifying(actualConvexHulls);
 		@SuppressWarnings("unchecked")
 		List<AtomicPolytope> actualMultiplicands = listFrom(new NestedIterator(actualSimplices, actualSingleConvexHull));
-		actual = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(actualMultiplicands);
+		var atomicActual = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(actualMultiplicands);
 		
-		if (! expected.equalsModuloPermutations(actual)) {
+		var equalityCheck = expected.checkEquality(atomicActual);
+		
+		if (! equalityCheck.areEqual()) {
 			println();
 			println("Discrepancy in expected polytope and actual computation");
 			println("root: " + getBase().getRoot());
@@ -360,9 +365,11 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 			println("Summed out simplex variables (to make into indices)     : " + join(", ", sortByString(summedOutSimplexVariables)));
 			println("Summed out non-simplex variables (to remove from factor): " + join(", ", sortByString(summedOutNonSimplexVariables)));
 			println();
-			println("Expected: " + expected);
+			println("Expected       : " + expected);
 			println();
-			println("Actual  : " + actual);
+			println("Atomic actual  : " + atomicActual);
+			println();
+			println("Equality check: " + equalityCheck);
 			System.exit(-1);
 		}
 	}
