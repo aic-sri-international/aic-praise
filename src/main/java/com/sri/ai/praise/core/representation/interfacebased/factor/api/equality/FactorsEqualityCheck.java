@@ -41,6 +41,5 @@ public interface FactorsEqualityCheck<F> {
 		
 		return new DefaultFactorsHaveDifferentValues<F,V>(first, second, violatingAssignment, valueOfFirst, valueOfSecond);
 	}
-	
-	
+
 }

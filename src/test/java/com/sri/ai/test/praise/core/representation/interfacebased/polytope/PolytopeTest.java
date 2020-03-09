@@ -38,10 +38,19 @@
 package com.sri.ai.test.praise.core.representation.interfacebased.polytope;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentValues;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope.multiply;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.firstPolytopeHasFunctionConvexHullWithoutMatchInSecond;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentFactors;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentIndices;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesHaveADifferentNumberOfFunctionConvexHulls;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesHaveDifferentSimplices;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,7 +67,9 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
@@ -374,4 +385,278 @@ public class PolytopeTest {
 		assertTrue(p1.equalsModuloPermutations(p2));
 	}
 
+	@Test
+	public void testCheckEquality() {
+
+		TableVariable u = new TableVariable("U", 2);
+		TableVariable v = new TableVariable("V", 2);
+		TableVariable x = new TableVariable("X", 2);
+		TableVariable y = new TableVariable("Y", 2);
+		TableVariable z = new TableVariable("Z", 2);
+		
+		Polytope p1;
+		Polytope p2;
+		PolytopesEqualityCheck expected;
+		PolytopesEqualityCheck actual;
+		
+		p1 = new Simplex(x);
+		expected = PolytopesEqualityCheck.polytopesAreEqual(p1, p1);
+		actual = p1.checkEquality(p1);
+		assertEquals(expected, actual);
+		
+		p1 = new Simplex(x);
+		p2 = new Simplex(y);
+		expected = PolytopesEqualityCheck.polytopesAreSimplicesOnDifferentVariables(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(u,v), new double[] {0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(u,v), new double[] {1., 0., 0., 0., }));
+		expected = polytopesAreEqual(p1, p1);
+		actual = p1.checkEquality(p1);
+		assertEquals(expected, actual);
+
+		FunctionConvexHull f1 = (FunctionConvexHull) p1;
+		FunctionConvexHull f2 = (FunctionConvexHull) p2;
+		expected = functionConvexHullsHaveDifferentFactors(p1, p2, f1.getFactor().checkEquality(f2.getFactor()));
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(y, x), // inverse order
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(),
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(), 
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(x, y),
+				new ArrayTableFactor(list(x,y,z), new double[] {0., 0., 0., 0., 0., 0., 0., 0., }));
+		expected = functionConvexHullsHaveDifferentIndices(p1, p2, set(), set(x,y));
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = new DefaultFunctionConvexHull(
+				list(x, y), 
+				new ArrayTableFactor(
+						list(x,y,z), 
+						new double[] {1., 2., 3., 4., 5., 6., 7., 8., }));
+		p2 = new DefaultFunctionConvexHull(
+				list(x, y),
+				new ArrayTableFactor(
+						list(z,x,y) /* permutation*/, 
+						new double[] {1., 3., 5., 7., 2., 4., 6., 8., }));
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(u),
+				new Simplex(v)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(v)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		expected = polytopesHaveDifferentSimplices(p1, p2, set(), set(u));
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
+				new Simplex(v),
+				new DefaultFunctionConvexHull(
+						list(x), 
+						new ArrayTableFactor(
+								list(z), 
+								new double[] {1., 2.}))
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new DefaultFunctionConvexHull(
+						list(x), 
+						new ArrayTableFactor(
+								list(z), 
+								new double[] {1., 2.})),
+				new Simplex(v),
+				new Simplex(u),
+				new DefaultFunctionConvexHull(
+						list(x, y), 
+						new ArrayTableFactor(
+								list(x,y,z), 
+								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
+				);
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes();
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes();
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(u)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(); // becomes IdentityPolytope
+		expected = polytopesAreOfIncomparableClasses(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				new Simplex(u)
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				new Simplex(v)
+				);
+		expected = PolytopesEqualityCheck.polytopesHaveDifferentSimplices(p1, p2, set(u), set(v));
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		// Next tests use f1 and f2 defined above
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				f2,
+				new Simplex(x),
+				f1,
+				new Simplex(x),
+				f1,
+				new Simplex(y),
+				f2
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				f2,
+				f2,
+				new Simplex(y),
+				f1,
+				f1
+				);
+		expected = polytopesAreEqual(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				f2,
+				new Simplex(x),
+				f1,
+				new Simplex(x),
+				f1,
+				new Simplex(y),
+				f2
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				f2,
+				f2,
+				new Simplex(y),
+				f1,
+				f2 // <-------- extra f2 instead of an f1
+				);
+		expected = firstPolytopeHasFunctionConvexHullWithoutMatchInSecond(
+				p1, p2, f1,
+				set(
+						functionConvexHullsHaveDifferentFactors(
+								f1, f2, 
+								factorsHaveDifferentValues(
+										f1.getFactor(), f2.getFactor(), 
+										list(0,0), 0.0, 1.0))
+						)
+				);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+		
+		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				new Simplex(y),
+				f2
+				);
+		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+				new Simplex(x),
+				f2,
+				new Simplex(y),
+				f1
+				);
+		expected = polytopesHaveADifferentNumberOfFunctionConvexHulls(p1, p2);
+		actual = p1.checkEquality(p2);
+		assertEquals(expected, actual);
+
+		
+	}
+	
 }

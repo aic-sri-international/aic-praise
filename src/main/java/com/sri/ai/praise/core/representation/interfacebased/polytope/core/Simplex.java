@@ -37,6 +37,9 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreSimplicesOnDifferentVariables;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.list;
 
@@ -45,6 +48,7 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 
 /**
  * @author braz
@@ -138,6 +142,19 @@ public class Simplex extends AbstractAtomicPolytope {
 				another instanceof Simplex 
 				&& 
 				getVariable().equals(((Simplex) another).getVariable());
+	}
+
+	@Override
+	public PolytopesEqualityCheck checkEquality(Polytope another) {
+		if (another instanceof Simplex) {
+			if (getVariable().equals(((Simplex) another).getVariable())) {
+				return polytopesAreEqual(this, another);
+			}
+			else {
+				return polytopesAreSimplicesOnDifferentVariables(this, another);
+			}
+		}
+		return polytopesAreOfIncomparableClasses(this, another);
 	}
 
 }

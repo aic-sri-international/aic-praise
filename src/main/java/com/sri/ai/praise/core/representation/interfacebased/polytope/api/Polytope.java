@@ -45,6 +45,7 @@ import java.util.Collection;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
@@ -101,4 +102,6 @@ public interface Polytope extends Approximation<Factor> {
 	 * Decides whether this polytope is equal to another one minus permutations in indices, variables, and multiplication factors.
 	 */
 	boolean equalsModuloPermutations(Object another);
+	
+	PolytopesEqualityCheck checkEquality(Polytope another);
 }

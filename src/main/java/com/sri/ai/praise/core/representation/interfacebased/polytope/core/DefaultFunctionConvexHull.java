@@ -37,12 +37,21 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentFactors;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentIndices;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
+import static com.sri.ai.util.Util.setFrom;
+import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.unorderedEquals;
+
 import java.util.Collection;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
-import com.sri.ai.util.Util;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 
 /**
  * A default implementation of {@link AbstractFunctionConvexHull} that does not perform any simplification.
@@ -80,9 +89,40 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 		Collection<? extends Variable> c1 = getIndices();
 		Collection<? extends Variable> c2 = another.getIndices();
 		return
-				Util.unorderedEquals(c1, c2) 
+				unorderedEquals(c1, c2) 
 				&&
 				getFactor().mathematicallyEquals(another.getFactor());
 	}
 
+	@Override
+	public PolytopesEqualityCheck checkEquality(Polytope another) {
+		if (another instanceof FunctionConvexHull) {
+			var anotherFunctionConvexHull = (FunctionConvexHull) another;
+			if ( ! unorderedEquals(getIndices(), anotherFunctionConvexHull.getIndices())) {
+				return makeEqualityCheckOfFunctionConvexHullsWithDifferentIndices(anotherFunctionConvexHull);
+			}
+			else {
+				return checkEqualityOfFunctionConvexHullsWithSameIndices(anotherFunctionConvexHull);
+			}
+		}
+		else {
+			return polytopesAreOfIncomparableClasses(this, another);
+		}
+	}
+
+	public PolytopesEqualityCheck makeEqualityCheckOfFunctionConvexHullsWithDifferentIndices(FunctionConvexHull anotherFunctionConvexHull) {
+		var indicesInFirstButNotInSecond = setFrom(subtract(getIndices(), anotherFunctionConvexHull.getIndices()));
+		var indicesInSecondButNotInFirst = setFrom(subtract(anotherFunctionConvexHull.getIndices(), getIndices()));
+		return functionConvexHullsHaveDifferentIndices(this, anotherFunctionConvexHull, indicesInFirstButNotInSecond, indicesInSecondButNotInFirst);
+	}
+
+	public PolytopesEqualityCheck checkEqualityOfFunctionConvexHullsWithSameIndices(FunctionConvexHull anotherFunctionConvexHull) {
+		var factorsEqualityCheck = getFactor().checkEquality(anotherFunctionConvexHull.getFactor());
+		if (factorsEqualityCheck.areEqual()) {
+			return polytopesAreEqual(this, anotherFunctionConvexHull);
+		}
+		else {
+			return functionConvexHullsHaveDifferentFactors(this, anotherFunctionConvexHull, factorsEqualityCheck);
+		}
+	}
 }

@@ -37,10 +37,14 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.firstPolytopeHasFunctionConvexHullWithoutMatchInSecond;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.thereAreFunctionConvexHullsInSecondPolytopeWithoutMatches;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
+import static com.sri.ai.util.Util.collectToSet;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
@@ -62,7 +66,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.explainableonetoonematching.ExplainableOneToOneMatching;
+import com.sri.ai.util.explainableonetoonematching.LeftOverMerger;
+import com.sri.ai.util.explainableonetoonematching.Matcher;
+import com.sri.ai.util.explainableonetoonematching.UnmatchedElementMerger;
 
 /**
  * @author braz
@@ -504,4 +513,77 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 			return false;
 		}
 	}
+	
+	@Override
+	public PolytopesEqualityCheck checkEquality(Polytope another) {
+		
+		List<AtomicPolytope> simplices1 = list();
+		List<AtomicPolytope> hulls1 = list();
+		collect(getAtomicPolytopes(), a -> a instanceof Simplex, simplices1, hulls1);
+
+		List<AtomicPolytope> simplices2 = list();
+		List<AtomicPolytope> hulls2 = list();
+		collect(another.getAtomicPolytopes(), a -> a instanceof Simplex, simplices2, hulls2);
+
+		var simplexVariables1 = mapIntoSet(simplices1, a -> ((Simplex)a).getVariable());
+		var simplexVariables2 = mapIntoSet(simplices2, a -> ((Simplex)a).getVariable());
+		
+		if (simplexVariables1.equals(simplexVariables2)) {
+			return checkEqualityGivenSameSimplices(another, hulls1, hulls2);
+		}
+		else {
+			return makeEqualityCheckForDifferentSimplices(another, simplexVariables1, simplexVariables2);
+		}
+		
+	}
+
+	private PolytopesEqualityCheck checkEqualityGivenSameSimplices(Polytope another, List<AtomicPolytope> hulls1, List<AtomicPolytope> hulls2) {
+		if (hulls1.size() == hulls2.size()) {
+			return checkEqualityGivenTheSameNumberOfFunctionConvexHulls(another, hulls1, hulls2);
+		}
+		else {
+			return PolytopesEqualityCheck.polytopesHaveADifferentNumberOfFunctionConvexHulls(this, another);
+		}
+	}
+
+	private PolytopesEqualityCheck checkEqualityGivenTheSameNumberOfFunctionConvexHulls(
+			Polytope another,
+			List<AtomicPolytope> hulls1,
+			List<AtomicPolytope> hulls2) {
+		
+		Matcher<FunctionConvexHull, PolytopesEqualityCheck> 
+		matcher = 
+		(f1, f2) -> { var equalityCheck = f1.checkEquality(f2); return equalityCheck.areEqual()? null : equalityCheck; };
+		// Note: ExplainableOneToOneMatching requires matcher to return null in case of equality.
+		
+		UnmatchedElementMerger<FunctionConvexHull, Set<PolytopesEqualityCheck>, PolytopesEqualityCheck> 
+		unmatchedElementMerger = 
+		(f, c) -> firstPolytopeHasFunctionConvexHullWithoutMatchInSecond(this, another, f, c);
+		
+		LeftOverMerger<Set<FunctionConvexHull>, PolytopesEqualityCheck> 
+		leftOverMerger = 
+		l -> thereAreFunctionConvexHullsInSecondPolytopeWithoutMatches(this, another, l);
+		
+		PolytopesEqualityCheck polytopesAreEqual = polytopesAreEqual(this, another);
+
+		List<FunctionConvexHull> hullsAsHulls1 = mapIntoList(hulls1, h -> (FunctionConvexHull) h);
+		List<FunctionConvexHull> hullsAsHulls2 = mapIntoList(hulls2, h -> (FunctionConvexHull) h);
+		
+		return ExplainableOneToOneMatching.match(hullsAsHulls1, hullsAsHulls2, matcher, unmatchedElementMerger, leftOverMerger, polytopesAreEqual);
+		
+		// Note: as of February 2020 left-over merger is never used because at this point the number of function convex hulls in both polytopes is identical.
+		// However, we're leaving it anyway in case future modifications make it necessary.
+		
+	}
+
+	private PolytopesEqualityCheck makeEqualityCheckForDifferentSimplices(
+			Polytope another,
+			Set<Variable> simplexVariables1,
+			Set<Variable> simplexVariables2) {
+		
+		var simplexVariablesInFirstButNotInSecond = collectToSet(simplexVariables1, v -> !simplexVariables2.contains(v));
+		var simplexVariablesInSecondButNotInFirst = collectToSet(simplexVariables2, v -> !simplexVariables1.contains(v));
+		return PolytopesEqualityCheck.polytopesHaveDifferentSimplices(this, another, simplexVariablesInFirstButNotInSecond, simplexVariablesInSecondButNotInFirst);
+	}
+
 }

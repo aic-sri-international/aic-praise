@@ -1,5 +1,7 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
@@ -8,6 +10,7 @@ import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.util.Enclosing;
 
 public class IdentityPolytope implements Polytope {
@@ -58,4 +61,13 @@ public class IdentityPolytope implements Polytope {
 		return another instanceof IdentityPolytope;
 	}
 
+	@Override
+	public PolytopesEqualityCheck checkEquality(Polytope another) {
+		if (another instanceof IdentityPolytope) {
+				return polytopesAreEqual(this, another);
+		}
+		else {
+			return polytopesAreOfIncomparableClasses(this, another);
+		}
+	}
 }
