@@ -359,7 +359,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	}
 
 	@Override
-	public Polytope computeUpdatedCurrentApproximationGivenThatExternalContextHasChangedWithoutIteratingItself() {
+	public void refreshFromWithout() {
 		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
 	}
 

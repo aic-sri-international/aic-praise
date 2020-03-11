@@ -87,7 +87,7 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  */
 public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputationWithLossySimplification<Factor> {
 	
-	public static final boolean debug = false;
+	public static final boolean debug = true;
 
 	///////////////// DATA MEMBERS
 	
@@ -167,7 +167,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeCom
 	}
 	
 	@Override
-	public Approximation<Factor> functionWithoutSimplification(List<Approximation<Factor>> subsApproximations) {
+	public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
 		
 		var productPolytope = getProductOfAllIncomingPolytopesAndFactorAtRoot(subsApproximations);
 		var summandVariables = productPolytope.getFreeVariables();
