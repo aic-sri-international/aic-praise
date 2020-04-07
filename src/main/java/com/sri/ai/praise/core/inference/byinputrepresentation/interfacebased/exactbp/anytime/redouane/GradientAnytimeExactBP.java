@@ -43,7 +43,7 @@ import com.sri.ai.util.computation.treecomputation.anytime.gradientdescent.core.
 public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputationWithGradientDescent<Factor> {
 
 	@Override
-	protected boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
+	public boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
 		boolean result = getBase().getRoot() instanceof Variable;
 		return result;
 	}

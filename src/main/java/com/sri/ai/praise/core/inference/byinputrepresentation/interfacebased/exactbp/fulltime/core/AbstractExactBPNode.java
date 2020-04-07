@@ -252,18 +252,18 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 	@Override
 	public ArrayList<ExactBPNode<SubRootType,RootType>> getSubs() {
 		if (subs == null) {
-			makeSubs();
+			subs = makeSubs();
 		}
 		return subs;
 	}
 	
-	private void makeSubs() {
+	protected ArrayList<ExactBPNode<SubRootType,RootType>> makeSubs() {
 		// This method creates the sub-ExactBPs.
 		// First, it needs to create the included factor live sets for these subs,
 		// because that is required in the constructor of ExactBPs.
 		ArrayList<? extends SubRootType> subsRoots = makeSubsRoots();
 		ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors = makeInitialSubsIncludedFactors(subsRoots);
-		makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
+		return makeSubsFromTheirIncludedFactors(subsRoots, subsIncludedFactors);
 	}
 
 	private ArrayList<RedirectingLiveSet<Factor>> makeInitialSubsIncludedFactors(ArrayList<? extends SubRootType> subsRoots) {
@@ -290,14 +290,17 @@ public abstract class AbstractExactBPNode<RootType,SubRootType> implements Exact
 		// TODO: for some reason, removing field includedFactors and the above line breaks the program, even though includedFactors is apparently never used!
 	}
 
-	private void makeSubsFromTheirIncludedFactors(ArrayList<? extends SubRootType> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
-		subs = new ArrayList<>(subsRoots.size());
+	private 
+	ArrayList<ExactBPNode<SubRootType,RootType>> 
+	makeSubsFromTheirIncludedFactors(ArrayList<? extends SubRootType> subsRoots, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
+		ArrayList<ExactBPNode<SubRootType,RootType>> subs = new ArrayList<>(subsRoots.size());
 		int subIndex = 0;
 		for (SubRootType subRoot : subsRoots) {
 			ExactBPNode<SubRootType,RootType> sub = makeSubFromItsIncludedFactors(subRoot, subIndex, subsIncludedFactors);
 			subs.add(sub);
 			subIndex++;
 		}
+		return subs;
 	}
 
 	private ExactBPNode<SubRootType,RootType> makeSubFromItsIncludedFactors(SubRootType subRoot, int subIndex, ArrayList<RedirectingLiveSet<Factor>> subsIncludedFactors) {
