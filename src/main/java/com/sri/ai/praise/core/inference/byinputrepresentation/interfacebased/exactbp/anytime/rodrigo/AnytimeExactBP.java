@@ -76,7 +76,7 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeExactBP
 	@Override
 	protected 
 	Approximation<Factor> 
-	computeUpdatedApproximationGivenThatExternalContextHasChangedByItself(Approximation<Factor> currentApproximation) {
+	computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
 		
 		Polytope polytope = (Polytope) currentApproximation;
 		

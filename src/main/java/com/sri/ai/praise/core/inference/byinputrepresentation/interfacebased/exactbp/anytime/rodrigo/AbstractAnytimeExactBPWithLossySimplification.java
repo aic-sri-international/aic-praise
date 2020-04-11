@@ -69,6 +69,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Produc
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.NestedIterator;
+import com.sri.ai.util.collect.RoundRobinIterator;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputationWithLossySimplification;
@@ -106,7 +107,7 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 	abstract
 	protected 
 	Approximation<Factor> 
-	computeUpdatedApproximationGivenThatExternalContextHasChangedByItself(Approximation<Factor> currentApproximation);
+	computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation);
 	
 	///////////////// DATA MEMBERS
 	
@@ -129,41 +130,17 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 	@Override
 	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
 		super.makeSubsAndIterateThemToTheirFirstApproximation();
-		subRoundRobinIterator = getSubs().iterator();
+		subRoundRobinIterator = new RoundRobinIterator<>(getSubs(), Iterator::hasNext);
 	}
 
 	@Override
 	public AbstractAnytimeExactBPWithLossySimplification<SubRootType, RootType> pickNextSubToIterate() {
-		
-		if (getSubs().isEmpty()) {
+		if (subRoundRobinIterator.hasNext()) {
+			return subRoundRobinIterator.next();
+		}
+		else {
 			return null;
 		}
-		
-		AbstractAnytimeExactBPWithLossySimplification<SubRootType, RootType> subWeStartedWith = getNextInSubRoundRobin();
-		
-		AbstractAnytimeExactBPWithLossySimplification<SubRootType, RootType> nextSubThatCanBeRefined = null; 
-		AbstractAnytimeExactBPWithLossySimplification<SubRootType, RootType> currentSub = subWeStartedWith; 
-		boolean cameBackToTheOneWeStartedWith = false;
-		do {
-			if (currentSub.hasNext()) {
-				nextSubThatCanBeRefined = currentSub;
-			}
-			else {
-				currentSub = getNextInSubRoundRobin();
-				if (currentSub == subWeStartedWith) {
-					cameBackToTheOneWeStartedWith = true;
-				}
-			}
-		} while (nextSubThatCanBeRefined == null && !cameBackToTheOneWeStartedWith);
-		
-		return nextSubThatCanBeRefined;
-	}
-
-	private AbstractAnytimeExactBPWithLossySimplification<SubRootType, RootType> getNextInSubRoundRobin() {
-		if (!subRoundRobinIterator.hasNext()) {
-			subRoundRobinIterator = getSubs().iterator();
-		}
-		return subRoundRobinIterator.next();
 	}
 
 	@Override

@@ -64,8 +64,8 @@ import com.sri.ai.util.base.Pair;
 
 /**
  * An implementation of {@link AbstractFunctionConvexHull} that 
- * simplifies the convex hull based on function f(I, FreeVariables) by the product polytope
- * <code>prod_{F in FreeVariables} Margin_Simplex_( Projection(F) )</code> 
+ * simplifies the convex hull based on function f(I, FreeVariables) to the product polytope
+ * <code>prod_{F in FreeVariables} Margin_Simplex( NormalizedProjection(F) )</code> 
  * where
  * <code>NormalizedProjection_F = normalize_F sum_{FreeVariables \ {F}} ConvexHull ( { f(Indices, FreeVariables) }_Indices ) </code>
  * and
@@ -75,10 +75,13 @@ import com.sri.ai.util.base.Pair;
  * <p>
  * Intuitively, we replace the convex hull by a product of the "margin simplexes" on each free variable.
  * A "margin simplex" is a convex hull of the same shape as the variable's polytope
- * (therefore with the same number of vertices, which is to say the variable's number of values).
+ * (therefore with the same number of vertices, which is to say the variable's number of values),
+ * but reduced in size.
  * It therefore has one vertex per value.
- * The vertex for a certain value is a distribution in which all other values have the minimum probability the exhibit in the original convex hull,
- * while the special value has the maximum probability (computed as 1 - the sum of the minimal probabilities of the remaining values).
+ * The vertex for a certain value is a distribution in which all other values have the minimum probability
+ * the exhibit in the original convex hull,
+ * while the special value has the maximum probability
+ * (computed as 1 - the sum of the minimal probabilities of the remaining values).
  * 
  * @author braz
  *
