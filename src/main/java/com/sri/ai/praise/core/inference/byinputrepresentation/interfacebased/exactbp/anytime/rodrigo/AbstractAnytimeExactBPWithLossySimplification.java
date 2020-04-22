@@ -37,7 +37,7 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo;
 
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collectToList;
@@ -313,7 +313,7 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 		@SuppressWarnings("unchecked")
 		var actualConvexHulls = (Collection<? extends FunctionConvexHull>) collectToList(actual.getAtomicPolytopes(), a -> a instanceof FunctionConvexHull);
 		var actualSimplices = collectToList(actual.getAtomicPolytopes(), a -> a instanceof Simplex);
-		var actualSingleConvexHull = multiplyIntoSingleFunctionConvexHullWithoutSimplifying(actualConvexHulls);
+		var actualSingleConvexHull = multiplyIntoSingleFunctionConvexHull(actualConvexHulls);
 		@SuppressWarnings("unchecked")
 		List<AtomicPolytope> actualMultiplicands = listFrom(new NestedIterator(actualSimplices, actualSingleConvexHull));
 		var atomicActual = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(actualMultiplicands);

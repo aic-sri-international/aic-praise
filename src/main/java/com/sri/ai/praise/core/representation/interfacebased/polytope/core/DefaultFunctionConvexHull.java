@@ -71,11 +71,6 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 	}
 	
 	@Override
-	public FunctionConvexHull simplify() {
-		return this;
-	}
-
-	@Override
 	public boolean equalsModuloPermutations(Object another) {
 		if (another instanceof FunctionConvexHull) {
 			return mathematicallyEqualsToAnotherFunctionConvexHull((FunctionConvexHull) another);

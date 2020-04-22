@@ -11,7 +11,7 @@ public interface FunctionConvexHull extends AtomicPolytope {
 	
 	Factor getFactor();
 	
-	FunctionConvexHull dynamicMultiplyIntoSingleFunctionConvexHullWithoutSimplification(Collection<? extends FunctionConvexHull> functionConvexHulls);
+	FunctionConvexHull dynamicMultiplyIntoSingleFunctionConvexHull(Collection<? extends FunctionConvexHull> functionConvexHulls);
 
 	FunctionConvexHull newInstance(Collection<? extends Variable> finalIndices, Factor factor);
 	
@@ -25,8 +25,6 @@ public interface FunctionConvexHull extends AtomicPolytope {
 	 * @return
 	 */
 	FunctionConvexHull addIndices(Collection<? extends Variable> newIndices);
-
-	Polytope simplify();
 
 	FunctionConvexHull normalize(Collection<? extends Variable> variables);
 

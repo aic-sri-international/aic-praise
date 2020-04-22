@@ -40,7 +40,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.firstPolytopeHasFunctionConvexHullWithoutMatchInSecond;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.thereAreFunctionConvexHullsInSecondPolytopeWithoutMatches;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHullWithoutSimplifying;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.collect;
@@ -379,7 +379,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		
 		// it's important to wait for simplification until the end because simplification will often depend
 		// on the indices and we want a polytope equivalent to the one with all the simplex variables as indices.
-		var productOfConvexHulls = multiplyIntoSingleFunctionConvexHullWithoutSimplifying(functionConvexHulls);
+		var productOfConvexHulls = multiplyIntoSingleFunctionConvexHull(functionConvexHulls);
 		
 		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
 		var productOfConvexHullsAfterSummingOut = productOfConvexHulls.sumOut(eliminatedMinusSimplexVariables);
@@ -389,9 +389,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 						simplexVariables, 
 						productOfConvexHullsAfterSummingOut.getFreeVariables());
 		
-		var resultBeforeSimplifying = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
-		
-		Polytope result = resultBeforeSimplifying.simplify();
+		var result = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
 		
 //		println("\nProductPolytope:");
 //		println("eliminated: " + join(eliminated));
@@ -402,7 +400,6 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 //		println("eliminated minus simplex variables: " + eliminatedMinusSimplexVariables);
 //		println("product of hulls after eliminating above: " + productOfConvexHullsAfterSummingOut);
 //		println("indices to add: " + indicesToAdd);
-//		println("result before simplifying: " + resultBeforeSimplifying);
 //		println("result                   : " + result);
 		
 		return result;
@@ -442,7 +439,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		}
 		else {
 			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = multiplyIntoSingleFunctionConvexHullWithoutSimplifying((Collection<? extends FunctionConvexHull>) atomicPolytopes);
+			result = multiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) atomicPolytopes);
 		}
 		// It would be natural to use simplification here but simplify may return non-atomic polytopes.
 		// What we really want is to sum out all other variables, which guarantees query is alone and simplify returns an atomic polytope then,

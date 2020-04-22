@@ -270,12 +270,14 @@ public class PRAiSEController {
     	
     	openMenuPopOver.setArrowLocation(ArrowLocation.LEFT_TOP);
     	openMenuPopOver.setAutoHide(true);
-    	openMenuPopOver.setDetachedTitle("Menu");
+    	openMenuPopOver.setDetachedTitle("Menu"); // Java 8 version
+    	//openMenuPopOver.setTitle("Menu"); // Java 11 version
     	openMenuPopOver.setContentNode(openMenuContent());
     	
     	configureSettingsPopOver.setArrowLocation(ArrowLocation.RIGHT_TOP);
     	configureSettingsPopOver.setAutoHide(true);
-    	configureSettingsPopOver.setDetachedTitle("Configure Settings");
+    	configureSettingsPopOver.setDetachedTitle("Configure Settings"); // Java 8 version
+//    	configureSettingsPopOver.setTitle("Configure Settings"); // Java 11 version
     	configureSettingsPopOver.setContentNode(configureSettingsContent());
     	//
     	//

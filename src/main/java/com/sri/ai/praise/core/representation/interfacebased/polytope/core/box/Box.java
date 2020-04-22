@@ -177,11 +177,6 @@ public class Box extends AbstractFunctionConvexHull {
 	}
 
 	@Override
-	public FunctionConvexHull simplify() {
-		return this;
-	}
-
-	@Override
 	public Box newInstance(Collection<? extends Variable> indices, Factor factor) {
 		throw new Error("newInstance not implemented for " + Box.class);
 	}

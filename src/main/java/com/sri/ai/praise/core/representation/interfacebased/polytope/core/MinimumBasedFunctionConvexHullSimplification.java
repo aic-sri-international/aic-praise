@@ -56,15 +56,12 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
-import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
 
 /**
- * An implementation of {@link AbstractFunctionConvexHull} that 
- * simplifies the convex hull based on function f(I, FreeVariables) to the product polytope
+ * A simplification of a {@link FunctionConvexHull} based on function f(I, FreeVariables) to the product polytope
  * <code>prod_{F in FreeVariables} Margin_Simplex( NormalizedProjection(F) )</code> 
  * where
  * <code>NormalizedProjection_F = normalize_F sum_{FreeVariables \ {F}} ConvexHull ( { f(Indices, FreeVariables) }_Indices ) </code>
@@ -86,22 +83,8 @@ import com.sri.ai.util.base.Pair;
  * @author braz
  *
  */
-final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvexHull {
+final public class MinimumBasedFunctionConvexHullSimplification {
 	
-	public MinimumBasedFunctionConvexHull(Collection<? extends Variable> indices, Factor factor) {
-		super(indices, factor);
-	}
-	
-	@Override
-	public MinimumBasedFunctionConvexHull newInstance(Collection<? extends Variable> indices, Factor factor) {
-		return new MinimumBasedFunctionConvexHull(indices, factor);
-	}
-	
-	@Override
-	public Polytope simplify() {
-		return simplify(this);
-	}
-
 	public static FunctionConvexHull simplify(FunctionConvexHull convexHull) {
 		var summationCostOfIndices = summationCost(convexHull.getIndices());
 		var summationCostOfFreeVariables = summationCost(convexHull.getFreeVariables());
@@ -137,18 +120,19 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 	 * @return
 	 */
 	@SuppressWarnings("unused")
-	private Polytope getDecoupledMarginSimplexProduct(FunctionConvexHull normalizedConvexHull) {
-		List<Variable> freeVariablesBuffer = listFrom(getFreeVariables());
-		var marginSimplices = mapIntoList(getFreeVariables(), v -> getMarginSimplexOnSingleVariable(v, freeVariablesBuffer));
+	private static Polytope getDecoupledMarginSimplexProduct(FunctionConvexHull normalizedConvexHull) {
+		Collection<? extends Variable> freeVariables = normalizedConvexHull.getFreeVariables();
+		List<Variable> freeVariablesBuffer = listFrom(freeVariables);
+		var marginSimplices = mapIntoList(freeVariables, v -> getMarginSimplexOnSingleVariable(normalizedConvexHull, v, freeVariablesBuffer));
 		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
 	}
 	
-	private FunctionConvexHull getMarginSimplexOnSingleVariable(Variable v, List<Variable> freeVariablesBuffer) {
+	private static FunctionConvexHull getMarginSimplexOnSingleVariable(FunctionConvexHull normalizedConvexHull, Variable v, List<Variable> freeVariablesBuffer) {
 
 		freeVariablesBuffer.remove(v);
 
 		var otherFreeVariables = freeVariablesBuffer;
-		var projection = MinimumBasedFunctionConvexHull.this.sumOut(otherFreeVariables); 
+		var projection = normalizedConvexHull.sumOut(otherFreeVariables); 
 		var normalizedProjection = projection.normalize(list(v));
 		var result = makeMarginSimplex(normalizedProjection);
 
@@ -213,15 +197,5 @@ final public class MinimumBasedFunctionConvexHull extends AbstractFunctionConvex
 		var indexVariables = mapIntoList(tableFactor.getVariables(), v -> new TableVariable("I" + indexIndex++, v.getCardinality()));
 		var newVariables = Util.makeListWithElementsOfTwoCollections(indexVariables, tableFactor.getVariables());
 		return new ArrayTableFactor(newVariables, newArray);
-	}
-	
-	@Override
-	public boolean equalsModuloPermutations(Object another) {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + MinimumBasedFunctionConvexHull.class);
-	}
-
-	@Override
-	public PolytopesEqualityCheck checkEquality(Polytope another) {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + MinimumBasedFunctionConvexHull.class);
 	}
 }
