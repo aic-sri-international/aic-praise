@@ -118,6 +118,109 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		this(variables, arrayListFilledWith(defaultValue, numberOfEntries(variables)));
 	}
 	
+	public static interface ParameterFunction {
+		double apply(int[] values);
+	}
+	public static interface ParameterFunction1 { double apply(int v1); }
+	public static interface ParameterFunction2 { double apply(int v1, int v2); }
+	public static interface ParameterFunction3 { double apply(int v1, int v2, int v3); }
+	public static interface ParameterFunction4 { double apply(int v1, int v2, int v3, int v4); }
+	public static interface ParameterFunction5 { double apply(int v1, int v2, int v3, int v4, int v5); }
+	public static interface ParameterFunction6 { double apply(int v1, int v2, int v3, int v4, int v5, int v6); }
+	public static interface ParameterFunction7 { double apply(int v1, int v2, int v3, int v4, int v5, int v6, int v7); }
+	public static interface ParameterFunction8 { double apply(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8); }
+	public static interface ParameterFunction9 { double apply(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8, int v9); }
+	
+	public static ArrayTableFactor fromFunctionOnArray(Collection<? extends TableVariable> variables, ParameterFunction parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction1 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction2 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction3 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction4 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction5 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3], index.index[4]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction6 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3], index.index[4], index.index[5]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction7 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3], index.index[4], index.index[5], index.index[6]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction8 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3], index.index[4], index.index[5], index.index[6], index.index[7]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction9 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply(index.index[0], index.index[1], index.index[2], index.index[3], index.index[4], index.index[5], index.index[6], index.index[7], index.index[8]);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
 	private MixedRadixNumber createMixedRadixNumberForIndexingFactorParameters() {
 		ArrayList<Integer> cardinalities = getCardinalities();
 		if (cardinalities.isEmpty()) {
@@ -139,11 +242,17 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	private double[] parameters;
 
 	private void set(ArrayList<Double> parameters) {
+		checkNumberOfParameters(parameters.size());
 		this.parameters = ArrayUtils.toPrimitive(parameters.toArray(new Double[parameters.size()]));
 	}
 
 	private void set(double[] parameters) {
+		checkNumberOfParameters(parameters.length);
 		this.parameters = parameters;
+	}
+
+	private void checkNumberOfParameters(int numberOfParameters) {
+		myAssert(numberOfParameters == this.numberOfEntries(), () -> "ArrayTableFactor: number of entries must be " + numberOfEntries() + " but got " + numberOfParameters + " parameters");
 	}
 
 	private double get(int i) {
@@ -508,10 +617,13 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		return result;
 	}
 
+	private static ArrayIndex makeArrayIndex(Collection<? extends TableVariable> someVariables, ArrayTableFactor factor) {
+		return factor.makeArrayIndex(someVariables);
+	}
 
-	private ArrayIndex makeArrayIndex(Collection<? extends TableVariable> someVariables, ArrayTableFactor factor) {
+	private ArrayIndex makeArrayIndex(Collection<? extends TableVariable> someVariables) {
 		var cardinalities = mapIntoList(someVariables, TableVariable::getCardinality);
-		var strides = mapIntoList(someVariables, factor::getStride);
+		var strides = mapIntoList(someVariables, this::getStride);
 		return new ArrayIndex(cardinalities, strides);
 	}
 
@@ -628,7 +740,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	protected Double getEntryFor(int[] values) {
+	public Double getEntryFor(int[] values) {
 		int parameterIndex = getParameterIndex(values);
 		return getParameter(parameterIndex);
 	}

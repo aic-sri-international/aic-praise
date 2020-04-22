@@ -40,6 +40,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.base.IdentityWrapper.identityWrapper;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -60,6 +61,10 @@ extends DefaultManyToManyRelation<IdentityWrapper<Factor>, Variable> implements 
 	public DefaultFactorNetwork(Collection<? extends Factor> factors) {
 		super();
 		indexFactorsAndVariables(factors);
+	}
+	
+	public DefaultFactorNetwork(Factor... factors) {
+		this(Arrays.asList(factors));
 	}
 
 	protected void indexFactorsAndVariables(Collection<? extends Factor> factors) {
