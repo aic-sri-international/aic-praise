@@ -12,6 +12,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
 
 public class AnytimeExactBPWithSimplificationTest {
@@ -19,8 +20,6 @@ public class AnytimeExactBPWithSimplificationTest {
 	@Test
 	public void test() {
 		
-		AnytimeExactBPSolver solver = new AnytimeExactBPSolver();
-
 		FactorNetwork factorNetwork;
 		Variable query;
 		
@@ -38,10 +37,11 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		println("Exact: ", new ExactBPSolver().apply(query, factorNetwork));
 		
-		var it = solver.apply(query, factorNetwork);
+		var it = new AnytimeExactBPSolver().apply(query, factorNetwork);
 		
 		while (it.hasNext()) {
-			println(it.next());
+			Polytope polytope = (Polytope) it.next();
+			println(polytope + ", " + polytope.length());
 		}
 	}	
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
@@ -176,6 +177,21 @@ public class EmptyTableFactor extends AbstractTableFactor {
 		return new EmptyTableFactor(remaining);
 	}
 
+	@Override
+	public TableFactor potentialRange(Collection<? extends Variable> eliminated) {
+		// unlike other aggregation functions, we choose to separate the remaining variables here
+		// at the level of the concrete class because it is not universally useful at the abstract class level
+		// (ArrayTableFactor does not require explicit representation of the remaining variables).
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		return new EmptyTableFactor(eliminatedAndRemaining.second);
+	}
+
+	@Override
+	public double value() {
+		indicateLackOfData((new Enclosing(){}).methodName());
+		return 0.0;
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// INVERSION ////////////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,9 @@ import static com.sri.ai.util.Util.list;
 
 import java.util.Collection;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
@@ -157,4 +159,8 @@ public class Simplex extends AbstractAtomicPolytope {
 		return polytopesAreOfIncomparableClasses(this, another);
 	}
 
+	@Override
+	public Factor probabilityRange() {
+		return new ConstantFactor(1.0);
+	}
 }

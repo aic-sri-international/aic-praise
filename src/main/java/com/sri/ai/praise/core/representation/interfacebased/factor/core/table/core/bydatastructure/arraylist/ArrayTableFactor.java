@@ -394,6 +394,18 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		return result;
 	}
 	
+	/**
+	 * Not currently public, but useful in the implementation of another method.
+	 */
+	private ArrayTableFactor subtractTableFactor(TableFactor another) {
+		ArrayTableFactor result = new ArrayTableFactor(getVariables());
+		ArrayTableFactor anotherArrayTableFactor = (ArrayTableFactor) another;
+		for (int i = 0; i != numberOfEntries(); i++) {
+			result.set(i, get(i) - anotherArrayTableFactor.get(i));
+		}
+		return result;
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// MULTIPLICATION ///////////////////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,6 +502,19 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		var min = min(variablesToEliminate);
+		var max = max(variablesToEliminate);
+		return max.subtractTableFactor(min);
+	}
+
+	@Override
+	public double value() {
+		myAssert(getVariables().size() == 0, () -> "value is valid only for factors with no variables.");
+		return getParameter(0);
+	}
+	
+	@Override
 	protected ArrayTableFactor sumOut(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
 
 //		if (summationCost() > 1000000)
@@ -579,12 +604,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	protected TableFactor min(List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {
-//		if (summationCost() > 1000000)
-//			println("ArrayTableFactor.MIN summation cost: " + summationCost());
-		var result = Timer.getResultAndTime(() -> aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining));
-//		if (summationCost() > 1000000)
-//			println("ArrayTableFactor.MIN done, time: " + result.second + " ms");
-		return result.first;
+		return aggregate((a, v) -> v < a ? v : a, Double.MAX_VALUE, eliminated, remaining);
 	}
 
 	private ArrayTableFactor aggregate(BinaryDoubleOperator operator, double initialValue, List<? extends TableVariable> eliminated, ArrayList<? extends TableVariable> remaining) {

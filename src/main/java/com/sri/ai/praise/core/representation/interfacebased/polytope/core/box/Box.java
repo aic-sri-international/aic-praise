@@ -196,6 +196,11 @@ public class Box extends AbstractFunctionConvexHull {
 		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
 	}
 
+	@Override
+	public Factor probabilityRange() {
+		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+	}
+
 	/*public Box(Factor phiMin, Factor phiMax, BoxFactorFactory factory) {
 		this(factory.make(phiMin,phiMax));
 	}*/

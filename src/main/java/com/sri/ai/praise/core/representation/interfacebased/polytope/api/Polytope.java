@@ -99,6 +99,24 @@ public interface Polytope extends Approximation<Factor> {
 	// TODO: this is a suspicious method, a bit too specific... It may be better to identify what is done with its result, and implement that instead.
 
 	/**
+	 * Assumes this polytope is of the form <code>convex_hull({ phi(i,v) }_i)</code> for <code>v</code> a tuple of variables,
+	 * and returns <code>lambda v: (max_i phi(i,v)) - (min_i phi(i,v))</code>,
+	 * that is, a function on <code>v</code> for the difference between maximum and minimum probabilities
+	 * given to v by each the vertices of the polytope. 
+	 * Taking the maximum of this factor is a relatively cheap way to estimate the volume of the polytope
+	 * and will be 0 if and only if its volume is 0.   
+	 */
+	Factor probabilityRange();
+	
+	/** 
+	 * Convenience method for <code>probabilityRange().max(getFreeVariables()).value()</code>,
+	 * that is, the maximum probability range over all assignments to the free variables of the polytope.
+	 */
+	default double length() {
+		return probabilityRange().max(getFreeVariables()).value();
+	}
+
+	/**
 	 * Decides whether this polytope is equal to another one minus permutations in indices, variables, and multiplication factors.
 	 */
 	boolean equalsModuloPermutations(Object another);

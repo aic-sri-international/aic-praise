@@ -162,4 +162,14 @@ public class ProceduralAttachmentExpressionFactor extends AbstractExpressionFact
 		throw new Error("argmin not supported for " + getClass());
 	}
 
+	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		throw new Error("potentialRange not supported for " + getClass());
+	}
+
+	@Override
+	public double value() {
+		throw new Error("value not supported for " + getClass());
+	}
+
 }

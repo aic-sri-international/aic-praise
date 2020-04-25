@@ -360,6 +360,16 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	}
 
 	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		throw new Error("potentialRange not yet implemented for NDArrayTableFactor");
+	}
+
+	@Override
+	public double value() {
+		throw new Error("value not yet implemented for NDArrayTableFactor");
+	}
+
+	@Override
 	public boolean mathematicallyEquals(Factor another) {
 		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
 	}

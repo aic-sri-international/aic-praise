@@ -518,7 +518,7 @@ public class TableFactorTest {
 		assertFalse(f1.mathematicallyEquals(f2));
 		
 		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
-		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4});
+		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4, 1, 3, 2, 4});
 		assertFalse(f1.mathematicallyEquals(f2));
 	}
 
@@ -590,7 +590,7 @@ public class TableFactorTest {
 		assertEquals(factorsHaveDifferentValues(f1, f2, list(0,1,1), 5, 5000), f1.checkEquality(f2));
 		
 		f1 = new ArrayTableFactor(list(x,y), new double[] {1, 2, 3, 4});
-		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4});
+		f2 = new ArrayTableFactor(list(y,x,z), new double[] {1, 3, 2, 4, 1, 3, 2, 4});
 		assertEquals(factorsHaveDifferentVariables(f1, f2, set(), set(z)), f1.checkEquality(f2));
 
 		f1 = new ArrayTableFactor(list(x), new double[] {1, 2});

@@ -285,6 +285,18 @@ public abstract class AbstractConditionedFactor implements Factor {
 	}
 
 	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		Factor potentialRangeOfConditionedFactor = factor.argmin(variablesToEliminate);
+		Factor result = getConditionedFactor(conditioningSample, potentialRangeOfConditionedFactor);
+		return result;
+	}
+
+	@Override
+	public double value() {
+		return factor.value();
+	}
+
+	@Override
 	public ExplanationTree getExplanation() {
 		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
 	}

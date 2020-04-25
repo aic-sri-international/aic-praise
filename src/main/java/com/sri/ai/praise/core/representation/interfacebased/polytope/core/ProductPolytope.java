@@ -62,11 +62,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
+import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.explainableonetoonematching.ExplainableOneToOneMatching;
 import com.sri.ai.util.explainableonetoonematching.LeftOverMerger;
@@ -583,4 +585,8 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		return PolytopesEqualityCheck.polytopesHaveDifferentSimplices(this, another, simplexVariablesInFirstButNotInSecond, simplexVariablesInSecondButNotInFirst);
 	}
 
+	@Override
+	public Factor probabilityRange() {
+		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+	}
 }

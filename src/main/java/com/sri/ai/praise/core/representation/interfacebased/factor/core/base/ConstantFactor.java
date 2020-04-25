@@ -17,8 +17,8 @@ import com.sri.ai.grinder.library.number.Times;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentValues;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
@@ -251,6 +251,16 @@ public class ConstantFactor implements Factor {
 		throw new Error("argmin not implemented for " + getClass());
 	}
 
+	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		throw new Error("argmin not implemented for " + getClass());
+	}
+
+	@Override
+	public double value() {
+		return constant;
+	}
+	
 	private ExplanationTree explanation = DefaultExplanationTree.PLACEHOLDER;
 
 	@Override

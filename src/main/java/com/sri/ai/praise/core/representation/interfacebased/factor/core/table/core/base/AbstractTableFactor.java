@@ -301,7 +301,7 @@ public abstract class AbstractTableFactor implements TableFactor {
 	// SUPPORT FOR AGGREGATION OPERATORS ////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	private Pair<List<TableVariable>, ArrayList<TableVariable>> organizeVariablesForElimination(Collection<? extends Variable> eliminated) {
+	protected Pair<List<TableVariable>, ArrayList<TableVariable>> organizeVariablesForElimination(Collection<? extends Variable> eliminated) {
 		
 		myAssert(getVariables().containsAll(eliminated), () -> "Not all variables to be eliminated occur in factor: " + eliminated + " not all in " + getVariables());
 		

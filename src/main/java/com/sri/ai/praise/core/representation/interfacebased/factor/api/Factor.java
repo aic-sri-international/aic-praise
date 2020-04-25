@@ -115,6 +115,12 @@ public interface Factor {
 	
 	ExplanationTree getExplanation();
 	
+	/** returns the factor equal to <code>(max_{variables_to_eliminate} factor) - (min_{variables_to_eliminate} factor)</code>. */
+	Factor potentialRange(Collection<? extends Variable> variablesToEliminate);
+	
+	/** The constant value of this factor in case it has no variables. */
+	double value();
+	
 	void setExplanation(ExplanationTree explanation);
 	
 	boolean mathematicallyEquals(Factor another);

@@ -2,9 +2,7 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 import static com.sri.ai.util.Util.compareNumbersComponentWise;
 import static com.sri.ai.util.Util.iterator;
-import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.Util.setDifference;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +11,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -74,19 +71,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 				println("Simplex bound");
 			}
 			else {
-				FunctionConvexHull hull = getFunctionConvexHull(atomicPolytope, query); 
-
-				var normalizedHullFactor = hull.getFactor().normalize(list(query));
-				var allButQuery = setDifference(normalizedHullFactor.getVariables(), list(query));
-				var upperBoundPerValue = (ArrayTableFactor) normalizedHullFactor.max(allButQuery);
-				var lowerBoundPerValue = (ArrayTableFactor) normalizedHullFactor.min(allButQuery);
-				var upperBoundOfLastValue = upperBoundPerValue.getEntries().get(upperBoundPerValue.numberOfEntries() - 1);
-				var lowerBoundOfLastValue = lowerBoundPerValue.getEntries().get(lowerBoundPerValue.numberOfEntries() - 1);
-				println("Bound length: " + (upperBoundOfLastValue - lowerBoundOfLastValue));
-				//println("Upper bound : " + upperBoundOfLastValue);
-				//println("Lower bound : " + lowerBoundOfLastValue);
-				//println("Hull        : " + hull);
-				//println("Normalized hull factor: " + normalizedHullFactor);
+				println("Bound length: " + atomicPolytope.length());
 			}
 		}
 		return current;

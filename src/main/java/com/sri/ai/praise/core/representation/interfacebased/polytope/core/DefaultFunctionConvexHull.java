@@ -120,4 +120,11 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 			return functionConvexHullsHaveDifferentFactors(this, anotherFunctionConvexHull, factorsEqualityCheck);
 		}
 	}
+
+	@Override
+	public Factor probabilityRange() {
+		var normalizedHullFactor = getFactor().normalize(getFreeVariables());
+		var result = normalizedHullFactor.potentialRange(getIndices());
+		return result;
+	}
 }

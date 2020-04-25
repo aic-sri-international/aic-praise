@@ -150,6 +150,16 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
+	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
+		throw new Error("argmin not implemented for " + getClass());
+	}
+
+	@Override
+	public double value() {
+		throw new Error("value not implemented for " + getClass());
+	}
+
+	@Override
 	public ExplanationTree getExplanation() {
 		// TODO: remove explanation awareness from ExactBP and make it a transparent feature of factors.
 		return null;

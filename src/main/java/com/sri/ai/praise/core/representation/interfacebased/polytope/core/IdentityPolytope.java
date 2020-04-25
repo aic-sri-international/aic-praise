@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreEqual;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
 import static java.util.Collections.emptyList;
@@ -7,6 +8,7 @@ import static java.util.Collections.emptyList;
 import java.util.Collection;
 
 import com.google.common.base.Predicate;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -69,5 +71,10 @@ public class IdentityPolytope implements Polytope {
 		else {
 			return polytopesAreOfIncomparableClasses(this, another);
 		}
+	}
+
+	@Override
+	public Factor probabilityRange() {
+		return ZERO_FACTOR;
 	}
 }
