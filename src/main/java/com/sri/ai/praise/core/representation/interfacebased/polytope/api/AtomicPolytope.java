@@ -37,6 +37,10 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 
+import java.util.Collection;
+
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+
 /**
  * Interface for atomic polytopes, which is to say polytopes which are not represented as products of polytopes.
  * @author braz
@@ -62,4 +66,7 @@ public interface AtomicPolytope extends Polytope {
 	 * @return
 	 */
 	AtomicPolytope getProductIfItIsASimplificationOrNullOtherwise(AtomicPolytope anotherAtomicPolytope);
+
+	@Override
+	AtomicPolytope normalize(Collection<? extends Variable> variablesToNormalize);
 }

@@ -109,15 +109,15 @@ public class Simplex extends AbstractAtomicPolytope {
 		// If we want to represent that, we must rely on the specific polytope implementation used.
 	}
 
-	@Override
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
-		if (variable.equals(getVariable())) {
-			return this;
-		}
-		else {
-			throw new Error("getEquivalentAtomicPolytopeOn can only be requested of Simplex for its own variable");
-		}
-	}
+//	@Override
+//	public AtomicPolytope getAtomicPolytopeEquivalentToMarginalPolytopeOf(Variable variable) {
+//		if (variable.equals(getVariable())) {
+//			return this;
+//		}
+//		else {
+//			throw new Error((new Enclosing()).methodName() + " can only be requested of Simplex for its own variable");
+//		}
+//	}
 
 	@Override
 	public String toString() {
@@ -161,6 +161,11 @@ public class Simplex extends AbstractAtomicPolytope {
 
 	@Override
 	public Factor probabilityRange() {
-		return new ConstantFactor(1.0);
+		return new ConstantFactor(1.0); // TODO: Wrong! It has to be a factor with one variable, the same as the simplex.
+	}
+
+	@Override
+	public Simplex normalize(Collection<? extends Variable> variablesToNormalize) {
+		return this;
 	}
 }

@@ -92,11 +92,20 @@ public interface Polytope extends Approximation<Factor> {
 	Polytope unSumOutSimplexVariables(Predicate<? super Variable> isSimplexVariabledToBeUnSummedOut);
 	
 	/**
-	 * Takes a polytope in which the only free variable is a given variable,
-	 * and returns a single equivalent {@link AtomicPolytope}.
+	 * Returns an {@link AtomicPolytope} equivalent to this polytope.
+	 * Currently supported only for polytopes with a single free variable.
 	 */
-	AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable);
-	// TODO: this is a suspicious method, a bit too specific... It may be better to identify what is done with its result, and implement that instead.
+	AtomicPolytope getEquivalentAtomicPolytope();
+	// The general case (more than one free variable) would require a KroneckerDeltaFactor
+	// since simplices can be seen as function convex hulls on that kind
+	// of factor, and this operation requires all factors to be multiplied.
+	// This would be expensive and it is unclear how useful it is it,
+	// although it would be nice to support generality.
+
+	/** 
+	 * Returns the polytope obtained by normalizing all its factor elements according to the variables provided
+	 */
+	Polytope normalize(Collection<? extends Variable> variablesToNormalize);
 
 	/**
 	 * Assumes this polytope is of the form <code>convex_hull({ phi(i,v) }_i)</code> for <code>v</code> a tuple of variables,

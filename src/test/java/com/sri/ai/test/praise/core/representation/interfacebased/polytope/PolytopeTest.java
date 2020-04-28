@@ -181,43 +181,43 @@ public class PolytopeTest {
 	public void testGetEquivalentAtomicPolytope() {
 		
 		product = Polytope.multiply(list(simplexU));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUV));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list(v)).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound, convexHullVW));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUV));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUFreeVBound));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU;
 		assertEquals(expected, actual);
 		
 		product = Polytope.multiply(list(simplexU, convexHullUBoundVFree));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list(v)).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		expected = simplexU; // simplexU dominates
 		assertEquals(expected, actual);
 
 		product = Polytope.multiply(list(convexHullUFreeVBound, convexHullVW));
-		actual = product.getEquivalentAtomicPolytopeOn(u);
+		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
 		println("Atomic polytope on u equivalent to " + product + ": " + actual);
 		ExpressionFactor expectedExpressionFactor = new DefaultExpressionFactor(parse("if U then if V then if W then 8 else 10 else 15 else if V then if W then 12 else 15 else 15"), context);
 		expected = new DefaultFunctionConvexHull(list(v,w), expectedExpressionFactor);

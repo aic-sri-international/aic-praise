@@ -34,6 +34,4 @@ public interface TableFactor extends Factor {
 	
 	@Override
 	TableFactor sumOut(Collection<? extends Variable> variablesToSumOut);
-
-	
 }

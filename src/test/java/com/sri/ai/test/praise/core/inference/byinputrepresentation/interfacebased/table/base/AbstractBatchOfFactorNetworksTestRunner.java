@@ -52,11 +52,16 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 
 	private int[] totalTimeForEachAlgorithm;
 	
+	private String resultDescription;
+	private boolean showResult;
+	
 	//////////////////// CONSTRUCTOR
 	
-	public AbstractBatchOfFactorNetworksTestRunner(Configuration configuration) {
+	public AbstractBatchOfFactorNetworksTestRunner(Configuration configuration, String resultDescription, boolean showResult) {
 		this.configuration = configuration;
 		this.totalTimeForEachAlgorithm = new int[getAlgorithms().size()];
+		this.resultDescription = resultDescription;
+		this.showResult = showResult;
 	}
 	
 	//////////////////// MAIN FUNCTIONALITY
@@ -129,13 +134,13 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 		for (int i = 0; i != getAlgorithms().size(); i++) {
 			var name = getAlgorithms().get(i).first;
 			var resultAndTime = resultsAndTimes.get(i);
-			println(name + ": " + resultAndTimeString(resultAndTime));
+			println(name + " " + resultDescription + ": " + resultAndTimeString(resultAndTime));
 		}
 		println();
 	}
 
 	private String resultAndTimeString(Pair<Result, Long> resultAndTime) {
-		return resultAndTime.first + ", " + resultAndTime.second + " ms";
+		return (showResult? resultAndTime.first  + ", " : "") + resultAndTime.second + " ms";
 	}
 
 	//////////////////// REPORTING AFTER ALL RUNS

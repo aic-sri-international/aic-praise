@@ -13,6 +13,7 @@ import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.ratioisInOnePlusOrMinusEpsilon;
+import static com.sri.ai.util.Util.round;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.subtract;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -64,6 +66,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static int maximumNumberOfEntriesToShow = 5;
+	public static int decimalPlaces = -1;
 	
 	private final MixedRadixNumber parameterIndexRadix; // null if number of variables is 0.
 
@@ -274,10 +277,11 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			return "[greater than " + maximumNumberOfEntriesToShow + " entries]";
 		}
 		else {
-			return "[" + Util.join(Arrays.stream(parameters).boxed().collect(Collectors.toList())) + "]";
+			DoubleUnaryOperator rounder = decimalPlaces == -1? d -> d : d -> round(d, decimalPlaces);
+			return "[" + Util.join(Arrays.stream(parameters).map(rounder).boxed().collect(Collectors.toList())) + "]";
 		}
 	}
-	
+
 	private double parametersAggregate(BinaryDoubleOperator operator, double initialValue) {
 		double result = initialValue;
 		for (int i = 0; i != parameters.length; i++) {

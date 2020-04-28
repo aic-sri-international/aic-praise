@@ -28,7 +28,7 @@ public class AEBPQueryTreeNode extends AEBPVariableTreeNode{
 	@Override
 	public Polytope messageSent(Predicate<Polytope> boxIt) {
 		Polytope message = super.messageSent(boxIt);
-		Polytope result = message.getEquivalentAtomicPolytopeOn(this.root);
+		Polytope result = message.getEquivalentAtomicPolytope();
 		return result;
 	}
 	//----------- Add Node -----------

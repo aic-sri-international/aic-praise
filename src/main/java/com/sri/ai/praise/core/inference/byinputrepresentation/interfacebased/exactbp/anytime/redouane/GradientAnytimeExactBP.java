@@ -142,21 +142,8 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 	}
 	
 	private static AtomicPolytope collapse(Polytope subPolytope) {
-		Variable freeVariable = getFreeVariable(subPolytope);
-		AtomicPolytope subAtomicPolytope = subPolytope.getEquivalentAtomicPolytopeOn(freeVariable);
+		AtomicPolytope subAtomicPolytope = subPolytope.getEquivalentAtomicPolytope();
 		return subAtomicPolytope;
-	}
-	
-	private static Variable getFreeVariable(Polytope subPolytope) {
-		Collection<? extends Variable> freeVariables = subPolytope.getFreeVariables();
-		if(freeVariables.size() != 1) {
-			throw new Error("BP messages should have one and only one free variable");
-		}
-		Variable freeVariable = null;
-		for(Variable variable : freeVariables) {
-			freeVariable = variable;
-		}
-		return freeVariable;
 	}
 	
 	private static Set<? extends Variable> getIndices(AtomicPolytope subAtomicPolytope) {

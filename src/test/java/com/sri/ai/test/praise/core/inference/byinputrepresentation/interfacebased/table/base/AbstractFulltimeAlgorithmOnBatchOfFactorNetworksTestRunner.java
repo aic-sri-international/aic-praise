@@ -27,7 +27,7 @@ public abstract class AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner
 extends AbstractBatchOfFactorNetworksTestRunner<Factor, Configuration> {
 
 	protected AbstractFulltimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
-		super(configuration);
+		super(configuration, "result", true /* show result */);
 	}
 
 	@Override

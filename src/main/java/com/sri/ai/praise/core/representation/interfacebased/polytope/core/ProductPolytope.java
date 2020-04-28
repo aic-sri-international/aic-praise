@@ -54,6 +54,7 @@ import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
+import static com.sri.ai.util.base.Pair.pair;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,6 +71,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.util.Enclosing;
 import com.sri.ai.util.Util;
+import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.explainableonetoonematching.ExplainableOneToOneMatching;
 import com.sri.ai.util.explainableonetoonematching.LeftOverMerger;
 import com.sri.ai.util.explainableonetoonematching.Matcher;
@@ -366,23 +368,14 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		// but the method sumOut does not attempt to standardize apart all the time as that would be expensive.
 		// To use sumOut without having to worry about standardizing apart, we instead use a technique
 		// that takes care of the simplices separately, and explicitly uses the fact that this is a summation.
-		
-		List<AtomicPolytope> simplexPolytopes = list();
-		List<AtomicPolytope> functionConvexHullPolytopes = list();
-		collect(polytopesDependentOnEliminated, p -> p instanceof Simplex, simplexPolytopes, functionConvexHullPolytopes);
-	
-		@SuppressWarnings("unchecked")
-		List<? extends Simplex> simplices = (List<? extends Simplex>) simplexPolytopes;
 
-		var simplexVariables = mapIntoList(simplices, Simplex::getVariable);
-	
-		@SuppressWarnings("unchecked")
-		var functionConvexHulls = (Collection<? extends FunctionConvexHull>) functionConvexHullPolytopes;
+		var simplicesAndFunctionConvexHulls = separateSimplicesAndFunctionConvexHulls(polytopesDependentOnEliminated);
+		var simplices = simplicesAndFunctionConvexHulls.first;
+		var functionConvexHulls = simplicesAndFunctionConvexHulls.second;
 		
-		// it's important to wait for simplification until the end because simplification will often depend
-		// on the indices and we want a polytope equivalent to the one with all the simplex variables as indices.
 		var productOfConvexHulls = multiplyIntoSingleFunctionConvexHull(functionConvexHulls);
 		
+		var simplexVariables = mapIntoList(simplices, Simplex::getVariable);
 		var eliminatedMinusSimplexVariables = subtract(eliminated, simplexVariables);
 		var productOfConvexHullsAfterSummingOut = productOfConvexHulls.sumOut(eliminatedMinusSimplexVariables);
 	
@@ -393,64 +386,50 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 		
 		var result = productOfConvexHullsAfterSummingOut.addIndices(indicesToAdd);
 		
-//		println("\nProductPolytope:");
-//		println("eliminated: " + join(eliminated));
-//		println("initial polytopes: " + join(polytopesDependentOnEliminated));
-//		println("simplices: " + join(simplices));
-//		println("convex hulls:\n" + join("\n", simplices));
-//		println("product of hulls: " + productOfConvexHulls);
-//		println("eliminated minus simplex variables: " + eliminatedMinusSimplexVariables);
-//		println("product of hulls after eliminating above: " + productOfConvexHullsAfterSummingOut);
-//		println("indices to add: " + indicesToAdd);
-//		println("result                   : " + result);
-		
 		return result;
 	}
 
-	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
-	
-	@Override
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
-		var nonSimplex = getFirst(getAtomicPolytopes(), p -> !( p instanceof Simplex));
+	private static Pair<List<? extends Simplex>, Collection<? extends FunctionConvexHull>> 
+	separateSimplicesAndFunctionConvexHulls(Collection<? extends AtomicPolytope> atomicPolytopes) {
 		
-		var allAreSimplices = nonSimplex == null;
+		List<AtomicPolytope> simplexPolytopes = list();
+		List<AtomicPolytope> functionConvexHullPolytopes = list();
+		collect(atomicPolytopes, p -> p instanceof Simplex, simplexPolytopes, functionConvexHullPolytopes);
+	
+		@SuppressWarnings("unchecked")
+		List<? extends Simplex> simplices = (List<? extends Simplex>) simplexPolytopes;
 
-		if (allAreSimplices) {
-			var simplexOnVariable = getFirst(getAtomicPolytopes(), p -> ((Simplex)p).getVariable().equals(variable));
-			if (simplexOnVariable == null) {
-				throw new Error("ProductPolytope has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
-			}
-			else {
-				return simplexOnVariable;
-			}
-		}
-		else {
-			return getEquivalentAtomicPolytopeOn(variable, getAtomicPolytopes());
-		}
+		@SuppressWarnings("unchecked")
+		var functionConvexHulls = (Collection<? extends FunctionConvexHull>) functionConvexHullPolytopes;
+
+		return pair(simplices, functionConvexHulls);
 	}
 	
+	//////////////////////// GET ATOMIC POLYTOPE
+	
 	@SuppressWarnings("unchecked")
-	public static AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable, Collection<? extends AtomicPolytope> atomicPolytopes) {
-		Simplex simplexOnVariableIfAny = (Simplex) getFirst(atomicPolytopes, p -> isSimplexOn(p, variable));
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytope() {
+		myAssert(getFreeVariables().size() == 1, () -> "getEquivalentAtomicPolytope is currently supported for polytopes with a single free variable but this polytope has free variables " + getFreeVariables());
+
+		var variable = getFirst(getFreeVariables());
+
+		Simplex simplexOnVariableIfAny = (Simplex) getFirst(getAtomicPolytopes(), p -> isSimplexOn(p, variable));
 		
-		boolean thereIsSimplexOnQuerySoItDominates = simplexOnVariableIfAny != null;
+		boolean thereIsSimplexOnVariableSoItDominates = simplexOnVariableIfAny != null;
 		
 		AtomicPolytope result;
-		if (thereIsSimplexOnQuerySoItDominates) {
+		if (thereIsSimplexOnVariableSoItDominates) {
 			result = simplexOnVariableIfAny;
 		}
 		else {
-			// all atomicPolytopes are non-simplex, or otherwise we would have simplexes on non-query variables and the query would not be the only free variable
-			result = multiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) atomicPolytopes);
+			// all atomic polytopes are non-simplex, or otherwise we would have simplexes on other variables and there would be more than only free variable
+			result = multiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) getAtomicPolytopes());
 		}
-		// It would be natural to use simplification here but simplify may return non-atomic polytopes.
-		// What we really want is to sum out all other variables, which guarantees query is alone and simplify returns an atomic polytope then,
-		// and cast, although if we sum other variables out we may be able to simply get rid of this method altogether
-		// and use sumOut instead.
 		
 		return result;
 	}
-
+	
 	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {
 		boolean result = 
 				atomicPolytope instanceof Simplex
@@ -458,7 +437,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 				((Simplex)atomicPolytope).getVariable().equals(variable);
 		return result;
 	}
-
+	
 	////////////////// ANCILLARY
 
 	@Override
@@ -588,5 +567,10 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 	@Override
 	public Factor probabilityRange() {
 		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+	}
+
+	@Override
+	public Polytope normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error("normalize is not valid for ProductPolytope");
 	}
 }

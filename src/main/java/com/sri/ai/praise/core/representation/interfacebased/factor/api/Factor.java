@@ -98,7 +98,10 @@ public interface Factor {
 	/** if f is a factor, returns 1/f */
 	Factor invert();
 	
-	/** returns the factor obtained by normalizing according to the variables provided */
+	/** 
+	 * Returns the factor obtained by normalizing all its factor elements according to the variables provided
+	 * (those are the ones we sum over, not the ones whose distribution becomes normalized).
+	 */
 	Factor normalize(Collection<? extends Variable> variablesToNormalize);
 	
 	/** returns the factor obtained by maximizing according to the variables provided */

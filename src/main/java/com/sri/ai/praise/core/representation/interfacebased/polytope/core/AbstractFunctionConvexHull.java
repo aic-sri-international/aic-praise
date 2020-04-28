@@ -7,7 +7,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.sum;
 import static com.sri.ai.util.Util.union;
@@ -160,23 +159,23 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 
 	//////////////////////// GET SINGLE ATOMIC POLYTOPE FOR A VARIABLE
 	
-	@Override
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
-		if (getFreeVariables().contains(variable)) {
-			if (getFreeVariables().size() == 1) {
-				// already in desired form, nothing to do
-				return this;
-			}
-			else {
-				// sum the other ones out
-				return sumOut(setDifference(getFreeVariables(), list(variable)));
-			}
-		}
-		else {
-			// variable is required to be in polytope
-			throw new Error(getClass() + " has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
-		}
-	}
+//	@Override
+//	public AtomicPolytope getAtomicPolytopeEquivalentToMarginalPolytopeOf(Variable variable) {
+//		if (getFreeVariables().contains(variable)) {
+//			if (getFreeVariables().size() == 1) {
+//				// already in desired form, nothing to do
+//				return this;
+//			}
+//			else {
+//				// sum the other ones out
+//				return sumOut(setDifference(getFreeVariables(), list(variable)));
+//			}
+//		}
+//		else {
+//			// variable is required to be in polytope
+//			throw new Error(getClass() + " has variables " + getFreeVariables() + " but getEquivalentAtomicPolytopeOn was requested for one not in it: " + variable);
+//		}
+//	}
 
 	//////////////////////// MULTIPLY INTO A SINGLE FUNCTION CONVEX HULL
 

@@ -91,4 +91,9 @@ public abstract class AbstractAtomicPolytope extends AbstractPolytope implements
 	public Collection<? extends AtomicPolytope> getAtomicPolytopes() {
 		return list(this);
 	}
+
+	@Override
+	public AtomicPolytope getEquivalentAtomicPolytope() {
+		return this;
+	}
 }

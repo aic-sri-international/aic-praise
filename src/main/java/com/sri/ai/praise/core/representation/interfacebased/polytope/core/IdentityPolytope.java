@@ -53,9 +53,14 @@ public class IdentityPolytope implements Polytope {
 		throw new Error(IdentityPolytope.class + " does not support " + (new Enclosing()).methodName());
 	}
 
+//	@Override
+//	public AtomicPolytope getAtomicPolytopeEquivalentToMarginalPolytopeOf(Variable variable) {
+//		throw new Error("getEquivalentAtomicPolytopeOn is not valid for IdentityPolytope");
+//	}
+//
 	@Override
-	public AtomicPolytope getEquivalentAtomicPolytopeOn(Variable variable) {
-		throw new Error("getEquivalentAtomicPolytopeOn is not valid for IdentityPolytope");
+	public AtomicPolytope getEquivalentAtomicPolytope() {
+		throw new Error("getEquivalentAtomicPolytope is not valid for IdentityPolytope");
 	}
 
 	@Override
@@ -76,5 +81,10 @@ public class IdentityPolytope implements Polytope {
 	@Override
 	public Factor probabilityRange() {
 		return ZERO_FACTOR;
+	}
+
+	@Override
+	public Polytope normalize(Collection<? extends Variable> variablesToNormalize) {
+		throw new Error("normalize is not valid for IdentityPolytope");
 	}
 }

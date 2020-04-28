@@ -36,7 +36,7 @@ AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner
 extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>, Configuration> {
 
 	protected AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
-		super(configuration);
+		super(configuration, "initial iterator", false /* do not show result because it is an iterator */);
 	}
 
 	@Override
@@ -59,9 +59,9 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	private Approximation<Factor> iterate(Iterator<Approximation<Factor>> anytimeIterator, String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm, Variable query, FactorNetwork factorNetwork) {
 		Approximation<Factor> current = null;
 		while (anytimeIterator.hasNext()) {
-			//println();
+
 			current = anytimeIterator.next();
-			AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
+			AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytope();
 			
 			if (atomicPolytope.getFreeVariables().size() > 1) {
 				println("AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: " + Util.removeNonDestructively(atomicPolytope.getFreeVariables(), query));
@@ -97,7 +97,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	}
 
 	private FunctionConvexHull getFunctionConvexHull(Approximation<Factor> current, Variable query) {
-		AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytopeOn(query);
+		AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytope();
 		return (FunctionConvexHull) atomicPolytope;
 	}
 
