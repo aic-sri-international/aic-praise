@@ -15,7 +15,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
 import com.sri.ai.util.Enclosing;
 
-public class IdentityPolytope implements Polytope {
+public class IdentityPolytope extends AbstractPolytope {
 
 	public final static IdentityPolytope IDENTITY_POLYTOPE = new IdentityPolytope();
 	
@@ -50,7 +50,7 @@ public class IdentityPolytope implements Polytope {
 
 	@Override
 	public Polytope unSumOutSimplexVariables(Predicate<? super Variable> shouldNotHaveBeenSummedOut) {
-		throw new Error(IdentityPolytope.class + " does not support " + (new Enclosing()).methodName());
+		throw new Error(IdentityPolytope.class + " does not support " + (new Enclosing(){}).methodName());
 	}
 
 //	@Override
@@ -86,5 +86,10 @@ public class IdentityPolytope implements Polytope {
 	@Override
 	public Polytope normalize(Collection<? extends Variable> variablesToNormalize) {
 		throw new Error("normalize is not valid for IdentityPolytope");
+	}
+	
+	@Override
+	public String toString() {
+		return "Identity polytope";
 	}
 }

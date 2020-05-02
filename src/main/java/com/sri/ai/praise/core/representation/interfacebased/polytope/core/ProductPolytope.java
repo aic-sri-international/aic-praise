@@ -81,7 +81,7 @@ import com.sri.ai.util.explainableonetoonematching.UnmatchedElementMerger;
  * @author braz
  *
  */
-public class ProductPolytope extends AbstractPolytope implements Polytope {
+public class ProductPolytope extends AbstractNonIdentityPolytope implements Polytope {
 	
 	private List<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes;
 	// by "already simplified", we mean each pair of atomic polytopes in this list cannot be simplified into an atomic polytope,
@@ -566,7 +566,7 @@ public class ProductPolytope extends AbstractPolytope implements Polytope {
 
 	@Override
 	public Factor probabilityRange() {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
 	}
 
 	@Override

@@ -371,11 +371,11 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
-		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
 	}
 	
 	@Override
 	public FactorsEqualityCheck checkEquality(Factor another) {
-		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
 	}
 }

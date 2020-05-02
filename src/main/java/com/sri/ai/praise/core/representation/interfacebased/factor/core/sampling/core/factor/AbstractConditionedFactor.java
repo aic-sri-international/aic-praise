@@ -236,7 +236,7 @@ public abstract class AbstractConditionedFactor implements Factor {
 
 	@Override
 	public Factor add(Factor another) {
-		myAssert(!intersect(conditioningSample.getVariables(), another.getVariables()), () -> (new Enclosing() {}).methodName() + " does not support the addition of a conditioned factor and another factor, if the latter contains variables conditioned in the first one");
+		myAssert(!intersect(conditioningSample.getVariables(), another.getVariables()), () -> (new Enclosing(){}).methodName() + " does not support the addition of a conditioned factor and another factor, if the latter contains variables conditioned in the first one");
 		Factor factorPlusAnother = factor.add(another);
 		Factor result = getConditionedFactor(conditioningSample, factorPlusAnother);
 		return result;
@@ -298,12 +298,12 @@ public abstract class AbstractConditionedFactor implements Factor {
 
 	@Override
 	public ExplanationTree getExplanation() {
-		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
+		throw new Error((new Enclosing(){}).methodName() + " not supported by " + AbstractConditionedFactor.class);
 	}
 
 	@Override
 	public void setExplanation(ExplanationTree explanation) {
-		throw new Error((new Enclosing() {}).methodName() + " not supported by " + AbstractConditionedFactor.class);
+		throw new Error((new Enclosing(){}).methodName() + " not supported by " + AbstractConditionedFactor.class);
 	}
 
 	///////////////////

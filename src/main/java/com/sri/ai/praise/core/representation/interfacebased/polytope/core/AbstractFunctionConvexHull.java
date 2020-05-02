@@ -241,19 +241,8 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 	}
 
 	@Override
-	public boolean equals(Object another) {
-		boolean result =
-				another instanceof FunctionConvexHull
-				&&
-				((FunctionConvexHull) another).getIndices().equals(getIndices())
-				&&
-				((FunctionConvexHull) another).getFactor().equals(getFactor());
-		return result;
-	}
-
-	@Override
 	public int hashCode() {
-		return getIndices().hashCode() + getFactor().hashCode();
+		return getIndices().hashCode()*31 + getFactor().hashCode();
 	}
 
 }

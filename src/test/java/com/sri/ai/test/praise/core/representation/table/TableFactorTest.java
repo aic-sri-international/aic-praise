@@ -36,6 +36,7 @@ public class TableFactorTest {
 	@BeforeAll
 	public static void setUp() {
 		ArrayTableFactor.maximumNumberOfEntriesToShow = 100;
+		ArrayTableFactor.decimalPlaces = -1;
 		println(ArrayTableFactor.class.getSimpleName() + " will only show tables with up to " + ArrayTableFactor.maximumNumberOfEntriesToShow + " elements.");
 	}
 	

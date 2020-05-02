@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -92,17 +93,23 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 			return convexHull;
 		}
 		
-		println("\nBefore simplification: " + convexHull.getFactor().summationCost());
-		println("                indices: " + convexHull.getIndices());
-		println("         free variables: " + convexHull.getFreeVariables());
+		println();
+		println("Before simplification: " + convexHull.getFactor().summationCost());
+		println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
+		println("       free variables: " + convexHull.getFreeVariables());
 		
 		var result = Timer.getResultAndTime(() -> makeMarginSimplex(convexHull.normalize(convexHull.getFreeVariables())));
 		
-		println(  "After  simplification: " + result.first.getFactor().summationCost());
-		println(  "              indices: " + result.first.getIndices());
-		println(  "       free variables: " + result.first.getFreeVariables());
+		println("After  simplification: " + result.first.getFactor().summationCost());
+		println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
+		println("       free variables: " + result.first.getFreeVariables());
 		
 		return result.first;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static String getIndicesCardinalities(FunctionConvexHull functionConvexHull) {
+		return join(mapIntoList((Collection<? extends TableVariable>) functionConvexHull.getIndices(), TableVariable::getCardinality));
 	}
 
 	public static int summationCost(Collection<? extends Variable> variables) {

@@ -188,17 +188,17 @@ public class Box extends AbstractFunctionConvexHull {
 
 	@Override
 	public boolean equalsModuloPermutations(Object another) {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
 	}
 
 	@Override
 	public PolytopesEqualityCheck checkEquality(Polytope another) {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
 	}
 
 	@Override
 	public Factor probabilityRange() {
-		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
 	}
 
 	/*public Box(Factor phiMin, Factor phiMax, BoxFactorFactory factory) {

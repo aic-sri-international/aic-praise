@@ -44,7 +44,7 @@ import java.util.Collection;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 
-public abstract class AbstractAtomicPolytope extends AbstractPolytope implements AtomicPolytope {
+public abstract class AbstractAtomicPolytope extends AbstractNonIdentityPolytope implements AtomicPolytope {
 
 	public AbstractAtomicPolytope() {
 		super();

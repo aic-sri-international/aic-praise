@@ -43,7 +43,11 @@ import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.MAX;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
 import static com.sri.ai.grinder.library.set.Sets.intensionalMultiSet;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreDifferent;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreEqual;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentVariables;
 import static com.sri.ai.util.Util.mapIntoList;
+import static com.sri.ai.util.Util.unorderedEquals;
 import static com.sri.ai.util.collect.PredicateIterator.predicateIterator;
 
 import java.util.ArrayList;
@@ -283,11 +287,25 @@ public abstract class AbstractExpressionFactor extends AbstractExpressionWrapper
 
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
-		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
 	}
 	
 	@Override
-	public FactorsEqualityCheck checkEquality(Factor another) {
-		throw new Error((new Enclosing()).methodName() + " not yet implemented for " + getClass());
+	public FactorsEqualityCheck<ExpressionFactor> checkEquality(Factor another) {
+		if (another instanceof AbstractExpressionFactor) {
+			var anotherExpressionFactor = (AbstractExpressionFactor) another;
+			if (unorderedEquals(getVariables(), anotherExpressionFactor.getVariables())) {
+				if (getInnerExpression().equals(anotherExpressionFactor.getInnerExpression())) {
+					return factorsAreEqual(this, anotherExpressionFactor);
+				}
+				else {
+					return factorsAreDifferent(this, anotherExpressionFactor, "expressions are different.");
+				}
+			}
+			else {
+				return factorsHaveDifferentVariables(this, anotherExpressionFactor);
+			}
+		}
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
 	}
 }

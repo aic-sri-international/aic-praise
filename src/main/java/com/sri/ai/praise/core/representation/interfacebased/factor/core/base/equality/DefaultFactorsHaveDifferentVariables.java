@@ -1,12 +1,16 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality;
 
+import static com.sri.ai.util.Util.set;
+import static com.sri.ai.util.Util.setDifference;
+
 import java.util.Collection;
 import java.util.Set;
 
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsHaveDifferentVariables;
 
-public class DefaultFactorsHaveDifferentVariables<F> 
+public class DefaultFactorsHaveDifferentVariables<F extends Factor> 
 extends AbstractFactorsEqualityCheck<F>
 implements FactorsHaveDifferentVariables<F> {
 	
@@ -17,6 +21,14 @@ implements FactorsHaveDifferentVariables<F> {
 		super(first, second);
 		this.variablesInFirstButNotInSecond = variablesInFirstButNotInSecond;
 		this.variablesInSecondButNotInFirst = variablesInSecondButNotInFirst;
+	}
+
+	public DefaultFactorsHaveDifferentVariables(F first, F second) {
+		this(
+				first, second, 
+				setDifference(first.getVariables(), second.getVariables(), set()),
+				setDifference(second.getVariables(), first.getVariables(), set())
+			);
 	}
 
 	@Override
