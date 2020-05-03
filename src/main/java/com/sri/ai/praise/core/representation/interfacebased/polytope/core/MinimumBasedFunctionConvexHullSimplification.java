@@ -45,6 +45,7 @@ import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
+import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +61,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.Pair;
+import com.sri.ai.util.base.Wrapper;
 
 /**
  * A simplification of a {@link FunctionConvexHull} based on function f(I, FreeVariables) to the product polytope
@@ -97,8 +99,10 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 		println("Before simplification: " + convexHull.getFactor().summationCost());
 		println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
 		println("       free variables: " + convexHull.getFreeVariables());
+		println("          convex hull: " + convexHull);
 		
-		var result = Timer.getResultAndTime(() -> makeMarginSimplex(convexHull.normalize(convexHull.getFreeVariables())));
+		var normalized = convexHull.normalize(convexHull.getFreeVariables());
+		var result = Timer.getResultAndTime(() -> makeMarginSimplex(normalized));
 		
 		println("After  simplification: " + result.first.getFactor().summationCost());
 		println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
@@ -122,33 +126,6 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 	}
 
 	/**
-	 * A even more aggressive relaxation that decouples variables; to try later.
-	 * @param normalizedConvexHull
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	private static Polytope getDecoupledMarginSimplexProduct(FunctionConvexHull normalizedConvexHull) {
-		Collection<? extends Variable> freeVariables = normalizedConvexHull.getFreeVariables();
-		List<Variable> freeVariablesBuffer = listFrom(freeVariables);
-		var marginSimplices = mapIntoList(freeVariables, v -> getMarginSimplexOnSingleVariable(normalizedConvexHull, v, freeVariablesBuffer));
-		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
-	}
-	
-	private static FunctionConvexHull getMarginSimplexOnSingleVariable(FunctionConvexHull normalizedConvexHull, Variable v, List<Variable> freeVariablesBuffer) {
-
-		freeVariablesBuffer.remove(v);
-
-		var otherFreeVariables = freeVariablesBuffer;
-		var projection = normalizedConvexHull.sumOut(otherFreeVariables); 
-		var normalizedProjection = projection.normalize(list(v));
-		var result = makeMarginSimplex(normalizedProjection);
-
-		freeVariablesBuffer.add(v);
-
-		return result;
-	}
-
-	/**
 	 * Given a normalized function convex hull, determines the minimum probability
 	 * for each assignment to the free variables
 	 * when ranging over all index assignments,
@@ -163,25 +140,26 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 	public static 
 	Pair<? extends List<? extends Variable>, Factor> 
 	makeMarginSimplexIndicesAndFactor(FunctionConvexHull normalizedConvexHull) {
-		
+		explain("Normalized: ", normalizedConvexHull);
 		var minima = normalizedConvexHull.getFactor().min(normalizedConvexHull.getIndices());
+		explain("minima: ", minima);
 		var marginSimplexFactor = marginSimplexFactor(minima);
 		var numberOfMarginSimplexIndices = marginSimplexFactor.getVariables().size()/2;
 		var marginSimplexIndices = marginSimplexFactor.getVariables().subList(0, numberOfMarginSimplexIndices);
 		return pair(marginSimplexIndices, marginSimplexFactor);
 	}
 
-	private static int indexIndex = 0;
-	
 	/**
 	 * Takes a factor containing the minimum probabilities for the values of a variable,
 	 * and returns a new factor with twice the dimensions as the original one,
-	 * with the first half being new index variables, based on the original ones,
-	 * such that each assignment to these index variables leaves a matrix on the original
-	 * variables with values equal to the minima, with the exception of the
-	 * position equal to the assignment to the indices (so it's the diagonal if
-	 * we consider indices assignments as the row and original variable assignments as the column)
-	 * which is equal to 1 - sum of minima in row, that is the maximum probability for that assignment.
+	 * with the first half of the dimensions being new index variables (I0, I1, ...)
+	 * equal to the original variables in cardinality.
+	 * Each assignment A to the tuple (I0, I1, ...) maps to a probability distribution
+	 * on the values of the original variables with probabilities equal to the given minima,
+	 * with the exception of the position corresponding to the same assignment A but to the original variables
+	 * (so it's the diagonal if we consider (I0, I1, ...) assignments as the row and original variable assignments as the column).
+	 * The probability at this position is instead (1 - sum of minima in row), that is, the maximum possible probability for that assignment
+	 * given all the minima.
 	 * @param minima
 	 * @return
 	 */
@@ -201,8 +179,39 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 			int offsetForDiagonalColumnInThisRow = row*numberOfAssignments + row;
 			newArray[offsetForDiagonalColumnInThisRow] = 1.0 - (sumOfMinima - array.get(row)); 
 		}
-		var indexVariables = mapIntoList(tableFactor.getVariables(), v -> new TableVariable("I" + indexIndex++, v.getCardinality()));
+		var indexIndex = new Wrapper<Integer>(0);
+		var indexVariables = mapIntoList(tableFactor.getVariables(), v -> new TableVariable("I" + indexIndex.value++, v.getCardinality()));
 		var newVariables = Util.makeListWithElementsOfTwoCollections(indexVariables, tableFactor.getVariables());
 		return new ArrayTableFactor(newVariables, newArray);
+	}
+
+	/**
+	 * A even more aggressive relaxation that decouples variables; to try later.
+	 * @param normalizedConvexHull
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private static Polytope getDecoupledMarginSimplexProduct(FunctionConvexHull normalizedConvexHull) {
+		Collection<? extends Variable> freeVariables = normalizedConvexHull.getFreeVariables();
+		List<Variable> freeVariablesBuffer = listFrom(freeVariables);
+		var marginSimplices = mapIntoList(freeVariables, v -> getMarginSimplexOnSingleVariable(normalizedConvexHull, v, freeVariablesBuffer));
+		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
+	}
+
+	private static FunctionConvexHull getMarginSimplexOnSingleVariable(
+			FunctionConvexHull normalizedConvexHull, 
+			Variable v, 
+			List<Variable> freeVariablesBuffer) {
+	
+		freeVariablesBuffer.remove(v);
+	
+		var otherFreeVariables = freeVariablesBuffer;
+		var projection = normalizedConvexHull.sumOut(otherFreeVariables); 
+		var normalizedProjection = projection.normalize(list(v));
+		var result = makeMarginSimplex(normalizedProjection);
+	
+		freeVariablesBuffer.add(v);
+	
+		return result;
 	}
 }
