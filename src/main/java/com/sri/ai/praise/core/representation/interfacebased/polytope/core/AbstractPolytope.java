@@ -12,9 +12,13 @@ public abstract class AbstractPolytope implements Polytope {
 	@Override
 	public boolean equals(Object another) {
 		return
-				another instanceof Polytope
-				&&
-				checkEquality((Polytope) another).areEqual();
+				this == another
+				||
+				(
+						another instanceof Polytope
+						&&
+						checkEquality((Polytope) another).areEqual()
+				);
 	}
 	
 	/**

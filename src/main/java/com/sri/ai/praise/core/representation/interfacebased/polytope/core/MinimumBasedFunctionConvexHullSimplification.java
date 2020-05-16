@@ -88,10 +88,25 @@ import com.sri.ai.util.base.Wrapper;
  */
 final public class MinimumBasedFunctionConvexHullSimplification {
 	
+	/**
+	 * Computes simplification.
+	 * @param convexHull function convex hull to be simplified
+	 * @return simplified polytope
+	 */
 	public static FunctionConvexHull simplify(FunctionConvexHull convexHull) {
+		return simplify(convexHull, false /* forced is false by default */);
+	}
+	
+	/**
+	 * Computes simplification.
+	 * @param convexHull function convex hull to be simplified
+	 * @param forced whether to force the simplification even if summation cost (representation size) is not decreased by simplification.
+	 * @return simplified polytope
+	 */
+	public static FunctionConvexHull simplify(FunctionConvexHull convexHull, boolean forced) {
 		var summationCostOfIndices = summationCost(convexHull.getIndices());
 		var summationCostOfFreeVariables = summationCost(convexHull.getFreeVariables());
-		if (summationCostOfFreeVariables >= summationCostOfIndices) {
+		if ( !forced && summationCostOfFreeVariables >= summationCostOfIndices) {
 			return convexHull;
 		}
 		
