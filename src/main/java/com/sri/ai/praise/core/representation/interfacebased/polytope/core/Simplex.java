@@ -127,9 +127,13 @@ public class Simplex extends AbstractAtomicPolytope {
 	@Override
 	public boolean equals(Object another) {
 		boolean result =
-				another instanceof Simplex
-				&&
-				((Simplex) another).getVariable().equals(getVariable());
+				this == another
+				||
+				(
+						another instanceof Simplex
+						&&
+						((Simplex) another).getVariable().equals(getVariable())
+				);
 		return result;
 	}
 	
