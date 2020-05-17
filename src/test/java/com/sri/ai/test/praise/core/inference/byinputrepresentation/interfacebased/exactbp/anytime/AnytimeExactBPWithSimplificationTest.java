@@ -455,11 +455,12 @@ public class AnytimeExactBPWithSimplificationTest {
 			this.trace = trace;
 		}
 		
+
 		@Override
 		protected
 		<RootType2, SubRootType2>
-		AnytimeExactBPWithTracing<RootType2,SubRootType2> newInstance(ExactBPNode<RootType2,SubRootType2> base) {
-			return new AnytimeExactBPWithTracing<RootType2,SubRootType2>(base, trace);
+		AnytimeExactBPWithTracing<RootType2, SubRootType2> newInstance(ExactBPNode<RootType2, SubRootType2> base) {
+			return new AnytimeExactBPWithTracing<RootType2, SubRootType2>(base, trace);
 		}
 		
 		@Override

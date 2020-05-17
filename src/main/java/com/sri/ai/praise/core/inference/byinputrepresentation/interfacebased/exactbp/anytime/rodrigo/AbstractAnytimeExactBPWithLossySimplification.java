@@ -67,6 +67,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
+import com.sri.ai.util.base.ConstructorReflectionManager;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.collect.RoundRobinIterator;
@@ -92,14 +93,6 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 
 	///////////////// ABSTRACT METHODS
 	
-	/**
-	 * Creates an instance of the implementing class for a base sub.
-	 */
-	abstract
-	protected
-	<RootType2, SubRootType2>
-	AnytimeExactBP<RootType2,SubRootType2> newInstance(ExactBPNode<RootType2,SubRootType2> base);	
-
 	@Override
 	abstract protected Approximation<Factor> simplify(Approximation<Factor> approximation);
 
@@ -113,10 +106,13 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 	
 	private Iterator<? extends AbstractAnytimeExactBPWithLossySimplification<SubRootType,RootType>> subRoundRobinIterator;
 
+	private ConstructorReflectionManager<? extends AbstractAnytimeExactBPWithLossySimplification> constructor;
+	
 	///////////////// CONSTRUCTOR
 	
 	public AbstractAnytimeExactBPWithLossySimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
+		constructor = new ConstructorReflectionManager<>(getClass(), ExactBPNode.class);
 	}
 
 	///////////////// IMPLEMENTATIONS
@@ -150,6 +146,23 @@ public abstract class AbstractAnytimeExactBPWithLossySimplification<RootType,Sub
 		return newInstance(baseExactBPSub);
 	}
 
+	/**
+	 * Method used for creating new instances of implementing classes from an {@link ExactBPNode},
+	 * with a default implementation using a constructor with a single parameter of that type.
+	 * Implementations with more complex constructors can instead override this method itself.
+	 */
+	@SuppressWarnings("unchecked")
+	protected
+	<RootType2, SubRootType2>
+	AbstractAnytimeExactBPWithLossySimplification<RootType2, SubRootType2> newInstance(ExactBPNode<RootType2, SubRootType2> base) {
+		try {
+			return constructor.newInstance(base);
+		}
+		catch (Throwable e) {
+			throw new Error("Error in instantiating a " + getClass() + ". Make sure that it has either a constructor taking a single parameter of class " + ExactBPNode.class + ", or that it overrides " + AbstractAnytimeExactBPWithLossySimplification.class + ".newInstance to return such an instance", e);
+		}
+	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public ExactBPNode<RootType,SubRootType> getBase() {

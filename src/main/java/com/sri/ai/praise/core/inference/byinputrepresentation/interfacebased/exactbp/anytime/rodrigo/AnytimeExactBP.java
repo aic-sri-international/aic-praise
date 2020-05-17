@@ -60,13 +60,6 @@ public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeExactBP
 	public AnytimeExactBP(ExactBPNode<RootType,SubRootType> base) {
 		super(base);
 	}
-
-	@Override
-	protected
-	<RootType2, SubRootType2>
-	AnytimeExactBP<RootType2,SubRootType2> newInstance(ExactBPNode<RootType2,SubRootType2> base) {
-		return new AnytimeExactBP<RootType2,SubRootType2>(base);
-	}
 	
 	@Override
 	protected Approximation<Factor> simplify(Approximation<Factor> approximation) {
