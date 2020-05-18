@@ -60,7 +60,7 @@ import com.sri.ai.util.livesets.core.lazy.memoryless.RedirectingLiveSet;
  * @author braz
  *
  */
-public class ExactBP extends ExactBPNodeFromVariableToFactor {
+public class ExactBP extends ExactBPNodeFromVariable {
 
 	@Override
 	public

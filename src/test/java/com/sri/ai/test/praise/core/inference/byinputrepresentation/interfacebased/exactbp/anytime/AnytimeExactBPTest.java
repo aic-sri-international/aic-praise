@@ -31,7 +31,7 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.PRAiSEUtil;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.AnytimeExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithoutSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.AbstractExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -317,7 +317,7 @@ public class AnytimeExactBPTest {
 		
 		long initialTime = System.currentTimeMillis();
 		ExactBPNode<Variable,Factor> exactBP = new ExpressionExactBP(query, factorNetwork);
-		AnytimeExactBP<Variable,Factor> anytimeExactBP = new AnytimeExactBP<>(exactBP);
+		AnytimeExactBPNodeWithoutSimplification<Variable,Factor> anytimeExactBP = new AnytimeExactBPNodeWithoutSimplification<>(exactBP);
 		Approximation<Factor> current = null;
 		while (anytimeExactBP.hasNext()) {
 			current = anytimeExactBP.next();

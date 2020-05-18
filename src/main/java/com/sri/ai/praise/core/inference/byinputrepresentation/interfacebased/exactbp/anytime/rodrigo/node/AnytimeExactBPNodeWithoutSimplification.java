@@ -35,29 +35,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
- * An anytime version of {@link ExactBPNode} algorithms.
- * This is implemented as a {@link AbstractAnytimeTreeComputationWithDefaultPickingOfSubs}
- * based on an {@link ExactBPNode}, which is gradually expanded.
- * <p>
- * It uses {@link Simplex} as an initial approximation,
- * and computes an approximation to the base's answer by not summing out the indices whose sub-messages
- * are simplexes (justification of this is to be found in the related publications).
+ * An extension of {@link AbstractAnytimeExactBPNodeWithSimplificationMechanism}
+ * doing no bound simplification.
  * 
  * @author braz
  *
  */
-public class AnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeExactBPWithLossySimplification<RootType, SubRootType> {
+public class AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType, SubRootType> {
 
-	public AnytimeExactBP(ExactBPNode<RootType,SubRootType> base) {
+	public AnytimeExactBPNodeWithoutSimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base);
 	}
 	

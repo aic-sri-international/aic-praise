@@ -13,8 +13,8 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.AnytimeExactBPSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.algorithm.AnytimeExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithoutSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
@@ -446,7 +446,7 @@ public class AnytimeExactBPWithSimplificationTest {
 	}
 
 	private static class AnytimeExactBPWithTracing<RootType, SubRootType> 
-	extends AnytimeExactBP<RootType, SubRootType> {
+	extends AnytimeExactBPNodeWithoutSimplification<RootType, SubRootType> {
 	
 		private Trace trace;
 	
@@ -459,7 +459,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		@Override
 		protected
 		<RootType2, SubRootType2>
-		AnytimeExactBPWithTracing<RootType2, SubRootType2> newInstance(ExactBPNode<RootType2, SubRootType2> base) {
+		AnytimeExactBPWithTracing<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
 			return new AnytimeExactBPWithTracing<RootType2, SubRootType2>(base, trace);
 		}
 		
@@ -491,7 +491,7 @@ public class AnytimeExactBPWithSimplificationTest {
 	}
 
 	private static class AnytimeExactBPSolverWithTracing
-	extends AnytimeExactBPSolver {
+	extends AnytimeExactBP {
 		
 		Trace trace;
 	
@@ -500,7 +500,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		}
 	
 		@Override
-		protected AnytimeExactBP<Variable, Factor> makeAnytimeExactBP(ExactBP exactBP) {
+		protected AnytimeExactBPNodeWithoutSimplification<Variable, Factor> makeAnytimeExactBPNodeWithoutSimplification(ExactBP exactBP) {
 			return new AnytimeExactBPWithTracing<>(exactBP, trace);
 		}
 		

@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.AnytimeExactBPSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.algorithm.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
@@ -27,7 +27,7 @@ class AnytimeAlgorithmsOnRandomTableFactorNetworksTest {
 			list( 
 					pair("VE", new FromExactToAnytimeSolver(new VariableEliminationSolver())),
 					//pair("EBP_AL", new FromExactToAnytimeSolver(new ExactBPSolver())), // TODO: not working, not sure why
-					pair("Anytime EBP", new AnytimeExactBPSolver())
+					pair("Anytime EBP", new AnytimeExactBP())
 					);
 
 	@Test

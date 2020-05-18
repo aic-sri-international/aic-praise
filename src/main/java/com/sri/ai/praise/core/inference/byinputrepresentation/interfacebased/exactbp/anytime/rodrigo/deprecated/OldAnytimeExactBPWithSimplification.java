@@ -1,5 +1,6 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.deprecated;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithoutSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -8,26 +9,26 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
 import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeEagerTreeComputationWithSimplification;
 
 @Deprecated // see base class for explanation why
-public class AnytimeExactBPWithSimplification<RootType,SubRootType> extends AbstractAnytimeEagerTreeComputationWithSimplification<Factor> {
+public class OldAnytimeExactBPWithSimplification<RootType,SubRootType> extends AbstractAnytimeEagerTreeComputationWithSimplification<Factor> {
 
-	public AnytimeExactBPWithSimplification(AnytimeExactBP<RootType,SubRootType> base) {
+	public OldAnytimeExactBPWithSimplification(AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> base) {
 		super(base);
 	}
 
-	public AnytimeExactBPWithSimplification(ExactBPNode<RootType,SubRootType> base) {
-		this(new AnytimeExactBP<RootType,SubRootType>(base));
+	public OldAnytimeExactBPWithSimplification(ExactBPNode<RootType,SubRootType> base) {
+		this(new AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType>(base));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AnytimeExactBP<RootType,SubRootType> getBase() {
-		return (AnytimeExactBP<RootType, SubRootType>) super.getBase();
+	public AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> getBase() {
+		return (AnytimeExactBPNodeWithoutSimplification<RootType, SubRootType>) super.getBase();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected AnytimeExactBPWithSimplification<RootType,SubRootType> newInstance(NullaryFunction<Approximation<Factor>> baseSub) {
-		return new AnytimeExactBPWithSimplification((AnytimeExactBP) baseSub);
+	protected OldAnytimeExactBPWithSimplification<RootType,SubRootType> newInstance(NullaryFunction<Approximation<Factor>> baseSub) {
+		return new OldAnytimeExactBPWithSimplification((AnytimeExactBPNodeWithoutSimplification) baseSub);
 	}
 
 	@Override

@@ -44,8 +44,8 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected ArrayList<? extends ExactBPNodeFromVariableToFactor> getSubs() {
-		return (ArrayList<? extends ExactBPNodeFromVariableToFactor>) super.getSubs();
+	protected ArrayList<? extends ExactBPNodeFromVariable> getSubs() {
+		return (ArrayList<? extends ExactBPNodeFromVariable>) super.getSubs();
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 		return result;
 	}
 
-	private boolean hasNotBeenEvaluatedAndIsRelevant(ExactBPNodeFromVariableToFactor sub) {
+	private boolean hasNotBeenEvaluatedAndIsRelevant(ExactBPNodeFromVariable sub) {
 		boolean result = 
 				!hasAlreadyBeenEvaluated(sub) 
 				&& 
@@ -67,7 +67,7 @@ public class LazyExactBPNodeFromFactorToVariableEvaluator extends AbstractLazyTr
 		return result;
 	}
 
-	private boolean isRelevantForCurrentResult(ExactBPNodeFromVariableToFactor subFromVariableToFactor) {
+	private boolean isRelevantForCurrentResult(ExactBPNodeFromVariable subFromVariableToFactor) {
 		Variable variable = subFromVariableToFactor.getRoot();
 		boolean result = currentProduct.getVariables().contains(variable);
 		return result;
