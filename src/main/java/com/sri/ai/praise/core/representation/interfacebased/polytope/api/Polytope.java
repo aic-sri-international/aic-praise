@@ -101,6 +101,10 @@ public interface Polytope extends Approximation<Factor> {
 	// of factor, and this operation requires all factors to be multiplied.
 	// This would be expensive and it is unclear how useful it is it,
 	// although it would be nice to support generality.
+	// PS: it would be not as expensive if Factors, like polytopes,
+	// could be represented by products of atomic factors.
+	// Then the KroneckerDeltaFactor becomes one element in a product
+	// and can probably be eliminated in more efficient ways downstream.
 
 	/** 
 	 * Returns the polytope obtained by normalizing all its factor elements according to the variables provided

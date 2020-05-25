@@ -165,6 +165,86 @@ public class AnytimeExactBPWithSimplificationTest {
 		runTest(query, factorNetwork, expectedHistory);
 	}
 
+
+	@Test
+	public void testQueryConnectedToIdentityLikeFactor() {
+		
+		FactorNetwork factorNetwork;
+		Variable query;
+		
+		TableVariable q = new TableVariable("q", 2);
+		TableVariable a = new TableVariable("a", 2);
+		TableVariable b = new TableVariable("b", 2);
+		
+		factorNetwork = new DefaultFactorNetwork(
+				arrayTableFactor(
+						list(q,a), 
+						(vq, va) -> 
+						va == 0? 
+								vq == 0? 0.5 : 0.5 :  
+								vq == 0? 0.5 : 0.5)
+				// table factor with equal entries is considered identity factor
+				,
+				arrayTableFactor(
+						list(a,b), 
+						(va, vb) -> 
+						vb == 0? 
+								va == 0? 0.4 : 0.6 :  
+								va == 0? 0.3 : 0.7)
+				);
+		
+		query = q;
+		
+		var expectedHistory = list(
+				"", 
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]", 
+				"Simplified: Identity polytope", 
+				"to        : Identity polytope", 
+				"", 
+				"Message   :    <----   q", 
+				"Simplified: {1}", 
+				"to        : {1}", 
+				"", 
+				"Message   : a   <----   phi[a, b]: [0.4, 0.3, 0.6, 0.7]", 
+				"Simplified: {(on b) phi[a, b]: [0.4, 0.3, 0.6, 0.7]}", 
+				"to        : {(on b) phi[a, b]: [0.4, 0.3, 0.6, 0.7]}", 
+				"", 
+				"Message   : phi[q, a]: [0.5, 0.5, 0.5, 0.5]   <----   a", 
+				"Simplified: {(on b) phi[a, b]: [0.4, 0.3, 0.6, 0.7]}", 
+				"to        : {(on b) phi[a, b]: [0.4, 0.3, 0.6, 0.7]}", 
+				"", 
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]", 
+				"Simplified: {(on b) phi[b]: [1.0, 1.0]}", 
+				"to        : {(on b) phi[b]: [1.0, 1.0]}", 
+				"", 
+				"Message   :    <----   q", 
+				"Simplified: {(on b) phi[b]: [1.0, 1.0]}", 
+				"to        : {(on b) phi[b]: [1.0, 1.0]}", 
+				"", 
+				"Message   : phi[a, b]: [0.4, 0.3, 0.6, 0.7]   <----   b", 
+				"Simplified: {1}", 
+				"to        : {1}", 
+				"", 
+				"Message   : a   <----   phi[a, b]: [0.4, 0.3, 0.6, 0.7]", 
+				"Simplified: {phi[a]: [0.7, 1.3]}", 
+				"to        : {phi[a]: [0.7, 1.3]}", 
+				"", 
+				"Message   : phi[q, a]: [0.5, 0.5, 0.5, 0.5]   <----   a", 
+				"Simplified: {phi[a]: [0.7, 1.3]}", 
+				"to        : {phi[a]: [0.7, 1.3]}", 
+				"", 
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]", 
+				"Simplified: {phi[]: [2.0]}", 
+				"to        : {phi[]: [2.0]}", 
+				"", 
+				"Message   :    <----   q", 
+				"Simplified: {phi[]: [2.0]}", 
+				"to        : {phi[]: [2.0]}"
+				);
+		
+		runTest(query, factorNetwork, expectedHistory);
+	}
+
 	@Test
 	public void test() {
 		

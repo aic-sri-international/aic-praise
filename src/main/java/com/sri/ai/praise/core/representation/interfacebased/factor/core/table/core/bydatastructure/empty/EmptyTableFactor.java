@@ -182,7 +182,8 @@ public class EmptyTableFactor extends AbstractTableFactor {
 		// unlike other aggregation functions, we choose to separate the remaining variables here
 		// at the level of the concrete class because it is not universally useful at the abstract class level
 		// (ArrayTableFactor does not require explicit representation of the remaining variables).
-		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		boolean resultMayBeUpToAConstant = false;
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated, resultMayBeUpToAConstant);
 		return new EmptyTableFactor(eliminatedAndRemaining.second);
 	}
 

@@ -5,6 +5,7 @@ import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.product;
+import static com.sri.ai.util.Util.removeNonDestructively;
 import static com.sri.ai.util.Util.setDifference;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
@@ -282,19 +283,22 @@ public abstract class AbstractTableFactor implements TableFactor {
 	
 	@Override
 	public TableFactor sumOut(Collection<? extends Variable> eliminated) {
-		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		boolean resultMayBeUpToAConstant = true;
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated, resultMayBeUpToAConstant);
 		return sumOut(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
 	}
 
 	@Override
 	public TableFactor max(Collection<? extends Variable> eliminated) {
-		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		boolean resultMayBeUpToAConstant = false;
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated, resultMayBeUpToAConstant);
 		return max(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
 	}
 
 	@Override
 	public TableFactor min(Collection<? extends Variable> eliminated) {
-		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated);
+		boolean resultMayBeUpToAConstant = false;
+		var eliminatedAndRemaining = organizeVariablesForElimination(eliminated, resultMayBeUpToAConstant);
 		return min(eliminatedAndRemaining.first, eliminatedAndRemaining.second);
 	}
 
@@ -302,15 +306,40 @@ public abstract class AbstractTableFactor implements TableFactor {
 	// SUPPORT FOR AGGREGATION OPERATORS ////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	protected Pair<List<TableVariable>, ArrayList<TableVariable>> organizeVariablesForElimination(Collection<? extends Variable> eliminated) {
+	/**
+	 * Returns a pair of collections;
+	 * the first collection contains the variables to be eliminated that are actually in the factor;
+	 * the second collection contains the remaining variables.
+	 * The option resultMayBeUpToAConstant indicates that it is ok for originally eliminated variables to not be in the factor,
+	 * but in any case they will not be present in the first collection of returned pair.
+	 * @param eliminated
+	 * @param resultMayBeUpToAConstant
+	 * @return
+	 */
+	protected 
+	Pair<List<TableVariable>, ArrayList<TableVariable>> 
+	organizeVariablesForElimination(
+			Collection<? extends Variable> eliminated,
+			boolean resultMayBeUpToAConstant) {
 		
-		myAssert(getVariables().containsAll(eliminated), () -> "Not all variables to be eliminated occur in factor: " + eliminated + " not all in " + getVariables());
+		var allEliminatedVariablesAreInFactor = getVariables().containsAll(eliminated);
+
+		Collection<? extends Variable> eliminatedAndPresentInFactor;
+		if (allEliminatedVariablesAreInFactor) {
+			eliminatedAndPresentInFactor = eliminated;
+		}
+		else if (resultMayBeUpToAConstant) {
+			eliminatedAndPresentInFactor = removeNonDestructively(eliminated, e -> !getVariables().contains(e));
+		}
+		else {
+			throw new Error("Not all variables to be eliminated occur in factor, and operation cannot be up to a constant: " + eliminated + " not all in " + getVariables() + " of factor " + this);
+		}
 		
 		// TODO: to avoid this ugly cast we would have to make TableFactor generic with the
 		// type of variable V it applies to, so the parameter of this method would be
 		// List<? extends V>.
 		@SuppressWarnings("unchecked")
-		List<TableVariable> eliminatedTableVariables = new LinkedList<>((Collection<TableVariable>) eliminated);
+		List<TableVariable> eliminatedTableVariables = new LinkedList<>((Collection<TableVariable>) eliminatedAndPresentInFactor);
 		
 		var remaining = setDifference(getVariables(), eliminatedTableVariables, arrayList());
 		

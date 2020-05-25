@@ -3,12 +3,14 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.IdentityFactor.IDENTITY_FACTOR;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
+import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
-import static java.util.Collections.unmodifiableList;
+import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.unorderedEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
@@ -26,31 +28,22 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 import com.sri.ai.util.explanation.tree.ExplanationTree;
 
-public class ConstantFactor implements Factor {
+public class ConstantFactor extends AbstractFactorWithVariables {
 
 	Double constant;
 	
 	public ConstantFactor(Double c) {
+		super(arrayList());
 		constant = c;
 	}
 	
 	@Override
 	public String toString() {
-		return constant.toString();
+		return "ConstantFactor(" + join(getVariables()) + ") = " + constant.toString();
 	}
 
 	public Double getConstant() {
 		return constant;
-	}
-	
-	@Override
-	public boolean contains(Variable variable) {
-		return false;
-	}
-
-	@Override
-	public List<? extends Variable> getVariables() {
-		return unmodifiableList(list());
 	}
 
 	@Override
@@ -66,17 +59,14 @@ public class ConstantFactor implements Factor {
 			ConstantFactor anotherConstant = (ConstantFactor) another;
 			result = multiplyTwoConstantFactors(anotherConstant);
 		}
-		
 		else if (another instanceof ExpressionFactor) {
 			ExpressionFactor anotherExpression = (ExpressionFactor) another;
 			result = evaluateAsFactor(Times.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
-		
 		else if (another instanceof ArrayTableFactor) {
 			ArrayTableFactor anotherTable = (ArrayTableFactor) another;
-			result = multiplyWithTableFactor(anotherTable);
+			result = multiplyByTableFactor(anotherTable);
 		}
-		
 		else {
 			throw new Error("Unknown class for another : class was " + another.getClass());
 		}
@@ -87,29 +77,26 @@ public class ConstantFactor implements Factor {
 	
 	private ConstantFactor multiplyTwoConstantFactors(ConstantFactor another) {
 		ConstantFactor result;
-		Double prodConstant = getConstant()*another.getConstant();
-		boolean isIdentityOrZero = false;
-		result = checkIsIdentityAndSetsValueToIdentityIfYes(prodConstant, isIdentityOrZero);
-		if(!isIdentityOrZero) {
-			result = checkIsZeroAndSetsValueToZeroIfYes(prodConstant, isIdentityOrZero);
+		Double productConstant = getConstant()*another.getConstant();
+		result = identityFactorIfConstantIsOne(productConstant);
+		if (result == null) {
+			result = zeroFactorIfConstantIsZero(productConstant);
 		}
-		if(!isIdentityOrZero) {
-			result = new ConstantFactor(prodConstant);
+		if (result == null) {
+			result = new ConstantFactor(productConstant);
 		}
 		return result;
 	}
 	
-	private IdentityFactor checkIsIdentityAndSetsValueToIdentityIfYes(Double constant, boolean resultNotNull) {
-		if(Math.abs(constant - 1.) < 0.0000001) {
-			resultNotNull = true;
+	private IdentityFactor identityFactorIfConstantIsOne(Double constant) {
+		if (Math.abs(constant - 1.) < 0.0000001) {
 			return IDENTITY_FACTOR;
 		}
 		return null;
 	}
 	
-	private ZeroFactor checkIsZeroAndSetsValueToZeroIfYes(Double constant, boolean resultNotNull) {
-		if(Math.abs(constant - 0.) < 0.0000001) {
-			resultNotNull = true;
+	private ZeroFactor zeroFactorIfConstantIsZero(Double constant) {
+		if (Math.abs(constant - 0.) < 0.0000001) {
 			return ZERO_FACTOR;
 		}
 		return null;
@@ -131,7 +118,7 @@ public class ConstantFactor implements Factor {
 		return result;
 	}
 	
-	private ArrayTableFactor multiplyWithTableFactor(ArrayTableFactor table) {
+	private ArrayTableFactor multiplyByTableFactor(ArrayTableFactor table) {
 		ArrayTableFactor result;
 		ArrayList<Double> newEntries = new ArrayList<>(table.getEntries().size());
 		for (Double entry : table.getEntries()) {
@@ -159,7 +146,7 @@ public class ConstantFactor implements Factor {
 
 	@Override
 	public Factor normalize() {
-		throw new Error("A constant factor cannot be normalized.");
+		return new UniformFactor(new ArrayList<>(getVariables()));
 	}
 
 	@Override
@@ -171,17 +158,14 @@ public class ConstantFactor implements Factor {
 			ConstantFactor anotherConstant = (ConstantFactor) another;
 			result = addTwoConstantFactors(anotherConstant);
 		}
-		
 		else if (another instanceof ExpressionFactor) {
 			ExpressionFactor anotherExpression = (ExpressionFactor) another;
 			result = evaluateAsFactor(Plus.make(makeSymbol(getConstant()), (Expression) another),anotherExpression.getContext());
 		}
-		
 		else if (another instanceof ArrayTableFactor) {
 			ArrayTableFactor anotherTable = (ArrayTableFactor) another;
 			result = addATableFactor(anotherTable);
 		}
-		
 		else {
 			throw new Error("Unknown class for another : class was " + another.getClass());
 		}
@@ -193,12 +177,11 @@ public class ConstantFactor implements Factor {
 	private ConstantFactor addTwoConstantFactors(ConstantFactor another) {
 		ConstantFactor result;
 		Double prodConstant = getConstant() + another.getConstant();
-		boolean isIdentityOrZero = false;
-		result = checkIsIdentityAndSetsValueToIdentityIfYes(prodConstant, isIdentityOrZero);
-		if(!isIdentityOrZero) {
-			result = checkIsZeroAndSetsValueToZeroIfYes(prodConstant, isIdentityOrZero);
+		result = identityFactorIfConstantIsOne(prodConstant);
+		if (result == null) {
+			result = zeroFactorIfConstantIsZero(prodConstant);
 		}
-		if(!isIdentityOrZero) {
+		if (result == null) {
 			result = new ConstantFactor(prodConstant);
 		}
 		return result;
@@ -216,7 +199,7 @@ public class ConstantFactor implements Factor {
 
 	@Override
 	public Factor invert() {
-		if(isZero()) {
+		if (isZero()) {
 			throw new Error("Cannot invert the Zero factor.");
 		}
 		else {
@@ -228,7 +211,8 @@ public class ConstantFactor implements Factor {
 
 	@Override
 	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
-		throw new Error("normalize not implemented for " + getClass());
+		var remaining = subtract(getVariables(), variablesToNormalize, arrayList());
+		return new UniformFactor(remaining);
 	}
 
 	@Override
@@ -236,26 +220,6 @@ public class ConstantFactor implements Factor {
 		return this;
 	}
 	
-	@Override
-	public Factor argmax(Collection<? extends Variable> variablesToMaximize) {
-		throw new Error("argmax not implemented for " + getClass());
-	}
-
-	@Override
-	public Factor min(Collection<? extends Variable> variablesToMinimize) {
-		throw new Error("min not implemented for " + getClass());
-	}
-
-	@Override
-	public Factor argmin(Collection<? extends Variable> variablesToMinimize) {
-		throw new Error("argmin not implemented for " + getClass());
-	}
-
-	@Override
-	public Factor potentialRange(Collection<? extends Variable> variablesToEliminate) {
-		throw new Error("argmin not implemented for " + getClass());
-	}
-
 	@Override
 	public double value() {
 		return constant;
@@ -281,7 +245,11 @@ public class ConstantFactor implements Factor {
 	@Override
 	public boolean mathematicallyEquals(Factor another) {
 		if (another instanceof ConstantFactor) {
-			return constant.equals(((ConstantFactor) another).constant);
+			var anotherConstantFactor = (ConstantFactor) another;
+			return 
+					constant.equals(((ConstantFactor) another).constant) 
+					&& 
+					unorderedEquals(getVariables(), anotherConstantFactor.getVariables());
 		}
 		else {
 			return false;
@@ -291,8 +259,12 @@ public class ConstantFactor implements Factor {
 	@Override
 	public FactorsEqualityCheck<Factor> checkEquality(Factor another) {
 		if (another instanceof ConstantFactor) {
-			double anotherConstant = ((ConstantFactor) another).constant;
-			boolean equals = constant.equals(anotherConstant);
+			var anotherConstantFactor = (ConstantFactor) another;
+			var anotherConstant = anotherConstantFactor.constant;
+			boolean equals = 					
+					constant.equals(anotherConstant) 
+					&& 
+					unorderedEquals(getVariables(), anotherConstantFactor.getVariables());
 			if (equals) {
 				return new DefaultFactorsAreEqual<>(this, another);
 			}

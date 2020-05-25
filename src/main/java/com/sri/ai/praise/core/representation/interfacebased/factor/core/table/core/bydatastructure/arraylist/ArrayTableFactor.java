@@ -673,8 +673,6 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			return new ArrayTableFactor(getVariables(), 1.0);
 		}
 
-		myAssert(getVariables().containsAll(variablesToNormalize), () -> "Not all variables to normalize occur in factor: " + variablesToNormalize + " not all in " + getVariables());
-
 		// TODO: it's odd that sum takes a List and normalize takes a Collection, forcing us here to create a new list.
 		
 //		if (summationCost() > 1000000)
