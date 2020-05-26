@@ -1,5 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty;
 
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unorderedEquals;
@@ -13,6 +14,7 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreEqual;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables;
@@ -126,13 +128,24 @@ public class EmptyTableFactor extends AbstractTableFactor {
 		return initializeNewFactorUnioningVariables(another);
 	}
 	
+	@Override
+	protected TableFactor multiplyKroneckerDeltaFactor(KroneckerDeltaFactor kronecker) {
+		var variable1 = getTableVariable(kronecker, 0);
+		var variable2 = getTableVariable(kronecker, 1);
+		return initializeNewFactorUnioningVariables(list(variable1, variable2));
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// SHARED SUPPORT FOR ADDING AND MULTIPLYING ////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private EmptyTableFactor initializeNewFactorUnioningVariables(TableFactor another) {
+		return initializeNewFactorUnioningVariables(another.getVariables());
+	}
+
+	private EmptyTableFactor initializeNewFactorUnioningVariables(Collection<? extends TableVariable> tableVariables) {
 		LinkedHashSet<TableVariable> newSetOfVariables = new LinkedHashSet<>(this.variables);
-		newSetOfVariables.addAll(another.getVariables());
+		newSetOfVariables.addAll(tableVariables);
 		return new EmptyTableFactor(new ArrayList<>(newSetOfVariables));
 	}
 

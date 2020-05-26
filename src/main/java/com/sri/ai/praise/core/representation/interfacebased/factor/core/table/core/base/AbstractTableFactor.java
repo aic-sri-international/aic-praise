@@ -1,6 +1,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base;
 
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.arrayList;
+import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.mapFromListOfKeysAndListOfValues;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.pair;
@@ -19,6 +21,8 @@ import java.util.Map;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.empty.EmptyTableFactor;
 import com.sri.ai.util.Enclosing;
@@ -65,6 +69,8 @@ public abstract class AbstractTableFactor implements TableFactor {
 	protected abstract TableFactor addTableFactor(TableFactor another);
 
 	protected abstract TableFactor multiplyTableFactor(TableFactor another);
+
+	protected abstract TableFactor multiplyKroneckerDeltaFactor(KroneckerDeltaFactor another);
 
 	protected abstract TableFactor slicePossiblyModifyingAssignment(Map<TableVariable, Integer> assignment, ArrayList<? extends TableVariable> remaining);
 
@@ -239,17 +245,26 @@ public abstract class AbstractTableFactor implements TableFactor {
 		Factor result;
 		
 		if (another instanceof ConstantFactor) {
-			result = another.multiply(this);
+			result = this;
 		}
-		else if (another.getClass() != this.getClass()) {
-			throw new Error("Trying to multiply different types of factors: this is a " +
-							this.getClass() + "and another is a " + another.getClass());
+		else if (another instanceof ZeroFactor) {
+			result = ZERO_FACTOR;
+		}
+		else if (another instanceof TableFactor) {
+			result = multiplyTableFactor((TableFactor) another);
+		}
+		else if (another instanceof KroneckerDeltaFactor) {
+			result = multiplyKroneckerDeltaFactor((KroneckerDeltaFactor) another);
 		}
 		else {
-			result = multiplyTableFactor((TableFactor) another);
+			throw new Error("Unimplemented multiplication between factors of classes " + this.getClass() + " and " + another.getClass());
 		}
 		
 		return result;
+	}
+
+	protected TableVariable getTableVariable(KroneckerDeltaFactor kronecker, int variableIndex) {
+		return castOrThrowError(TableVariable.class, kronecker.getVariables().get(variableIndex), KroneckerDeltaFactor.class + " instance being operated along with TableFactor by " + getClass() + " instance but its variable %s is not an instance of %s; it is an instance of %s");
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

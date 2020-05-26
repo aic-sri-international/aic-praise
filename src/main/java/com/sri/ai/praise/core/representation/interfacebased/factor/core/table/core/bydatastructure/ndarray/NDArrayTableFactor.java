@@ -25,6 +25,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.AbstractTableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
@@ -376,6 +377,11 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	
 	@Override
 	public FactorsEqualityCheck checkEquality(Factor another) {
+		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
+	}
+
+	@Override
+	protected TableFactor multiplyKroneckerDeltaFactor(KroneckerDeltaFactor another) {
 		throw new Error((new Enclosing(){}).methodName() + " not yet implemented for " + getClass());
 	}
 }

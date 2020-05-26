@@ -6,6 +6,7 @@ import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersection;
+import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
@@ -37,6 +38,7 @@ import com.google.common.primitives.Ints;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsAreOfIncomparableClasses;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.equality.DefaultFactorsHaveDifferentVariables;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
@@ -119,6 +121,10 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	
 	public ArrayTableFactor(Collection<? extends TableVariable> variables, Double defaultValue) {
 		this(variables, arrayListFilledWith(defaultValue, numberOfEntries(variables)));
+	}
+	
+	public ArrayTableFactor(ArrayTableFactor another) {
+		this(another.name, another.getVariables(), Arrays.copyOf(another.parameters, another.parameters.length));
 	}
 	
 	public static interface ParameterFunction {
@@ -458,6 +464,48 @@ public class ArrayTableFactor extends AbstractTableFactor {
 			} while (exclusive2Values.incrementIfPossible());
 		} while (exclusive1Values.incrementIfPossible());
 		
+		return result;
+	}
+	
+	@Override
+	protected ArrayTableFactor multiplyKroneckerDeltaFactor(KroneckerDeltaFactor kronecker) {
+		var variable1 = getTableVariable(kronecker, 0);
+		var variable2 = getTableVariable(kronecker, 1);
+		ArrayTableFactor result;
+		if (getVariables().containsAll(list(variable1, variable2))) {
+			result = multiplyEmbeddedKroneckerDeltaFactor(kronecker, variable1, variable2);
+		}
+		else {
+			result = multiplyKroneckerDeltaFactorByConversion(variable1, variable2);
+		}
+		return result;
+		// TODO: it might be worth specializing even more for the cases with a single overlapping variable and no overlapping variables.
+	}
+
+	private 
+	ArrayTableFactor 
+	multiplyEmbeddedKroneckerDeltaFactor(KroneckerDeltaFactor kronecker, TableVariable variable1, TableVariable variable2) {
+		var result = new ArrayTableFactor(this);
+		var kroneckerTableVariables = list(variable1, variable2);
+		var remainingVariables = subtract(result.getVariables(), kroneckerTableVariables);
+		var remainingIndex = makeArrayIndex(remainingVariables, result);
+		do {
+			var kroneckerIndex = makeArrayIndex(kroneckerTableVariables, result);
+			do {
+				if (kroneckerIndex.index()[0] != kroneckerIndex.index()[1]) {
+					var offset = remainingIndex.offset() + kroneckerIndex.offset();
+					result.set(offset, 0.0);
+				}
+			} while (kroneckerIndex.incrementIfPossible());
+		} while (remainingIndex.incrementIfPossible());
+		return result;
+	}
+
+	private
+	ArrayTableFactor
+	multiplyKroneckerDeltaFactorByConversion(TableVariable variable1, TableVariable variable2) {
+		var kroneckerTable = arrayTableFactor(list(variable1, variable2), (v1, v2) -> v1 == v2? 1.0 : 0.0);
+		var result = multiply(kroneckerTable);
 		return result;
 	}
 	
@@ -925,9 +973,30 @@ public class ArrayTableFactor extends AbstractTableFactor {
 
 	@Override
 	public int hashCode() {
-		return getVariables().hashCode()*31 + parameters.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(parameters);
+		return result;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ArrayTableFactor other = (ArrayTableFactor) obj;
+		if (!Arrays.equals(parameters, other.parameters)) {
+			return false;
+		}
+		return true;
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	// PROBABLY UNNECESSARILY PUBLIC ////////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

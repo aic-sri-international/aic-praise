@@ -33,7 +33,7 @@ public class KroneckerDeltaFactor extends AbstractFactorWithVariables {
 			result = this;
 		}
 		else {
-			throw new Error("Multiplication of " + getClass() + " by " + another.getClass() + " is not implemented.");
+			result = another.multiply(this); // defer to the other class since KroneckerDeltaFactor is a basic factor type
 		}
 		
 		return result;

@@ -4,6 +4,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.api.eq
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsAreOfIncomparableClasses;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentValues;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentVariables;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.arrayTableFactor;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.print;
@@ -15,10 +16,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
@@ -33,11 +35,11 @@ import com.sri.ai.util.Util;
  */
 public class TableFactorTest {
 
-	@BeforeAll
-	public static void setUp() {
+	@BeforeEach
+	public void setUp() {
 		ArrayTableFactor.maximumNumberOfEntriesToShow = 100;
 		ArrayTableFactor.decimalPlaces = -1;
-		println(ArrayTableFactor.class.getSimpleName() + " will only show tables with up to " + ArrayTableFactor.maximumNumberOfEntriesToShow + " elements.");
+		println(ArrayTableFactor.class.getSimpleName() + " in " + TableFactorTest.class.getSimpleName() + " will only show tables with up to " + ArrayTableFactor.maximumNumberOfEntriesToShow + " elements.");
 	}
 	
 	// CREATE TABLES TO TEST //////////////////////////////////////////////////////////////////////////////////////////
@@ -599,6 +601,52 @@ public class TableFactorTest {
 		assertEquals(factorsHaveDifferentVariables(f1, f2, set(x), set()), f1.checkEquality(f2));
 		
 	}
+	
+	@Test
+	public void testMultiplyByKroneckerDeltaFactor() {
+		TableVariable a = new TableVariable("a", 3);
+		TableVariable b = new TableVariable("b", 3);
+		TableVariable c = new TableVariable("c", 2);
+		TableVariable d = new TableVariable("d", 2);
+		
+		ArrayTableFactor f;
+		KroneckerDeltaFactor k;
+		Factor product;
+		Factor expected;
+		
+		f = arrayTableFactor(list(a, b), 
+				(va, vb) -> va == 0? vb == 0? 0.8 : 0.1 : vb == 0? 0.4 : 0.3);
+		k = new KroneckerDeltaFactor(a, b);
+		expected = new ArrayTableFactor(list(a,b), new double[] {0.8, 0.0, 0.0, 0.0, 0.3, 0.0, 0.0, 0.0, 0.3});
+		runMultiplyByKroneckerTest(f, k, expected);
+		
+		f = arrayTableFactor(list(a, b), 
+				(va, vb) -> va == 0? vb == 0? 0.8 : 0.1 : vb == 0? 0.4 : 0.3);
+		k = new KroneckerDeltaFactor(c, d);
+		expected = arrayTableFactor(list(a,b,c,d), 
+				(va, vb, vc, vd) -> vc != vd? 0.0 : va == 0? vb == 0? 0.8 : 0.1 : vb == 0? 0.4 : 0.3);
+		runMultiplyByKroneckerTest(f, k, expected);
+		
+		f = arrayTableFactor(list(a, c), 
+				(va, vc) -> va == 0? vc == 0? 0.8 : 0.2 : vc == 0? 0.7 : 0.3);
+		k = new KroneckerDeltaFactor(c, d);
+		expected = arrayTableFactor(list(a,d,c), 
+				(va, vd, vc) -> vc != vd? 0.0 : va == 0? vc == 0? 0.8 : 0.2 : vc == 0? 0.7 : 0.3);
+		runMultiplyByKroneckerTest(f, k, expected);
+	}
+
+	private void runMultiplyByKroneckerTest(ArrayTableFactor f, KroneckerDeltaFactor k, Factor expected) {
+		Factor product;
+		product = f.multiply(k);
+		println(f);
+		println("*");
+		println(k);
+		println("=");
+		println(product);
+		println();
+		assertEquals(expected, product);
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
