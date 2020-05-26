@@ -20,9 +20,10 @@ public class ConfigurationForUAITest<Result> extends DefaultConfigurationForBatc
 	public ConfigurationForUAITest(
 			List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns,
+			double maximumComponentwiseError,
 			String uaiFileResourcePath,
 			BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> tableFactorMaker) {
-		super(algorithms, numberOfRuns);
+		super(algorithms, numberOfRuns, maximumComponentwiseError);
 		this.tableFactorMaker = tableFactorMaker;
 		this.uaiFileResourcePath = uaiFileResourcePath;
 	}
@@ -30,8 +31,9 @@ public class ConfigurationForUAITest<Result> extends DefaultConfigurationForBatc
 	public ConfigurationForUAITest(
 			List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns, 
+			double maximumComponentwiseError,
 			String uaiFileResourcePath) {
-		this(algorithms, numberOfRuns, uaiFileResourcePath, (v,e) -> new ArrayTableFactor(v,e));
+		this(algorithms, numberOfRuns, maximumComponentwiseError, uaiFileResourcePath, (v,e) -> new ArrayTableFactor(v,e));
 	}
 
 	public BinaryFunction<ArrayList<TableVariable>, ArrayList<Double>, TableFactor> getTableFactorMaker() {

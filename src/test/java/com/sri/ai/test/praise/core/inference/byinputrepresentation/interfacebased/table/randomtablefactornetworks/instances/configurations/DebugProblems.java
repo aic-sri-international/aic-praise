@@ -16,6 +16,7 @@ public class DebugProblems<Result> extends DefaultConfigurationForRandomTableFac
 		super(
 				algorithms,
 				/* numberOfRuns = */ 1,
+				/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
 				/* minimumNumberOfVariables = */ 3,
 				/* maximumNumberOfVariables = */ 3,
 				/* minimumCardinality = */ 2,

@@ -35,7 +35,9 @@ AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner
 <Configuration extends ConfigurationForBatchOfFactorNetworksTest<Iterator<Approximation<Factor>>>> 
 extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>, Configuration> {
 
-	protected AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner(Configuration configuration) {
+	protected AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner(
+			Configuration configuration) {
+		
 		super(configuration, "initial iterator", false /* do not show result because it is an iterator */);
 	}
 
@@ -91,7 +93,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			println("Comparing " + name1 + " and " + name2 + "...");
 			println(name1 + ": " + array1);
 			println(name2 + ": " + array2);
-			compareNumbersComponentWise(array1, array2, 0.001);
+			compareNumbersComponentWise(array1, array2, getConfiguration().getMaximumComponentwiseError());
 		}
 		println();
 	}

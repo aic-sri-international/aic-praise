@@ -15,6 +15,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.ArrayListSolver;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.convertersolverwrapper.NDArraySolver;
+import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.randomtablefactornetworks.instances.configurations.Defaults;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.base.FulltimeAlgorithmsOnUAITestRunner;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.configuration.ConfigurationForUAITest;
 import com.sri.ai.util.base.BinaryFunction;
@@ -43,6 +44,7 @@ public class FulltimeAlgorithmsOnUAITest {
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
+						/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
 						"/UAITests/grid10x10.f10.uai")
 				).run();
 	}
@@ -52,6 +54,7 @@ public class FulltimeAlgorithmsOnUAITest {
 				new ConfigurationForUAITest<>(
 						algorithms,
 						/* numberOfRuns = */ 1, 
+						/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
 						"/UAITests/BN_1.uai")
 				).run();
 	}

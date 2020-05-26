@@ -11,6 +11,8 @@ public interface ConfigurationForBatchOfFactorNetworksTest<Result> {
 
 	int getNumberOfRuns();
 	
+	double getMaximumComponentwiseError();
+	
 	List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms();
 
 }

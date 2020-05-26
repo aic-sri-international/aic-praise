@@ -23,6 +23,7 @@ implements ConfigurationForRandomTableFactorNetworksTest<Result> {
 	protected DefaultConfigurationForRandomTableFactorNetworksTest(
 			List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms,
 			int numberOfRuns,
+			double maximumComponentwiseError,
 			int minimumNumberOfVariables, int maximumNumberOfVariables, 
 			int minimumCardinality, int maximumCardinality, 
 			int minimumNumberOfFactors, int maximumNumberOfFactors,
@@ -39,7 +40,8 @@ implements ConfigurationForRandomTableFactorNetworksTest<Result> {
 				minimumPotential, maximumPotential,
 				tableFactorMaker,
 				random);
-		this.configurationForTestsOnBatchOfFactorNetworks = new DefaultConfigurationForBatchOfFactorNetworksTest<Result>(algorithms, numberOfRuns);
+		this.configurationForTestsOnBatchOfFactorNetworks = 
+				new DefaultConfigurationForBatchOfFactorNetworksTest<Result>(algorithms, numberOfRuns, maximumComponentwiseError);
 	}
 
 	@Override
@@ -52,4 +54,8 @@ implements ConfigurationForRandomTableFactorNetworksTest<Result> {
 		return configurationForTestsOnBatchOfFactorNetworks.getNumberOfRuns();
 	}
 
+	@Override
+	public double getMaximumComponentwiseError() {
+		return configurationForTestsOnBatchOfFactorNetworks.getMaximumComponentwiseError();
+	}
 }

@@ -16,6 +16,7 @@ public class LargestProblems<Result> extends DefaultConfigurationForRandomTableF
 		super(
 				algorithms,
 				/* numberOfRuns = */ 10,
+				/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
 				/* minimumNumberOfVariables = */ 20,
 				/* maximumNumberOfVariables = */ 30,
 				/* minimumCardinality = */ 2,

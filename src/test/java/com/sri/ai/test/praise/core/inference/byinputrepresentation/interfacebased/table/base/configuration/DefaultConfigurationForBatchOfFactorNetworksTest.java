@@ -12,23 +12,32 @@ public class DefaultConfigurationForBatchOfFactorNetworksTest<Result> implements
 	private List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms;
 	
 	private int numberOfRuns;
+	
+	private double maximumComponentwiseError;
 
 	public DefaultConfigurationForBatchOfFactorNetworksTest(
 			List<Pair<String,BinaryFunction<Variable, FactorNetwork, Result>>> algorithms, 
-			int numberOfRuns) {
+			int numberOfRuns,
+			double maximumComponentwiseError) {
 		
 		this.algorithms = algorithms;
 		this.numberOfRuns = numberOfRuns;
+		this.maximumComponentwiseError = maximumComponentwiseError;
+	}
+
+	@Override
+	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms() {
+		return algorithms;
 	}
 
 	@Override
 	public int getNumberOfRuns() {
 		return numberOfRuns;
 	}
-
+	
 	@Override
-	public List<Pair<String, BinaryFunction<Variable, FactorNetwork, Result>>> getAlgorithms() {
-		return algorithms;
+	public double getMaximumComponentwiseError() {
+		return maximumComponentwiseError;
 	}
 
 }
