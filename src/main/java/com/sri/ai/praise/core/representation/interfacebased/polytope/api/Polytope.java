@@ -40,6 +40,7 @@ package com.sri.ai.praise.core.representation.interfacebased.polytope.api;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.google.common.base.Predicate;
@@ -71,6 +72,11 @@ public interface Polytope extends Approximation<Factor> {
 	
 	static Polytope multiply(Collection<? extends Polytope> polytopes) {
 		Polytope result = accumulate(polytopes, Polytope::multiply, identityPolytope());
+		return result;
+	}
+
+	static Polytope product(Polytope... polytopes) {
+		Polytope result = accumulate(Arrays.asList(polytopes), Polytope::multiply, identityPolytope());
 		return result;
 	}
 

@@ -42,6 +42,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.b
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -82,6 +83,10 @@ public interface Factor {
 	
 	static Factor multiply(Iterable<? extends Factor> factors) {
 		return accumulate(factors.iterator(), Factor::multiply, IDENTITY_FACTOR);
+	}
+
+	static Factor product(Factor... factors) {
+		return accumulate(Arrays.asList(factors), Factor::multiply, IDENTITY_FACTOR);
 	}
 
 	Factor normalize();

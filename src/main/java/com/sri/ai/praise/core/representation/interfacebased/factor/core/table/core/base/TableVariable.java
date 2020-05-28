@@ -59,4 +59,12 @@ public class TableVariable implements Variable {
 		result = 31 * result + cardinality.hashCode();
 		return result;
 	}
+
+	@Override
+	/**
+	 * Creates a new table variable with name <code>this.getName() + "'"</code>.
+	 */
+	public TableVariable makeNewVariableWithSameRangeButDifferentEqualsIdentity() {
+		return new TableVariable(getName() + "'", getCardinality());
+	}
 }

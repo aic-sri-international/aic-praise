@@ -41,4 +41,9 @@ import java.util.List;
 
 public interface Variable {
 	List<? extends Object> getValues();
+
+	/**
+	 * Make a new variable <code>v</code> with same range as <code>this</code> but such that <code>this.equals(v)</code> is <code>false</code>.
+	 */
+	Variable makeNewVariableWithSameRangeButDifferentEqualsIdentity();
 }

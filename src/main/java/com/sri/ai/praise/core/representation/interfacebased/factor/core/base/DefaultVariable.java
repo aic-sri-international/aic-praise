@@ -3,6 +3,7 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.base;
 import java.util.List;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.util.base.IdentityWrapper;
 
 /**
  * A {@link Variable} based on a Java object.
@@ -55,6 +56,15 @@ public class DefaultVariable implements Variable {
 	@Override
 	public String toString() {
 		return object.toString();
+	}
+
+	@Override
+	/**
+	 * Creates a new variable with object <code>new IdentityWrapper<>(this.getObject())</code>.
+	 */
+	public DefaultVariable makeNewVariableWithSameRangeButDifferentEqualsIdentity() {
+		var newObject = new IdentityWrapper<>(getObject());
+		return new DefaultVariable(newObject);
 	}
 
 }

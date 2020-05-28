@@ -39,7 +39,9 @@ package com.sri.ai.test.praise.core.representation.interfacebased.polytope;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.equality.FactorsEqualityCheck.factorsHaveDifferentValues;
+import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.arrayTableFactor;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope.multiply;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope.product;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.firstPolytopeHasFunctionConvexHullWithoutMatchInSecond;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentFactors;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.functionConvexHullsHaveDifferentIndices;
@@ -60,6 +62,8 @@ import org.junit.jupiter.api.Test;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
+import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionFactor;
@@ -178,7 +182,7 @@ public class PolytopeTest {
 	}
 	
 	@Test
-	public void testGetEquivalentAtomicPolytope() {
+	public void testGetEquivalentAtomicPolytopeOfPolytopeWithASingleFreeVariable() {
 		
 		product = Polytope.multiply(list(simplexU));
 		actual = product.sumOut(list()).getEquivalentAtomicPolytope();
@@ -225,6 +229,74 @@ public class PolytopeTest {
 		println(actual.toString());
 		assertEquals(expected.toString(), actual.toString()); // factor are compared by reference, not value
 	}
+	
+	@Test
+	public void testGetEquivalentAtomicPolytope() {
+		Polytope p;
+		AtomicPolytope expected;
+		
+		var u = new TableVariable("u", 2);
+		var v = new TableVariable("v", 2);
+		var w = new TableVariable("w", 2);
+		var x = new TableVariable("x", 2);
+		var y = new TableVariable("y", 2);
+		var z = new TableVariable("z", 2);
+
+		var w_p = w.makeNewVariableWithSameRangeButDifferentEqualsIdentity();
+		var z_p = z.makeNewVariableWithSameRangeButDifferentEqualsIdentity();
+		
+		var uvwxy = arrayTableFactor(list(u,v,w,x,y), (vu, vv, vw, vx, vy) -> vv == 0? 0.3 : 0.7);
+		var wxy_uv = new DefaultFunctionConvexHull(list(u, v), uvwxy);
+		
+		var zwx = arrayTableFactor(list(z,w,x), (vz, vw, vx) -> vw == 0? 0.4 : 0.6);
+		var wx_z = new DefaultFunctionConvexHull(list(z), zwx);
+		
+		p = new Simplex(v);
+		expected = (AtomicPolytope) p;
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(new Simplex(v), new Simplex(v));
+		expected = new Simplex(v);
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(new Simplex(v), new Simplex(v));
+		expected = new Simplex(v);
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(wxy_uv);
+		expected = wxy_uv;
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(wxy_uv, new Simplex(w));
+		expected = new DefaultFunctionConvexHull(list(u,v,w_p), wxy_uv.getFactor().multiply(new KroneckerDeltaFactor(w, w_p)));
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(new Simplex(w), wxy_uv); // just flipping the order
+		expected = new DefaultFunctionConvexHull(list(u,v,w_p), wxy_uv.getFactor().multiply(new KroneckerDeltaFactor(w, w_p)));
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(new Simplex(w), wxy_uv, wx_z);
+		expected = new DefaultFunctionConvexHull(list(u,v,z,w_p), Factor.product(wxy_uv.getFactor(), wx_z.getFactor(), new KroneckerDeltaFactor(w, w_p)));
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+		
+		p = product(new Simplex(w), wxy_uv, new Simplex(z), wx_z);
+		expected = new DefaultFunctionConvexHull(list(u,v,z,w_p,z_p), 
+				Factor.product(wxy_uv.getFactor(), wx_z.getFactor(), new KroneckerDeltaFactor(w, w_p), new KroneckerDeltaFactor(z, z_p)));
+		runGetEquivalentAtomicPolytopeTest(p, expected);
+	}
+
+	private void runGetEquivalentAtomicPolytopeTest(Polytope polytope, AtomicPolytope expected) {
+		
+		var actual = polytope.getEquivalentAtomicPolytope();
+		var check = expected.checkEquality(actual);
+		println();
+		println("Polytope                           : ", polytope);
+		println("Expected equivalent atomic polytope: ", actual);
+		println("  Actual equivalent atomic polytope: ", expected);
+		println("Equality check: " + check);
+		assertEquals(check, polytopesAreEqual(expected, actual));
+	}
+	
 	
 	@Test
 	public void testMathematicalEquivalence() {

@@ -407,11 +407,20 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 	
 	//////////////////////// GET ATOMIC POLYTOPE
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public AtomicPolytope getEquivalentAtomicPolytope() {
-		myAssert(getFreeVariables().size() == 1, () -> "getEquivalentAtomicPolytope is currently supported for polytopes with a single free variable but this polytope has free variables " + getFreeVariables());
+		AtomicPolytope result;
+		if (getFreeVariables().size() == 1) {
+			result = getEquivalentAtomicPolytopeForOneFreeVariableCase();
+		}
+		else {
+			result = getEquivalentAtomicPolytopeForMultipleFreeVariablesCase();
+		}
+		return result;
+	}
 
+	@SuppressWarnings("unchecked")
+	private AtomicPolytope getEquivalentAtomicPolytopeForOneFreeVariableCase() {
 		var variable = getFirst(getFreeVariables());
 
 		Simplex simplexOnVariableIfAny = (Simplex) getFirst(getAtomicPolytopes(), p -> isSimplexOn(p, variable));
@@ -426,8 +435,35 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 			// all atomic polytopes are non-simplex, or otherwise we would have simplexes on other variables and there would be more than only free variable
 			result = multiplyIntoSingleFunctionConvexHull((Collection<? extends FunctionConvexHull>) getAtomicPolytopes());
 		}
-		
 		return result;
+	}
+	
+	private AtomicPolytope getEquivalentAtomicPolytopeForMultipleFreeVariablesCase() {
+		var functionConvexHulls = mapIntoList(getAtomicPolytopes(), this::getCorrespondingFunctionConvexHull);
+		var allFactors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
+		var allIndices = Util.unionOfResults(functionConvexHulls, FunctionConvexHull::getIndices);
+		var productFactor = Factor.multiply(allFactors);
+		var result = new DefaultFunctionConvexHull(allIndices, productFactor);
+		return result;
+	}
+	
+	private FunctionConvexHull getCorrespondingFunctionConvexHull(AtomicPolytope atomicPolytope) {
+		if (atomicPolytope instanceof Simplex) {
+			return makeKroneckerDeltaPolytopeFrom((Simplex) atomicPolytope);
+		}
+		else if (atomicPolytope instanceof FunctionConvexHull) {
+			return (FunctionConvexHull) atomicPolytope;
+		}
+		else {
+			throw new Error("Unexpected atomic polytope type in " + (new Enclosing() {}).methodName() + ": " + atomicPolytope.getClass() + ", atomic polytope: " + atomicPolytope);
+		}
+	}
+
+	private FunctionConvexHull makeKroneckerDeltaPolytopeFrom(Simplex simplex) {
+		var factor = Polytopes.makeKroneckerDeltaFactorFrom(simplex);
+		var kroneckerDeltaPolytopeIndex = factor.getVariables().get(1);
+		var hull = new DefaultFunctionConvexHull(list(kroneckerDeltaPolytopeIndex), factor);
+		return hull;
 	}
 	
 	private static boolean isSimplexOn(AtomicPolytope atomicPolytope, Variable variable) {

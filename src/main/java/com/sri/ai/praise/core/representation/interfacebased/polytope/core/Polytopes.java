@@ -9,6 +9,7 @@ import java.util.List;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.KroneckerDeltaFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -49,6 +50,16 @@ public class Polytopes {
 			updatedAtomicPolytope = functionConvexHull.newInstance(remainingIndices, functionConvexHull.getFactor());
 		}
 		return updatedAtomicPolytope;
+	}
+
+	/** 
+	 * Makes a {@link KroneckerDeltaFactor} <code>K(V,V')</code> such that 
+	 * the given simplex <code>S_v</code> is equivalent to function convex hull <code>{ K(V,V') }_{V'}</code>.
+	 */
+	public static KroneckerDeltaFactor makeKroneckerDeltaFactorFrom(Simplex simplex) {
+		Variable simplexVariable = simplex.getVariable();
+		Variable newIndex = simplexVariable.makeNewVariableWithSameRangeButDifferentEqualsIdentity();
+		return new KroneckerDeltaFactor(simplexVariable, newIndex);
 	}
 
 }

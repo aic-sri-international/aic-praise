@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core;
 
+import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.expresso.helper.Expressions.parse;
 
 import java.util.List;
@@ -44,6 +45,7 @@ import java.util.List;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.WrappedExpression;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
+import com.sri.ai.util.Enclosing;
 
 public class DefaultExpressionVariable extends WrappedExpression implements ExpressionVariable {
 
@@ -80,6 +82,24 @@ public class DefaultExpressionVariable extends WrappedExpression implements Expr
 	public List<? extends Object> getValues() {
 		throw new Error(getClass() + ".getValues() not implemented -- getValues() is deemed not needed for most algorithms.");
 		// TODO: refactor to make getValues part of a specific interface used by the algorithms that require values
+	}
+
+	@Override
+	/**
+	 * If this expression variable is based on a symbol with a string value, returns
+	 * a new expression value based on the symbol with the same string concatenated with a prime symbol.
+	 * Otherwise, throws an Error.
+	 */
+	public ExpressionVariable makeNewVariableWithSameRangeButDifferentEqualsIdentity() {
+		if (getSyntacticFormType().equals("Symbol") && getValue() instanceof String) {
+			var stringValue = (String) getValue();
+			var primedStringValue = stringValue + "'";
+			var primedSymbol = makeSymbol(primedStringValue);
+			return expressionVariable(primedSymbol);
+		}
+		else {
+			throw new Error((new Enclosing() {}).methodName() + " not supported for " + getClass() + " that are not Symbols or do not have a String value: " + this + ", of class: " + getClass());
+		}
 	}
 
 }
