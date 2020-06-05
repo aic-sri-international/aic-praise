@@ -51,7 +51,7 @@ import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.sortByString;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.union;
-import static com.sri.ai.util.base.ConstructorReflectionManager.constructorReflectionManager;
+import static com.sri.ai.util.base.ConstructorByLazyReflection.constructorByLazyReflectionOfClassAndParameters;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +68,7 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.DefaultFunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
-import com.sri.ai.util.base.ConstructorReflectionManager;
+import com.sri.ai.util.base.ConstructorByLazyReflection;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.collect.RoundRobinIterator;
@@ -97,11 +97,11 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	///////////////// ABSTRACT METHODS
 	
 	@Override
-	abstract protected Approximation<Factor> simplify(Approximation<Factor> approximation);
+	abstract public Approximation<Factor> simplify(Approximation<Factor> approximation);
 
 	@Override
 	abstract
-	protected 
+	public
 	Approximation<Factor> 
 	computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation);
 	
@@ -109,13 +109,13 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	
 	private Iterator<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType,RootType>> subRoundRobinIterator;
 
-	private ConstructorReflectionManager<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism> constructor;
+	private ConstructorByLazyReflection<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism> constructor;
 	
 	///////////////// CONSTRUCTOR
 	
 	public AbstractAnytimeExactBPNodeWithSimplificationMechanism(ExactBPNode<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
-		constructor = constructorReflectionManager(getClass(), ExactBPNode.class);
+		constructor = constructorByLazyReflectionOfClassAndParameters(getClass(), ExactBPNode.class);
 	}
 
 	///////////////// IMPLEMENTATIONS

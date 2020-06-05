@@ -44,19 +44,19 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Minimu
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
- * An extension of {@link AnytimeExactBPNodeWithoutSimplification} using {@link MinimumBasedFunctionConvexHullSimplification}.
+ * An extension of {@link AnytimeExactBPNodeWithIdentitySimplification} using {@link MinimumBasedFunctionConvexHullSimplification}.
  * 
  * @author braz
  *
  */
-public class AnytimeExactBPNodeWithMinimumBasedSimplification<RootType,SubRootType> extends AnytimeExactBPNodeWithoutSimplification<RootType, SubRootType> {
+public class AnytimeExactBPNodeWithMinimumBasedSimplification<RootType,SubRootType> extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
 
 	public AnytimeExactBPNodeWithMinimumBasedSimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base);
 	}
 	
 	@Override
-	protected Approximation<Factor> simplify(Approximation<Factor> approximation) {
+	public Approximation<Factor> simplify(Approximation<Factor> approximation) {
 		var convexHull = (FunctionConvexHull) approximation;
 		return MinimumBasedFunctionConvexHullSimplification.simplify(convexHull, true /* forced */);
 	}

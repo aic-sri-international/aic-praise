@@ -19,7 +19,7 @@ public interface AnytimeExactBPNode<RootType, SubRootType> extends AnytimeEagerT
 	ExactBPNode<RootType, SubRootType> getBase();
 
 	@Override
-	ArrayList<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType, RootType>> getSubs();
+	ArrayList<? extends AnytimeExactBPNode<SubRootType, RootType>> getSubs();
 
 	@Override
 	Approximation<Factor> function(List<Approximation<Factor>> subsApproximations);

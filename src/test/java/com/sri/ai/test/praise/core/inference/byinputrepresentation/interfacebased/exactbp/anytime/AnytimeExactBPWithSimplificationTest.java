@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.algorithm.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithoutSimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
@@ -506,7 +506,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		Trace simplificationTrace = new Trace();
 		
-		var it = new AnytimeExactBPSolverWithTracing(simplificationTrace).apply(query, factorNetwork);
+		var it = new AnytimeExactBPWithIdentitySimplificationAndTracing(simplificationTrace).apply(query, factorNetwork);
 		
 		while (it.hasNext()) {
 			var polytope = (Polytope) it.next();
@@ -520,13 +520,43 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		assertEquals(expectedHistory, simplificationTrace.history);
 	}
+	
+	private static class AnytimeExactBPWithIdentitySimplificationAndTracing extends AnytimeExactBP {
+		
+		Trace trace;
+	
+		public AnytimeExactBPWithIdentitySimplificationAndTracing(Trace trace) {
+			this.trace = trace;
+		}
+	
+		@Override
+		protected AnytimeExactBPNodeWithIdentitySimplification<Variable, Factor> newInstance(ExactBP exactBP) {
+			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<>(exactBP, trace);
+		}
+		
+	}
 
-	private static class AnytimeExactBPWithTracing<RootType, SubRootType> 
-	extends AnytimeExactBPNodeWithoutSimplification<RootType, SubRootType> {
+	private static class AnytimeExactBPSolverWithMinimumBasedSimplificationAndTracing extends AnytimeExactBP {
+		
+		Trace trace;
+	
+		public AnytimeExactBPSolverWithMinimumBasedSimplificationAndTracing(Trace trace) {
+			this.trace = trace;
+		}
+	
+		@Override
+		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> newInstance(ExactBP exactBP) {
+			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<>(exactBP, trace);
+		}
+		
+	}
+
+	private static class AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType, SubRootType> 
+	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
 	
 		private Trace trace;
 	
-		public AnytimeExactBPWithTracing(ExactBPNode<RootType, SubRootType> base, Trace trace) {
+		public AnytimeExactBPNodeWithIdentitySimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, Trace trace) {
 			super(base);
 			this.trace = trace;
 		}
@@ -535,12 +565,12 @@ public class AnytimeExactBPWithSimplificationTest {
 		@Override
 		protected
 		<RootType2, SubRootType2>
-		AnytimeExactBPWithTracing<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
-			return new AnytimeExactBPWithTracing<RootType2, SubRootType2>(base, trace);
+		AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
+			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType2, SubRootType2>(base, trace);
 		}
 		
 		@Override
-		protected Approximation<Factor> simplify(Approximation<Factor> approximation) {
+		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
 			var result = super.simplify(approximation);
 			var root = getBase().getRoot();
 			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
@@ -552,7 +582,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		}
 	
 		@Override
-		protected 
+		public 
 		Approximation<Factor> 
 		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
 			var result = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
@@ -566,20 +596,49 @@ public class AnytimeExactBPWithSimplificationTest {
 		}
 	}
 
-	private static class AnytimeExactBPSolverWithTracing
-	extends AnytimeExactBP {
-		
-		Trace trace;
+	private static class AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<RootType, SubRootType> 
+	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
 	
-		public AnytimeExactBPSolverWithTracing(Trace trace) {
+		private Trace trace;
+	
+		public AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, Trace trace) {
+			super(base);
 			this.trace = trace;
+		}
+		
+
+		@Override
+		protected
+		<RootType2, SubRootType2>
+		AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
+			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<RootType2, SubRootType2>(base, trace);
+		}
+		
+		@Override
+		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
+			var result = super.simplify(approximation);
+			var root = getBase().getRoot();
+			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
+			trace.accept("");
+			trace.accept("Message   : " + parentifAny + "   <----   " + root);
+			trace.accept("Simplified: " + approximation);
+			trace.accept("to        : " + result);
+			return result;
 		}
 	
 		@Override
-		protected AnytimeExactBPNodeWithoutSimplification<Variable, Factor> makeAnytimeExactBPNodeWithoutSimplification(ExactBP exactBP) {
-			return new AnytimeExactBPWithTracing<>(exactBP, trace);
+		public 
+		Approximation<Factor> 
+		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
+			var result = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
+			var root = getBase().getRoot();
+			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
+			trace.accept("");
+			trace.accept("Message   : " + parentifAny + "   <----   " + root);
+			trace.accept("Updated   : " + currentApproximation);
+			trace.accept("to        : " + result);
+			return result;
 		}
-		
 	}
 
 	private static class Trace implements Consumer<String> {

@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.deprecated;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithoutSimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -11,24 +11,24 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeE
 @Deprecated // see base class for explanation why
 public class OldAnytimeExactBPWithSimplification<RootType,SubRootType> extends AbstractAnytimeEagerTreeComputationWithSimplification<Factor> {
 
-	public OldAnytimeExactBPWithSimplification(AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> base) {
+	public OldAnytimeExactBPWithSimplification(AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> base) {
 		super(base);
 	}
 
 	public OldAnytimeExactBPWithSimplification(ExactBPNode<RootType,SubRootType> base) {
-		this(new AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType>(base));
+		this(new AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType>(base));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> getBase() {
-		return (AnytimeExactBPNodeWithoutSimplification<RootType, SubRootType>) super.getBase();
+	public AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> getBase() {
+		return (AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType>) super.getBase();
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected OldAnytimeExactBPWithSimplification<RootType,SubRootType> newInstance(NullaryFunction<Approximation<Factor>> baseSub) {
-		return new OldAnytimeExactBPWithSimplification((AnytimeExactBPNodeWithoutSimplification) baseSub);
+		return new OldAnytimeExactBPWithSimplification((AnytimeExactBPNodeWithIdentitySimplification) baseSub);
 	}
 
 	@Override

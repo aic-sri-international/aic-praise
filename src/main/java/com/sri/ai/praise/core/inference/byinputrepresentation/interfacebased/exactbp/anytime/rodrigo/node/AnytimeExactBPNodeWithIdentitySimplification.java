@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node;
 
+import java.util.ArrayList;
+
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -49,19 +51,19 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
  * @author braz
  *
  */
-public class AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType, SubRootType> {
+public class AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType, SubRootType> {
 
-	public AnytimeExactBPNodeWithoutSimplification(ExactBPNode<RootType,SubRootType> base) {
+	public AnytimeExactBPNodeWithIdentitySimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base);
 	}
 	
 	@Override
-	protected Approximation<Factor> simplify(Approximation<Factor> approximation) {
+	public Approximation<Factor> simplify(Approximation<Factor> approximation) {
 		return approximation;
 	}
 
 	@Override
-	protected 
+	public 
 	Approximation<Factor> 
 	computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
 		
@@ -80,4 +82,16 @@ public class AnytimeExactBPNodeWithoutSimplification<RootType,SubRootType> exten
 		Polytope polytopeAfterReversingSummingOutOfNewlyFreeVariables = polytope.unSumOutSimplexVariables(getBase()::isFreeVariable);
 		return polytopeAfterReversingSummingOutOfNewlyFreeVariables;
 	}
+	
+	@Override
+	public AnytimeExactBPNodeWithIdentitySimplification<SubRootType, RootType> pickNextSubToIterate() {
+		return (AnytimeExactBPNodeWithIdentitySimplification<SubRootType, RootType>) super.pickNextSubToIterate();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ArrayList<? extends AnytimeExactBPNodeWithIdentitySimplification<SubRootType, RootType>> getSubs() {
+		return (ArrayList<? extends AnytimeExactBPNodeWithIdentitySimplification<SubRootType, RootType>>) super.getSubs();
+	}
+	
 }
