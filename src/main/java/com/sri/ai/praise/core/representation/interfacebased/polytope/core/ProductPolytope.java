@@ -43,19 +43,24 @@ import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
 import static com.sri.ai.util.Util.accumulate;
+import static com.sri.ai.util.Util.arrayListFrom;
 import static com.sri.ai.util.Util.collect;
 import static com.sri.ai.util.Util.collectToSet;
+import static com.sri.ai.util.Util.forAll;
 import static com.sri.ai.util.Util.getFirst;
 import static com.sri.ai.util.Util.intersection;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
+import static com.sri.ai.util.Util.unionOfResults;
 import static com.sri.ai.util.base.Pair.pair;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -439,12 +444,31 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 	}
 	
 	private AtomicPolytope getEquivalentAtomicPolytopeForMultipleFreeVariablesCase() {
-		var functionConvexHulls = mapIntoList(getAtomicPolytopes(), this::getCorrespondingFunctionConvexHull);
+		// We get atomic polytopes with hulls coming first.
+		// This is due to simplices being converted to function convex hulls being based on Kronecker delta factors.
+		// If two simplices occur before any function convex hulls, 
+		// we would try to multiply the Kronecker delta factors, 
+		// which is not currently supported because this would require 
+		// either the ability to represent a product factor with multiple Kronecker delta factors, 
+		// or a multi-variable-pair Kronecker.
+		// Here, if all atomic polytopes are simplices an error is thrown.
+		// Upper code must deal with that case separately.
+		var atomicPolytopesWithHullsComingFirst = getAtomicPolytopesWithFunctioConvexHullsComingFirst();
+		var functionConvexHulls = mapIntoArrayList(atomicPolytopesWithHullsComingFirst, this::getCorrespondingFunctionConvexHull);
 		var allFactors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
-		var allIndices = Util.unionOfResults(functionConvexHulls, FunctionConvexHull::getIndices);
+		var allIndices = unionOfResults(functionConvexHulls, FunctionConvexHull::getIndices);
 		var productFactor = Factor.multiply(allFactors);
 		var result = new DefaultFunctionConvexHull(allIndices, productFactor);
 		return result;
+	}
+
+	private ArrayList<? extends AtomicPolytope> getAtomicPolytopesWithFunctioConvexHullsComingFirst() {
+		var atomicPolytopes = arrayListFrom(getAtomicPolytopes());
+		atomicPolytopes.sort((f1, f2) -> f1 instanceof FunctionConvexHull? -1 : f2 instanceof FunctionConvexHull? +1 : 0);
+		if (atomicPolytopes.get(0) instanceof Simplex) {
+			throw new Error("Trying to obtain an atomic polytope equivalent to a product polytope composed by simplices only. This is not supported because the result is a multi-variable simplex, which is not yet supported or implemented. For now, code should check for this case beforehand and get around it. For example, a common case for obtaining an equivalent atomic polytope is to compute a polytope's length. But if the polytope is a simplex-only product, then the length is trivially 1.");
+		}
+		return atomicPolytopes;
 	}
 	
 	private FunctionConvexHull getCorrespondingFunctionConvexHull(AtomicPolytope atomicPolytope) {
@@ -602,7 +626,25 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 
 	@Override
 	public Factor probabilityRange() {
-		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
+		try {
+			return getEquivalentAtomicPolytope().probabilityRange();
+		}
+		catch (Error e) {
+			throw new Error((new Enclosing() {}).methodName() + " not supported in this case", e);
+		}
+	}
+	
+	@Override
+	public double length() {
+		// We override the default implementation because it uses {@link #probabilityRange()}
+		// which does not currently support simplex-only product factors.
+		// So we check for this case separately here.
+		if (forAll(getAtomicPolytopes(), a -> a instanceof Simplex)) {
+			return 1.0;
+		}
+		else {
+			return super.length();
+		}
 	}
 
 	@Override

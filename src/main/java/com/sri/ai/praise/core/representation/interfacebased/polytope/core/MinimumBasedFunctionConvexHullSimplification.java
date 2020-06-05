@@ -37,6 +37,8 @@
  */
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.IDENTITY_POLYTOPE;
+import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
@@ -46,6 +48,7 @@ import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
+import static com.sri.ai.util.graph.JGraphTUtil.getConnectedSets;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,6 +90,50 @@ import com.sri.ai.util.base.Wrapper;
  *
  */
 final public class MinimumBasedFunctionConvexHullSimplification {
+	
+	
+	public static Polytope simplify(Polytope polytope, boolean forced) {
+		if (polytope.isIdentity()) {
+			return IDENTITY_POLYTOPE;
+		}
+		else if (polytope instanceof FunctionConvexHull) {
+			return simplify((FunctionConvexHull) polytope, forced);
+		}
+		else if (polytope instanceof ProductPolytope){
+			return simplifyProductPolytope(polytope, forced);
+		}
+		else { // no simplification available
+			return polytope;
+		}
+	}
+
+	private static Polytope simplifyProductPolytope(Polytope nonIdentityPolytope, boolean forced) {
+		return
+				getConnectedSets(
+						nonIdentityPolytope.getAtomicPolytopes(), 
+						(a1, a2) -> intersect(a1.getFreeVariables(), a2.getFreeVariables()))
+				.stream()
+				.map(Polytope::multiply)
+				.map(Polytope::getEquivalentAtomicPolytope)
+				.map(p -> simplify(p, forced))
+				.reduce(Polytope::multiply)
+				.get();
+		
+// 		No-stream version for possible debugging
+//		var setsOfConnectedAtomicPolytopes = 
+//				getConnectedSets(
+//						nonIdentityPolytope.getAtomicPolytopes(), 
+//						(a1, a2) -> 
+//						intersect(a1.getFreeVariables(), a2.getFreeVariables()));
+//		var factorizedPolytopes =
+//				mapIntoList(setsOfConnectedAtomicPolytopes, Polytope::multiply);
+//		var factorizedAtomicPolytopes =
+//				mapIntoList(factorizedPolytopes, Polytope::getEquivalentAtomicPolytope);
+//		var simplifiedFactorizedAtomicPolytopes =
+//				mapIntoList(factorizedAtomicPolytopes, simplifyHull);
+//		var result = Polytope.multiply(simplifiedFactorizedAtomicPolytopes);
+//		return result;
+	}
 	
 	/**
 	 * Computes simplification.

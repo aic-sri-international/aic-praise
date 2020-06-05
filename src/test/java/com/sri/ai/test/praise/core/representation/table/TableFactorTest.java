@@ -611,7 +611,6 @@ public class TableFactorTest {
 		
 		ArrayTableFactor f;
 		KroneckerDeltaFactor k;
-		Factor product;
 		Factor expected;
 		
 		f = arrayTableFactor(list(a, b), 
