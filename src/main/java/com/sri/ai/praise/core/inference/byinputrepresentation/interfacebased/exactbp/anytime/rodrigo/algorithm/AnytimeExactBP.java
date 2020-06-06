@@ -4,8 +4,9 @@ import static com.sri.ai.util.base.ConstructorByLazyReflection.constructorByLazy
 
 import java.util.Iterator;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithIdentitySimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.AnytimeSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -23,7 +24,7 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
  * @author braz
  *
  */
-public class AnytimeExactBP implements BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> {
+public class AnytimeExactBP implements AnytimeSolver {
 
 	private ConstructorByLazyReflection<AnytimeExactBPNode> anytimeExactBPNodeConstructor;
 	

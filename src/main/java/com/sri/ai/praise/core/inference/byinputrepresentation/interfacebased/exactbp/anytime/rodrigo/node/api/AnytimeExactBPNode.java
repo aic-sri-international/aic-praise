@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,11 @@ import com.sri.ai.util.computation.treecomputation.anytime.api.AnytimeEagerTreeC
 public interface AnytimeExactBPNode<RootType, SubRootType> extends AnytimeEagerTreeComputation<Factor> {
 
 	@Override
-	boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance();
+	boolean informativeApproximationRequiresAllSubsToBeInformative();
 
+	@Override
+	boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative();
+	
 	@Override
 	AnytimeExactBPNode<SubRootType, RootType> pickNextSubToIterate();
 

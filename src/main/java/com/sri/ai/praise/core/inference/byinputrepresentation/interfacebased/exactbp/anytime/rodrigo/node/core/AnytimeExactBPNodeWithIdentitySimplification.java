@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core;
 
 import java.util.ArrayList;
 
@@ -45,13 +45,14 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
- * An extension of {@link AbstractAnytimeExactBPNodeWithSimplificationMechanism}
+ * An extension of {@link AbstractAnytimeExactBPNodeWithSimplification}
  * doing no bound simplification.
  * 
  * @author braz
  *
  */
-public class AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType, SubRootType> {
+public class AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> 
+extends AbstractAnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 
 	public AnytimeExactBPNodeWithIdentitySimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base);

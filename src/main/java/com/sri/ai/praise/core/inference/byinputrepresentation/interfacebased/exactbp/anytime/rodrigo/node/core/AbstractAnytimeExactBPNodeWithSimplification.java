@@ -35,7 +35,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node;
+package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core;
 
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.AbstractFunctionConvexHull.multiplyIntoSingleFunctionConvexHull;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNodeWithSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -88,9 +89,9 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  * @author braz
  *
  */
-public abstract class AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType,SubRootType> 
+public abstract class AbstractAnytimeExactBPNodeWithSimplification<RootType,SubRootType> 
 extends AbstractAnytimeTreeComputationWithLossySimplification<Factor> 
-implements AnytimeExactBPNode<RootType, SubRootType> {
+implements AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 	
 	public static final boolean debug = false;
 
@@ -107,13 +108,11 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	
 	///////////////// DATA MEMBERS
 	
-	private Iterator<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType,RootType>> subRoundRobinIterator;
-
-	private ConstructorByLazyReflection<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism> constructor;
+	private ConstructorByLazyReflection<? extends AbstractAnytimeExactBPNodeWithSimplification> constructor;
 	
 	///////////////// CONSTRUCTOR
 	
-	public AbstractAnytimeExactBPNodeWithSimplificationMechanism(ExactBPNode<RootType,SubRootType> base) {
+	public AbstractAnytimeExactBPNodeWithSimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
 		constructor = constructorByLazyReflectionOfClassAndParameters(getClass(), ExactBPNode.class);
 	}
@@ -121,29 +120,37 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	///////////////// IMPLEMENTATIONS
 	
 	@Override
-	public boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
+	public boolean informativeApproximationRequiresAllSubsToBeInformative() {
 		boolean result = getBase().getRoot() instanceof Variable;
 		return result;
 	}
 
 	@Override
-	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
-		super.makeSubsAndIterateThemToTheirFirstApproximation();
-		subRoundRobinIterator = new RoundRobinIterator<>(getSubs(), Iterator::hasNext);
+	public boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative() {
+		return false;
 	}
-
+	
 	@Override
-	public AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType, RootType> pickNextSubToIterate() {
-		if (subRoundRobinIterator.hasNext()) {
-			return subRoundRobinIterator.next();
+	public AbstractAnytimeExactBPNodeWithSimplification<SubRootType, RootType> pickNextSubToIterate() {
+		if (getSubRoundRobinIterator().hasNext()) {
+			return getSubRoundRobinIterator().next();
 		}
 		else {
 			return null;
 		}
 	}
 
+	private Iterator<? extends AbstractAnytimeExactBPNodeWithSimplification<SubRootType,RootType>> subRoundRobinIterator;
+	private Iterator<? extends AbstractAnytimeExactBPNodeWithSimplification<SubRootType,RootType>> getSubRoundRobinIterator() {
+		if (subRoundRobinIterator == null) {
+			subRoundRobinIterator = new RoundRobinIterator<>(getSubs(), Iterator::hasNext);
+		}
+		return subRoundRobinIterator;
+	}
+	
+
 	@Override
-	protected AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType, RootType> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
+	protected AbstractAnytimeExactBPNodeWithSimplification<SubRootType, RootType> makeAnytimeVersion(NullaryFunction<Factor> baseSub) {
 		@SuppressWarnings("unchecked")
 		var baseExactBPSub = (ExactBPNode<SubRootType, RootType>) baseSub;
 		return newAnytimeExactBPNode(baseExactBPSub);
@@ -158,12 +165,12 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	@SuppressWarnings("unchecked")
 	protected
 	<RootType2, SubRootType2>
-	AbstractAnytimeExactBPNodeWithSimplificationMechanism<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
+	AbstractAnytimeExactBPNodeWithSimplification<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
 		try {
 			return constructor.newInstance(base);
 		}
 		catch (Throwable e) {
-			throw new Error("Error in instantiating an anytime exact BP node from " + getClass() + ". Make sure that it has either a constructor taking a single parameter of class " + ExactBPNode.class + ", or that it overrides " + AbstractAnytimeExactBPNodeWithSimplificationMechanism.class + ".newInstance to return such an instance", e);
+			throw new Error("Error in instantiating an anytime exact BP node from " + getClass() + ". Make sure that it has either a constructor taking a single parameter of class " + ExactBPNode.class + ", or that it overrides " + AbstractAnytimeExactBPNodeWithSimplification.class + ".newInstance to return such an instance", e);
 		}
 	}
 	
@@ -175,8 +182,8 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public ArrayList<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType,RootType>> getSubs() {
-		return (ArrayList<? extends AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType,RootType>>) super.getSubs();
+	public ArrayList<? extends AbstractAnytimeExactBPNodeWithSimplification<SubRootType,RootType>> getSubs() {
+		return (ArrayList<? extends AbstractAnytimeExactBPNodeWithSimplification<SubRootType,RootType>>) super.getSubs();
 	}
 	
 	@Override
@@ -364,7 +371,7 @@ implements AnytimeExactBPNode<RootType, SubRootType> {
 	private Collection<? extends Variable> getSimplexVariables_DEBUG() {
 		List<Variable> simplexVariables = list();
 		if (getBase().hasMadeSubsYet()) {
-			getSubs().stream().forEach(s -> simplexVariables.addAll(((AbstractAnytimeExactBPNodeWithSimplificationMechanism<SubRootType, RootType>) s).getSimplexVariables_DEBUG()));
+			getSubs().stream().forEach(s -> simplexVariables.addAll(((AbstractAnytimeExactBPNodeWithSimplification<SubRootType, RootType>) s).getSimplexVariables_DEBUG()));
 		}
 		else if (getBase().getRoot() instanceof Variable) {
 			simplexVariables.add((Variable) getBase().getRoot());

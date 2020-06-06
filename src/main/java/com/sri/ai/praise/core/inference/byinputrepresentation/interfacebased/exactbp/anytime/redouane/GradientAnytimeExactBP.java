@@ -8,7 +8,6 @@ import static com.sri.ai.util.Util.mapIntoList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -43,22 +42,18 @@ import com.sri.ai.util.computation.treecomputation.anytime.gradientdescent.core.
 public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTreeComputationWithGradientDescent<Factor> {
 
 	@Override
-	public boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
+	public boolean informativeApproximationRequiresAllSubsToBeInformative() {
 		boolean result = getBase().getRoot() instanceof Variable;
 		return result;
 	}
 
+	@Override
+	public boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative() {
+		return false;
+	}
+	
 	public GradientAnytimeExactBP(ExactBPNode<RootType,SubRootType> base) {
 		super(base, new Simplex(base.getMessageVariable()));
-	}
-
-	@SuppressWarnings("unused")
-	private Iterator<? extends Anytime<Factor>> subIteratorForRefinement;
-
-	@Override
-	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
-		super.makeSubsAndIterateThemToTheirFirstApproximation();
-		subIteratorForRefinement = getSubs().iterator();
 	}
 
 	@Override
@@ -125,7 +120,7 @@ public class GradientAnytimeExactBP<RootType,SubRootType> extends AbstractAnytim
 		Approximation<Factor> subApproximation = sub.getCurrentApproximation();
 		AtomicPolytope subAtomicPolytope = transformApproximationToAtomicPolytopeOrThrowsErrorIfNotPossible(subApproximation);
 		Set<? extends Variable> subAtomicPolytopeIndices = getIndices(subAtomicPolytope);
-		if(evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance()) {
+		if(informativeApproximationRequiresAllSubsToBeInformative()) {
 			// root is a variable
 			return getAbsoluteVolumeVariationFromFactorToVariableWithRespectTo(sub, subAtomicPolytopeIndices);
 		} 

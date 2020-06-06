@@ -110,16 +110,16 @@ public class OldAnytimeExactBP<RootType,SubRootType> extends AbstractAnytimeTree
 	}
 
 	@Override
-	public boolean evenOneSubWithTotalIgnoranceRendersApproximationEqualToTotalIgnorance() {
+	public boolean informativeApproximationRequiresAllSubsToBeInformative() {
 		boolean result = getBase().getRoot() instanceof Variable;
 		return result;
 	}
 
 	@Override
-	protected void makeSubsAndIterateThemToTheirFirstApproximation() {
-		super.makeSubsAndIterateThemToTheirFirstApproximation();
+	public boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative() {
+		return false;
 	}
-
+	
 	@Override
 	public OldAnytimeExactBP<SubRootType, RootType> pickNextSubToIterate() {
 		

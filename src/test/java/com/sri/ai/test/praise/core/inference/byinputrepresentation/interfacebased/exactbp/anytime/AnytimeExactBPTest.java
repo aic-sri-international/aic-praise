@@ -31,7 +31,7 @@ import com.sri.ai.grinder.theory.linearrealarithmetic.LinearRealArithmeticTheory
 import com.sri.ai.grinder.theory.propositional.PropositionalTheory;
 import com.sri.ai.grinder.theory.tuple.TupleTheory;
 import com.sri.ai.praise.core.PRAiSEUtil;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithIdentitySimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.AbstractExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;

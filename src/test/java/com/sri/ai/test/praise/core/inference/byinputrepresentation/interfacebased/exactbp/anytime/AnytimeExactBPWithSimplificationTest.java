@@ -3,18 +3,22 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.arrayTableFactor;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.round;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.AnytimeSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.algorithm.AnytimeExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.AnytimeExactBPNodeWithIdentitySimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNodeWithSimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithMinimumBasedSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
@@ -500,33 +504,83 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		runTest(query, factorNetwork, expectedHistory);
 	}
-
+	
 	private void runTest(Variable query, FactorNetwork factorNetwork, List<String> expectedHistory) {
 		println("Exact: ", new ExactBPSolver().apply(query, factorNetwork).normalize());
+		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracing(), query, factorNetwork, expectedHistory);
+//		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracingWrapper(), query, factorNetwork, expectedHistory);
+		//runTest(new AnytimeExactBPWithMinimumBasedSimplificationAndTracing(), query, factorNetwork, expectedHistory);
+	}
+
+	private void runTest(
+			AnytimeSolverWithTracing solver,
+			Variable query,
+			FactorNetwork factorNetwork,
+			List<String> expectedHistory) {
 		
-		Trace simplificationTrace = new Trace();
-		
-		var it = new AnytimeExactBPWithIdentitySimplificationAndTracing(simplificationTrace).apply(query, factorNetwork);
-		
-		while (it.hasNext()) {
-			var polytope = (Polytope) it.next();
-			var atomicPolytope = polytope.getEquivalentAtomicPolytope();
-			var normalized = atomicPolytope.normalize(list(query));
-			println(normalized + ", " + round(normalized.length(), 3));
+		var approximationsIterator = solver.apply(query, factorNetwork);
+
+		while (approximationsIterator.hasNext()) {
+			var polytope = (Polytope) approximationsIterator.next();
+			println(polytope + ", " + round(polytope.length(), 3));
 		}
-		
-		println("Simplification trace:");
-		println(join("\n", simplificationTrace.history));
-		
-		assertEquals(expectedHistory, simplificationTrace.history);
+
+		println("Trace:");
+		println(join("\n", solver.getTrace()));
+
+		assertEquals(expectedHistory, solver.getTrace());
 	}
 	
-	private static class AnytimeExactBPWithIdentitySimplificationAndTracing extends AnytimeExactBP {
-		
-		Trace trace;
+	///////////////// TRACING INTERFACES
 	
-		public AnytimeExactBPWithIdentitySimplificationAndTracing(Trace trace) {
-			this.trace = trace;
+	private static interface AnytimeSolverWithTracing extends AnytimeSolver {
+		List<String> getTrace();
+	}
+
+	private static interface AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> 
+	extends AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
+		List<String> getTrace();
+	}
+
+	///// Solver wrapper
+	
+	@SuppressWarnings("unused")
+	private static class AnytimeExactBPWithIdentitySimplificationAndTracingWrapper
+	extends AnytimeExactBP 
+	implements AnytimeSolverWithTracing
+	{
+		
+		public List<String> trace;
+	
+		public AnytimeExactBPWithIdentitySimplificationAndTracingWrapper() {
+			this.trace = list();
+		}
+	
+		@Override
+		protected AnytimeExactBPNodeWithSimplification<Variable, Factor> newInstance(ExactBP exactBP) {
+			var node = new AnytimeExactBPNodeWithIdentitySimplification<>(exactBP);
+			return new DefaultAnytimeExactBPNodeWithSimplificationAndTracing<>(node, trace);
+		}
+		
+		@Override
+		public List<String> getTrace() {
+			return trace;
+		}
+		
+	}
+
+
+	///////////////// AnytimeSolverWithTracing implementations
+	
+	private static class AnytimeExactBPWithIdentitySimplificationAndTracing 
+	extends AnytimeExactBP 
+	implements AnytimeSolverWithTracing
+	{
+		
+		public List<String> trace;
+	
+		public AnytimeExactBPWithIdentitySimplificationAndTracing() {
+			this.trace = list();
 		}
 	
 		@Override
@@ -534,16 +588,17 @@ public class AnytimeExactBPWithSimplificationTest {
 			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<>(exactBP, trace);
 		}
 		
+		@Override
+		public List<String> getTrace() {
+			return trace;
+		}
+		
 	}
 
-	private static class AnytimeExactBPSolverWithMinimumBasedSimplificationAndTracing extends AnytimeExactBP {
+	@SuppressWarnings("unused")
+	private static class AnytimeExactBPWithMinimumBasedSimplificationAndTracing 
+	extends AnytimeExactBPWithIdentitySimplificationAndTracing {
 		
-		Trace trace;
-	
-		public AnytimeExactBPSolverWithMinimumBasedSimplificationAndTracing(Trace trace) {
-			this.trace = trace;
-		}
-	
 		@Override
 		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> newInstance(ExactBP exactBP) {
 			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<>(exactBP, trace);
@@ -551,12 +606,164 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 	}
 
+	///////////////// AnytimeExactBPNodeWithSimplificationAndTracing implementations
+	
+	//// Common code for all implementations
+	
+	private static <RootType, SubRootType> void traceSimplification(
+			AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> node,
+			Approximation<Factor> approximation,
+			Approximation<Factor> simplification) {
+
+		var root = node.getBase().getRoot();
+		var parentifAny = node.getBase().getParent() != null? node.getBase().getParent() : "";
+		node.getTrace().add("");
+		node.getTrace().add("Message   : " + parentifAny + "   <----   " + root);
+		node.getTrace().add("Simplified: " + approximation);
+		node.getTrace().add("to        : " + simplification);
+	}
+
+	private static <RootType, SubRootType> void traceComputeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(
+			AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> node,
+			Approximation<Factor> currentApproximation,
+			Approximation<Factor> updatedApproximation) {
+		var root = node.getBase().getRoot();
+		var parentifAny = node.getBase().getParent() != null? node.getBase().getParent() : "";
+		node.getTrace().add("");
+		node.getTrace().add("Message   : " + parentifAny + "   <----   " + root);
+		node.getTrace().add("Updated   : " + currentApproximation);
+		node.getTrace().add("to        : " + updatedApproximation);
+	}
+
+	//// Wrapper
+	
+	private static class DefaultAnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> 
+	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> {
+	
+		private AnytimeExactBPNodeWithSimplification<RootType, SubRootType> base;
+		private List<String> trace;
+	
+		public DefaultAnytimeExactBPNodeWithSimplificationAndTracing(
+				AnytimeExactBPNodeWithSimplification<RootType, SubRootType> base, 
+				List<String> trace) {
+			this.base = base;
+			this.trace = trace;
+		}
+		
+
+		@Override
+		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
+			var simplification = base.simplify(approximation);
+			traceSimplification(this, approximation, simplification);
+			return simplification;
+		}
+	
+		@Override
+		public 
+		Approximation<Factor> 
+		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
+			var updatedApproximation = base.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
+			traceComputeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(
+					this,
+					currentApproximation,
+					updatedApproximation);
+			return updatedApproximation;
+		}
+
+		@Override
+		public List<String> getTrace() {
+			return trace;
+		}
+
+
+		@Override
+		public boolean informativeApproximationRequiresAllSubsToBeInformative() {
+			return base.informativeApproximationRequiresAllSubsToBeInformative();
+		}
+
+
+		@Override
+		public boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative() {
+			return base.informativeApproximationRequiresThatNotAllSubsAreNonInformative();
+		}
+		
+		@Override
+		public AnytimeExactBPNodeWithSimplification<SubRootType, RootType> pickNextSubToIterate() {
+			return base.pickNextSubToIterate();
+		}
+
+
+		@Override
+		public ExactBPNode<RootType, SubRootType> getBase() {
+			return base.getBase();
+		}
+
+
+		@Override
+		public ArrayList<? extends AnytimeExactBPNodeWithSimplificationAndTracing<SubRootType, RootType>> getSubs() {
+			return mapIntoArrayList(base.getSubs(), s -> new DefaultAnytimeExactBPNodeWithSimplificationAndTracing<>(s, trace));
+		}
+
+
+		@Override
+		public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
+			return base.function(subsApproximations);
+		}
+
+
+		@Override
+		public void setCurrentApproximation(Approximation<Factor> newCurrentApproximation) {
+			base.setCurrentApproximation(newCurrentApproximation);
+		}
+
+
+		@Override
+		public Approximation<Factor> getTotalIgnorance() {
+			return base.getTotalIgnorance();
+		}
+
+
+		@Override
+		public Approximation<Factor> getCurrentApproximation() {
+			return base.getCurrentApproximation();
+		}
+
+
+		@Override
+		public void refreshFromWithout() {
+			base.refreshFromWithout();
+		}
+
+
+		@Override
+		public void refreshFromWithin() {
+			base.refreshFromWithin();
+		}
+
+
+		@Override
+		public boolean hasNext() {
+			return base.hasNext();
+		}
+
+
+		@Override
+		public Approximation<Factor> next() {
+			return base.next();
+		}
+	}
+
+	
+	//// Implementation for identity simplification
+	
 	private static class AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType, SubRootType> 
-	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
+	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType>
+	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType>
+	{
 	
-		private Trace trace;
+		private List<String> trace;
 	
-		public AnytimeExactBPNodeWithIdentitySimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, Trace trace) {
+		public AnytimeExactBPNodeWithIdentitySimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, List<String> trace) {
 			super(base);
 			this.trace = trace;
 		}
@@ -565,47 +772,52 @@ public class AnytimeExactBPWithSimplificationTest {
 		@Override
 		protected
 		<RootType2, SubRootType2>
-		AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType2, SubRootType2> newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
+		AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType2, SubRootType2> 
+		newAnytimeExactBPNode(ExactBPNode<RootType2, SubRootType2> base) {
+			
 			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType2, SubRootType2>(base, trace);
 		}
 		
 		@Override
 		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
-			var result = super.simplify(approximation);
-			var root = getBase().getRoot();
-			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
-			trace.accept("");
-			trace.accept("Message   : " + parentifAny + "   <----   " + root);
-			trace.accept("Simplified: " + approximation);
-			trace.accept("to        : " + result);
-			return result;
+			var simplification = super.simplify(approximation);
+			traceSimplification(this, approximation, simplification);
+			return simplification;
 		}
 	
 		@Override
 		public 
 		Approximation<Factor> 
 		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
-			var result = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
-			var root = getBase().getRoot();
-			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
-			trace.accept("");
-			trace.accept("Message   : " + parentifAny + "   <----   " + root);
-			trace.accept("Updated   : " + currentApproximation);
-			trace.accept("to        : " + result);
-			return result;
+			var updatedApproximation = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
+			traceComputeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(
+					this,
+					currentApproximation,
+					updatedApproximation);
+			return updatedApproximation;
+		}
+
+
+
+		@Override
+		public List<String> getTrace() {
+			return trace;
 		}
 	}
 
+	//// Implementation for minimum-based simplification
+	
 	private static class AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<RootType, SubRootType> 
-	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
+	extends AnytimeExactBPNodeWithMinimumBasedSimplification<RootType, SubRootType> 
+	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType>
+	{
 	
-		private Trace trace;
+		private List<String> trace;
 	
-		public AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, Trace trace) {
+		public AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing(ExactBPNode<RootType, SubRootType> base, List<String> trace) {
 			super(base);
 			this.trace = trace;
 		}
-		
 
 		@Override
 		protected
@@ -616,41 +828,26 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		@Override
 		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
-			var result = super.simplify(approximation);
-			var root = getBase().getRoot();
-			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
-			trace.accept("");
-			trace.accept("Message   : " + parentifAny + "   <----   " + root);
-			trace.accept("Simplified: " + approximation);
-			trace.accept("to        : " + result);
-			return result;
+			var simplification = super.simplify(approximation);
+			traceSimplification(this, approximation, simplification);
+			return simplification;
 		}
-	
+
 		@Override
 		public 
 		Approximation<Factor> 
 		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
-			var result = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
-			var root = getBase().getRoot();
-			var parentifAny = getBase().getParent() != null? getBase().getParent() : "";
-			trace.accept("");
-			trace.accept("Message   : " + parentifAny + "   <----   " + root);
-			trace.accept("Updated   : " + currentApproximation);
-			trace.accept("to        : " + result);
-			return result;
+			var updatedApproximation = super.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
+			traceComputeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(
+					this,
+					currentApproximation,
+					updatedApproximation);
+			return updatedApproximation;
+		}
+
+		@Override
+		public List<String> getTrace() {
+			return trace;
 		}
 	}
-
-	private static class Trace implements Consumer<String> {
-		public List<String> history;
-		
-		public Trace() {
-			this.history = list();
-		}
-		
-		@Override
-		public void accept(String item) {
-			history.add(item);
-		}
-	}	
 }
