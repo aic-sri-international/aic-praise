@@ -368,14 +368,14 @@ public class PolytopeTest {
 		assertTrue(p1.equalsModuloPermutations(p2));
 		
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
 								list(x,y,z), 
 								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -385,7 +385,7 @@ public class PolytopeTest {
 		assertTrue(p1.equalsModuloPermutations(p2));
 		
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -394,7 +394,7 @@ public class PolytopeTest {
 				new Simplex(u),
 				new Simplex(v)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(v),
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
@@ -406,7 +406,7 @@ public class PolytopeTest {
 		assertTrue(p1.equalsModuloPermutations(p2));
 		
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -414,7 +414,7 @@ public class PolytopeTest {
 								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
 				new Simplex(v)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(v),
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
@@ -426,7 +426,7 @@ public class PolytopeTest {
 		assertFalse(p1.equalsModuloPermutations(p2));
 		
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
 						list(x, y), 
@@ -440,7 +440,7 @@ public class PolytopeTest {
 								list(z), 
 								new double[] {1., 2.}))
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x), 
 						new ArrayTableFactor(
@@ -542,14 +542,14 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
 								list(x,y,z), 
 								new double[] {1., 2., 3., 4., 5., 6., 7., 8., }))
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -560,7 +560,7 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -569,7 +569,7 @@ public class PolytopeTest {
 				new Simplex(u),
 				new Simplex(v)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(v),
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
@@ -582,7 +582,7 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x, y), 
 						new ArrayTableFactor(
@@ -590,7 +590,7 @@ public class PolytopeTest {
 								new double[] {1., 2., 3., 4., 5., 6., 7., 8., })),
 				new Simplex(v)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(v),
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
@@ -603,7 +603,7 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(u),
 				new DefaultFunctionConvexHull(
 						list(x, y), 
@@ -617,7 +617,7 @@ public class PolytopeTest {
 								list(z), 
 								new double[] {1., 2.}))
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new DefaultFunctionConvexHull(
 						list(x), 
 						new ArrayTableFactor(
@@ -635,25 +635,25 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes();
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes();
+		p1 = ProductPolytope.makeEquivalentToProductOf();
+		p2 = ProductPolytope.makeEquivalentToProductOf();
 		expected = polytopesAreEqual(p1, p2);
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(u)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(); // becomes IdentityPolytope
+		p2 = ProductPolytope.makeEquivalentToProductOf(); // becomes IdentityPolytope
 		expected = polytopesAreOfIncomparableClasses(p1, p2);
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				new Simplex(u)
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				new Simplex(v)
 				);
@@ -662,7 +662,7 @@ public class PolytopeTest {
 		assertEquals(expected, actual);
 		
 		// Next tests use f1 and f2 defined above
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				f2,
 				new Simplex(x),
 				f1,
@@ -671,7 +671,7 @@ public class PolytopeTest {
 				new Simplex(y),
 				f2
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				f2,
 				f2,
@@ -683,7 +683,7 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				f2,
 				new Simplex(x),
 				f1,
@@ -692,7 +692,7 @@ public class PolytopeTest {
 				new Simplex(y),
 				f2
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				f2,
 				f2,
@@ -713,12 +713,12 @@ public class PolytopeTest {
 		actual = p1.checkEquality(p2);
 		assertEquals(expected, actual);
 		
-		p1 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p1 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				new Simplex(y),
 				f2
 				);
-		p2 = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(
+		p2 = ProductPolytope.makeEquivalentToProductOf(
 				new Simplex(x),
 				f2,
 				new Simplex(y),

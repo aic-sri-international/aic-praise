@@ -38,6 +38,8 @@
 package com.sri.ai.praise.core.representation.interfacebased.polytope.core;
 
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.IDENTITY_POLYTOPE;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makeEquivalentToProductOf;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex.productOfSimplices;
 import static com.sri.ai.util.Util.intersect;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
@@ -45,6 +47,9 @@ import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.pair;
 import static com.sri.ai.util.Util.product;
+import static com.sri.ai.util.Util.thereExists;
+import static com.sri.ai.util.Util.unionOfResults;
+import static com.sri.ai.util.base.IsInstanceOf.isInstanceOf;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
 import static com.sri.ai.util.graph.JGraphTUtil.getConnectedSets;
@@ -52,12 +57,14 @@ import static com.sri.ai.util.graph.JGraphTUtil.getConnectedSets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.api.TableFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.Timer;
@@ -66,7 +73,9 @@ import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.base.Wrapper;
 
 /**
- * A simplification of a {@link FunctionConvexHull} based on function f(I, FreeVariables) to the product polytope
+ * A simplification of polytope bounds that decreases their space complexity at the cost of tightness.
+ * 
+ * It is based on the simplification of a {@link FunctionConvexHull} based on function f(I, FreeVariables) to the product polytope
  * <code>prod_{F in FreeVariables} Margin_Simplex( NormalizedProjection(F) )</code> 
  * where
  * <code>NormalizedProjection_F = normalize_F sum_{FreeVariables \ {F}} ConvexHull ( { f(Indices, FreeVariables) }_Indices ) </code>
@@ -85,10 +94,39 @@ import com.sri.ai.util.base.Wrapper;
  * while the special value has the maximum probability
  * (computed as 1 - the sum of the minimal probabilities of the remaining values).
  * 
+ * For identity polytopes, the simplification simply returns the same.
+ * 
+ * For product polytopes, the simplification separates sets of atomic polytopes that share variables
+ * and simplifies each of these subsets.
+ * For subsets containing function convex hulls only, we compute an equivalent function convex hull and simplify it.
+ * For subsets containing simplices, the result is the product of simplices of the free variables, based on:
+ * S_x * { phi(x,y,i) }_i
+ * =
+ * { (x=x') }_x' * { phi(x,y,i) }_i
+ * =
+ * { (x=x') * phi(x,y,i) }_i,_x'
+ * =
+ * { if x=x' then phi(x,y,i) else 0 }_i,_x'
+ * 
+ * This is a set of distributions { P_i,x'(x, y) }_i,x'.
+ * 
+ * We want M(x,y) = min_i,x' P_i,x'(x,y)
+ * 
+ * min_i,x' P_i,x'(x,y)
+ * =
+ * min( min_i P_i,x(x,y), min_i,x':x'!=x P_i,x'(x,y) )
+ * =
+ * min( min_i P_i,x(x,y), 0 )
+ * =
+ * 0
+ * If each assignment to free variables has a minimum of 0, then there will be a vertex in which its probability is 1,
+ * thus forming a simplex of free variables, which is equivalent to the product of simplices of individual free
+ * variables.
+ * 
  * @author braz
  *
  */
-final public class MinimumBasedFunctionConvexHullSimplification {
+final public class MinimumBasedSimplification {
 	
 	
 	public static Polytope simplify(Polytope polytope, boolean forced) {
@@ -107,31 +145,41 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 	}
 
 	private static Polytope simplifyProductPolytope(Polytope nonIdentityPolytope, boolean forced) {
-		return
+		var connectedSets = 
 				getConnectedSets(
 						nonIdentityPolytope.getAtomicPolytopes(), 
-						(a1, a2) -> intersect(a1.getFreeVariables(), a2.getFreeVariables()))
-				.stream()
-				.map(Polytope::multiply)
-				.map(Polytope::getEquivalentAtomicPolytope)
-				.map(p -> simplify(p, forced))
-				.reduce(Polytope::multiply)
-				.get();
-		
-// 		No-stream version for possible debugging
-//		var setsOfConnectedAtomicPolytopes = 
-//				getConnectedSets(
-//						nonIdentityPolytope.getAtomicPolytopes(), 
-//						(a1, a2) -> 
-//						intersect(a1.getFreeVariables(), a2.getFreeVariables()));
-//		var factorizedPolytopes =
-//				mapIntoList(setsOfConnectedAtomicPolytopes, Polytope::multiply);
-//		var factorizedAtomicPolytopes =
-//				mapIntoList(factorizedPolytopes, Polytope::getEquivalentAtomicPolytope);
-//		var simplifiedFactorizedAtomicPolytopes =
-//				mapIntoList(factorizedAtomicPolytopes, simplifyHull);
-//		var result = Polytope.multiply(simplifiedFactorizedAtomicPolytopes);
-//		return result;
+						(a1, a2) -> intersect(a1.getFreeVariables(), a2.getFreeVariables()));
+		return simplifyConnectedSets(connectedSets, forced);
+	}
+
+	private static
+	Polytope
+	simplifyConnectedSets(List<? extends Set<? extends AtomicPolytope>> connectedSets, boolean forced) {
+		var simplifiedConnectedSets = mapIntoList(connectedSets, cs -> simplifyConnectedSet(cs, forced));
+		return Polytope.multiply(simplifiedConnectedSets);
+	}
+
+	private static Polytope simplifyConnectedSet(Set<? extends AtomicPolytope> connectedSet, boolean forced) {
+		if (thereExists(connectedSet, isInstanceOf(Simplex.class))) {
+			return simplifyConnectedSetWithSimplices(connectedSet);
+		}
+		else {
+			return simplifyConnectedSetWithoutSimplices(connectedSet, forced);
+		}
+	}
+
+	private static Polytope simplifyConnectedSetWithSimplices(Set<? extends AtomicPolytope> connectedSet) {
+		var connectedSetFreeVariables = unionOfResults(connectedSet, Polytope::getFreeVariables);
+		return productOfSimplices(connectedSetFreeVariables);
+	}
+
+	private static Polytope simplifyConnectedSetWithoutSimplices(
+			Set<? extends AtomicPolytope> connectedSetWithoutSimplices,
+			boolean forced) {
+		var setProduct = makeEquivalentToProductOf(connectedSetWithoutSimplices);
+		var atomicPolytope = setProduct.getEquivalentAtomicPolytope();
+		var result = simplify(atomicPolytope, forced);
+		return result;
 	}
 	
 	/**
@@ -256,7 +304,7 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 		Collection<? extends Variable> freeVariables = normalizedConvexHull.getFreeVariables();
 		List<Variable> freeVariablesBuffer = listFrom(freeVariables);
 		var marginSimplices = mapIntoList(freeVariables, v -> getMarginSimplexOnSingleVariable(normalizedConvexHull, v, freeVariablesBuffer));
-		return ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(marginSimplices);
+		return ProductPolytope.makeEquivalentToProductOf(marginSimplices);
 	}
 
 	private static FunctionConvexHull getMarginSimplexOnSingleVariable(

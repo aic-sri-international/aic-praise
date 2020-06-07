@@ -58,6 +58,7 @@ import static com.sri.ai.util.Util.myAssert;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
 import static com.sri.ai.util.Util.unionOfResults;
+import static com.sri.ai.util.base.IsInstanceOf.isInstanceOf;
 import static com.sri.ai.util.base.Pair.pair;
 
 import java.util.ArrayList;
@@ -70,6 +71,7 @@ import java.util.Set;
 import com.google.common.base.Predicate;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.UniformFactor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.FunctionConvexHull;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
@@ -111,7 +113,7 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 	 * @param alreadySimplifiedAtomicPolytopes
 	 * @return
 	 */
-	public static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
+	public static Polytope makeEquivalentToProductOf(Collection<? extends AtomicPolytope> alreadySimplifiedAtomicPolytopes) {
 		Polytope result;
 		if (alreadySimplifiedAtomicPolytopes.isEmpty()) {
 			result = identityPolytope();
@@ -125,8 +127,8 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 		return result;
 	}
 	
-	public static Polytope makePolytopeEquivalentToProductOfAtomicPolytopes(AtomicPolytope... atomicPolytopes) {
-		return makePolytopeEquivalentToProductOfAtomicPolytopes(Arrays.asList(atomicPolytopes));
+	public static Polytope makeEquivalentToProductOf(AtomicPolytope... atomicPolytopes) {
+		return makeEquivalentToProductOf(Arrays.asList(atomicPolytopes));
 	}
 
 	@Override
@@ -189,7 +191,7 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 		
 		includeAnotherByItselfIfMultiplicationsFailed(atomicAnother, anotherAlreadyIncorporated, resultAtomicPolytopes);
 		
-		Polytope result = makePolytopeEquivalentToProductOfAtomicPolytopes(resultAtomicPolytopes);
+		Polytope result = makeEquivalentToProductOf(resultAtomicPolytopes);
 		
 		return result;
 	}
@@ -233,7 +235,7 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 
 		List<AtomicPolytope> allAtomicPolytopesInResult = independentOfEliminated; // re-using independentOfEliminated
 		allAtomicPolytopesInResult.addAll(summedOutFromDependents.getAtomicPolytopes());
-		Polytope result = makePolytopeEquivalentToProductOfAtomicPolytopes(allAtomicPolytopesInResult);
+		Polytope result = makeEquivalentToProductOf(allAtomicPolytopesInResult);
 
 		return result;
 	}
@@ -251,7 +253,7 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 		var allAreSimplices = nonSimplex == null;
 
 		if (allAreSimplices) {
-			return makePolytopeEquivalentToProductOfAtomicPolytopes(dependentAtomicPolytopes);
+			return makeEquivalentToProductOf(dependentAtomicPolytopes);
 		}
 		else {
 			return sumOutFromDependentAtomicPolytopes(eliminated, dependentAtomicPolytopes);
@@ -453,6 +455,8 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 		// or a multi-variable-pair Kronecker.
 		// Here, if all atomic polytopes are simplices an error is thrown.
 		// Upper code must deal with that case separately.
+		// The ultimate solution for this is to have something like ProductFactor 
+		// that can hold multiple Kronecker factors.
 		var atomicPolytopesWithHullsComingFirst = getAtomicPolytopesWithFunctioConvexHullsComingFirst();
 		var functionConvexHulls = mapIntoArrayList(atomicPolytopesWithHullsComingFirst, this::getCorrespondingFunctionConvexHull);
 		var allFactors = mapIntoList(functionConvexHulls, FunctionConvexHull::getFactor);
@@ -626,6 +630,12 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 
 	@Override
 	public Factor probabilityRange() {
+		
+		// Since getEquivalentAtomicPolytope is invalid for product with simplices only, we check this case first
+		if (forAll(getAtomicPolytopes(), isInstanceOf(Simplex.class))) {
+			return new UniformFactor();
+		}
+		
 		try {
 			return getEquivalentAtomicPolytope().probabilityRange();
 		}

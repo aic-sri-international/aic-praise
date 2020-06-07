@@ -40,11 +40,11 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.MinimumBasedFunctionConvexHullSimplification;
+import com.sri.ai.praise.core.representation.interfacebased.polytope.core.MinimumBasedSimplification;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
- * An extension of {@link AnytimeExactBPNodeWithIdentitySimplification} using {@link MinimumBasedFunctionConvexHullSimplification}.
+ * An extension of {@link AnytimeExactBPNodeWithIdentitySimplification} using {@link MinimumBasedSimplification}.
  * 
  * @author braz
  *
@@ -58,11 +58,11 @@ public class AnytimeExactBPNodeWithMinimumBasedSimplification<RootType,SubRootTy
 	@Override
 	public Approximation<Factor> simplify(Approximation<Factor> approximation) {
 		var polytope = (Polytope) approximation;
-		return MinimumBasedFunctionConvexHullSimplification.simplify(polytope, getForceSimplification());
+		return MinimumBasedSimplification.simplify(polytope, getForceSimplification());
 	}
 
 	public boolean getForceSimplification() {
-		return true;
+		return false;
 	}
 
 }

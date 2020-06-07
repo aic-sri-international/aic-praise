@@ -75,11 +75,11 @@ import com.sri.ai.util.collect.NestedIterator;
 import com.sri.ai.util.collect.RoundRobinIterator;
 import com.sri.ai.util.computation.anytime.api.Anytime;
 import com.sri.ai.util.computation.anytime.api.Approximation;
-import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeTreeComputationWithLossySimplification;
+import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeEagerTreeComputationWithSimplification;
 
 /**
  * An anytime version of {@link ExactBPNode} algorithms.
- * This is implemented as a {@link AbstractAnytimeTreeComputationWithLossySimplification}
+ * This is implemented as a {@link AbstractAnytimeEagerTreeComputationWithSimplification}
  * based on an {@link ExactBPNode}, which is gradually expanded.
  * <p>
  * It uses {@link Simplex} as an initial approximation,
@@ -90,7 +90,7 @@ import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeT
  *
  */
 public abstract class AbstractAnytimeExactBPNodeWithSimplification<RootType,SubRootType> 
-extends AbstractAnytimeTreeComputationWithLossySimplification<Factor> 
+extends AbstractAnytimeEagerTreeComputationWithSimplification<Factor> 
 implements AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 	
 	public static final boolean debug = false;
@@ -332,7 +332,7 @@ implements AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 		var convexHull = new DefaultFunctionConvexHull(summedOutSimplexVariables, summedOutFactor);
 		@SuppressWarnings("unchecked")
 		List<AtomicPolytope> multiplicands = listFrom(new NestedIterator(simplices, convexHull));
-		var expected = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(multiplicands);
+		var expected = ProductPolytope.makeEquivalentToProductOf(multiplicands);
 
 		@SuppressWarnings("unchecked")
 		var actualConvexHulls = (Collection<? extends FunctionConvexHull>) collectToList(actual.getAtomicPolytopes(), a -> a instanceof FunctionConvexHull);
@@ -340,7 +340,7 @@ implements AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 		var actualSingleConvexHull = multiplyIntoSingleFunctionConvexHull(actualConvexHulls);
 		@SuppressWarnings("unchecked")
 		List<AtomicPolytope> actualMultiplicands = listFrom(new NestedIterator(actualSimplices, actualSingleConvexHull));
-		var atomicActual = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(actualMultiplicands);
+		var atomicActual = ProductPolytope.makeEquivalentToProductOf(actualMultiplicands);
 		
 		var equalityCheck = expected.checkEquality(atomicActual);
 		

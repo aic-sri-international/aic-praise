@@ -4,12 +4,11 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.t
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.decimalPlaces;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.maximumNumberOfEntriesToShow;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.IDENTITY_POLYTOPE;
-import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.MinimumBasedFunctionConvexHullSimplification.simplify;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.MinimumBasedSimplification.simplify;
 import static com.sri.ai.util.Util.arrayList;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.repeat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedList;
@@ -183,7 +182,6 @@ class MinimumBasedFunctionConvexHullSimplificationTest {
 		var checkEquality = expected.checkEquality(actual);
 		println("Equality: " + checkEquality);
 		assertTrue(checkEquality.areEqual());
-		assertEquals(expected, actual);
 	}
 	
 	@Test
@@ -288,22 +286,12 @@ class MinimumBasedFunctionConvexHullSimplificationTest {
 										va == 0 ? 2 : 8 : 
 										va == 0 ? 9 : 1)));
 		// because of Simplex(b), all value tuples of of a and b will have probability 0
-		// for some combination of polytope vertices.
-		// For each value tuple of a and b, we fix n - 1 of them to their minimum probability (0)
-		// and compute the probability for the remaining one (1).
-		// We therefore get four vertices, each of them concentrating all probability on a single value.
+		// for some combination of polytope vertices, so we get their simplices.
 		expected =
 				Polytope.product(
 						new Simplex(j),
-						new DefaultFunctionConvexHull(
-								list(i0, i1),
-								new ArrayTableFactor(
-										list(i0, i1, a, b), 
-										new double[] {
-												1.0, 0.0, 0.0, 0.0, 
-												0.0, 1.0, 0.0, 0.0, 
-												0.0, 0.0, 1.0, 0.0, 
-												0.0, 0.0, 0.0, 1.0})));
+						new Simplex(a),
+						new Simplex(b));
 
 		runSimplifyPolytopeTest(p, expected);
 

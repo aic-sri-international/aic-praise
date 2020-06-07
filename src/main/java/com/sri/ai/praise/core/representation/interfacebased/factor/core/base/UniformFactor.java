@@ -20,6 +20,10 @@ public class UniformFactor extends AbstractFactorWithVariables {
 		super(variables);
 	}
 	
+	public UniformFactor() {
+		super(arrayList());
+	}
+	
 	@Override
 	public int summationCost() {
 		return 0; // costs constant time to sum over

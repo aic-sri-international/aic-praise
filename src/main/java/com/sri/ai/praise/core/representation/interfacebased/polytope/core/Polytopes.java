@@ -25,7 +25,7 @@ public class Polytopes {
 		var mappedAtomicPolytopes = updatedAtomicPolytopesAndChange.first;
 		var thereWasChange = updatedAtomicPolytopesAndChange.second;
 		Polytope result = thereWasChange
-								? ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(mappedAtomicPolytopes)
+								? ProductPolytope.makeEquivalentToProductOf(mappedAtomicPolytopes)
 								: polytope;
 		return result;
 	}

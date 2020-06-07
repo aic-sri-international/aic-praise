@@ -6,10 +6,10 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.util.base.NullaryFunction;
 import com.sri.ai.util.computation.anytime.api.Approximation;
-import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeEagerTreeComputationWithSimplification;
+import com.sri.ai.util.computation.treecomputation.anytime.core.AbstractAnytimeEagerTreeComputationWithSimplificationWrapper;
 
 @Deprecated // see base class for explanation why
-public class OldAnytimeExactBPWithSimplification<RootType,SubRootType> extends AbstractAnytimeEagerTreeComputationWithSimplification<Factor> {
+public class OldAnytimeExactBPWithSimplification<RootType,SubRootType> extends AbstractAnytimeEagerTreeComputationWithSimplificationWrapper<Factor> {
 
 	public OldAnytimeExactBPWithSimplification(AnytimeExactBPNodeWithIdentitySimplification<RootType,SubRootType> base) {
 		super(base);

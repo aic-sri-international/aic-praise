@@ -41,7 +41,9 @@ import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreOfIncomparableClasses;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck.polytopesAreSimplicesOnDifferentVariables;
 import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.IdentityPolytope.identityPolytope;
+import static com.sri.ai.praise.core.representation.interfacebased.polytope.core.ProductPolytope.makeEquivalentToProductOf;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Collection;
 
@@ -59,6 +61,10 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equalit
 public class Simplex extends AbstractAtomicPolytope {
 	
 	private Variable variable;
+
+	public static Simplex simplex(Variable variable) {
+		return new Simplex(variable);
+	}
 	
 	public Simplex(Variable variable) {
 		this.variable = variable;
@@ -108,16 +114,6 @@ public class Simplex extends AbstractAtomicPolytope {
 		// This plays a role here because sum_V Simplex_U for V containing variables other than U will result in their cardinality multiplying the result.
 		// If we want to represent that, we must rely on the specific polytope implementation used.
 	}
-
-//	@Override
-//	public AtomicPolytope getAtomicPolytopeEquivalentToMarginalPolytopeOf(Variable variable) {
-//		if (variable.equals(getVariable())) {
-//			return this;
-//		}
-//		else {
-//			throw new Error((new Enclosing()).methodName() + " can only be requested of Simplex for its own variable");
-//		}
-//	}
 
 	@Override
 	public String toString() {
@@ -171,5 +167,9 @@ public class Simplex extends AbstractAtomicPolytope {
 	@Override
 	public Simplex normalize(Collection<? extends Variable> variablesToNormalize) {
 		return this;
+	}
+
+	public static Polytope productOfSimplices(Collection<? extends Variable> variables) {
+		return makeEquivalentToProductOf(mapIntoList(variables, Simplex::simplex));
 	}
 }

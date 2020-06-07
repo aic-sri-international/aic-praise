@@ -32,7 +32,7 @@ public abstract class AbstractNonIdentityPolytope extends AbstractPolytope {
 			List<AtomicPolytope> updatedAtomicPolytopes = list();
 			mapIntoList(newlyFreeIndices, i -> new Simplex(i), updatedAtomicPolytopes);
 			mapIntoList(getAtomicPolytopes(), a -> removeIndicesSatisfying(a, shouldNotHaveBeenSummedOut), updatedAtomicPolytopes);
-			updatedPolytope = ProductPolytope.makePolytopeEquivalentToProductOfAtomicPolytopes(updatedAtomicPolytopes);
+			updatedPolytope = ProductPolytope.makeEquivalentToProductOf(updatedAtomicPolytopes);
 		}
 		
 //		if (true) {

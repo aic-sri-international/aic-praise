@@ -1,5 +1,6 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base;
 
+import static com.sri.ai.util.Util.actualFreeMemory;
 import static com.sri.ai.util.Util.compareNumbersComponentWise;
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
@@ -83,19 +84,23 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 		while (anytimeIterator.hasNext()) {
 
 			current = anytimeIterator.next();
-			AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytope();
+			Polytope polytope = (Polytope) current;
 
-			if (atomicPolytope.getFreeVariables().size() > 1) {
+			if (polytope.getFreeVariables().size() > 1) {
 				println(
-						"AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: "
-								+ Util.removeNonDestructively(atomicPolytope.getFreeVariables(), query));
+						"Warning: AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: "
+								+ Util.removeNonDestructively(polytope.getFreeVariables(), query)
+								+ ": polytope: " + polytope);
 			}
 
-			if (atomicPolytope instanceof Simplex) {
-				println("Simplex bound");
+			String boundDescription;
+			if (polytope instanceof Simplex) {
+				boundDescription = "Simplex bound";
 			} else {
-				println("Bound length: " + atomicPolytope.length());
+				boundDescription = "Bound length: " + polytope.length();
 			}
+			println(boundDescription + ", " + actualFreeMemory());
+			
 		}
 		return current;
 	}
