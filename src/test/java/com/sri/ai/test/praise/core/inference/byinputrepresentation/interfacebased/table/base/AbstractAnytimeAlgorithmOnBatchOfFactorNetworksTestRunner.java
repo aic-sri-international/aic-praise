@@ -2,6 +2,8 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 import static com.sri.ai.util.Util.compareNumbersComponentWise;
 import static com.sri.ai.util.Util.iterator;
+import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
@@ -38,41 +40,60 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	protected AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner(
 			Configuration configuration) {
 		
-		super(configuration, "initial iterator", false /* do not show result because it is an iterator */);
+		super(configuration, "", false /* do not show result because it is an iterator */);
 	}
 
 	@Override
-	protected void beforeExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm, Variable query, FactorNetwork factorNetwork) {
+	protected void beforeExecution(
+			String algorithmName,
+			BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm,
+			Variable query,
+			FactorNetwork factorNetwork) {
+		
 		ThreadExplanationLogger.setIsActive(false);
 		println("Running " + algorithmName + "...");
 	}
 
 	@Override
-	protected Pair<Iterator<Approximation<Factor>>, Long> afterExecution(String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm, Variable query, FactorNetwork factorNetwork, Pair<Iterator<Approximation<Factor>>, Long> resultAndTime) {
-		var realResultAndTime = Timer.getResultAndTime(() ->  iterate(resultAndTime.first, algorithmName, algorithm, query, factorNetwork));
+	protected Pair<Iterator<Approximation<Factor>>, Long> afterExecution(
+			String algorithmName,
+			BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm,
+			Variable query,
+			FactorNetwork factorNetwork,
+			Pair<Iterator<Approximation<Factor>>, Long> resultAndTime) {
+		
+		var realResultAndTime =
+				Timer.getResultAndTime(
+						() -> iterate(resultAndTime.first, algorithmName, algorithm, query, factorNetwork));
 		resultAndTime.first = iterator(realResultAndTime.first);
 		resultAndTime.second = realResultAndTime.second;
-		ThreadExplanationLogger.setIsActive(false);
 		println("Done running  " + algorithmName + " to completion. Time: " + resultAndTime.second + " ms.");
 		println();
 		return resultAndTime;
 	}
 
-	private Approximation<Factor> iterate(Iterator<Approximation<Factor>> anytimeIterator, String algorithmName, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm, Variable query, FactorNetwork factorNetwork) {
+	private Approximation<Factor> iterate(
+			Iterator<Approximation<Factor>> anytimeIterator,
+			String algorithmName,
+			BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm,
+			Variable query,
+			FactorNetwork factorNetwork) {
+
 		Approximation<Factor> current = null;
 		while (anytimeIterator.hasNext()) {
 
 			current = anytimeIterator.next();
 			AtomicPolytope atomicPolytope = ((Polytope) current).getEquivalentAtomicPolytope();
-			
+
 			if (atomicPolytope.getFreeVariables().size() > 1) {
-				println("AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: " + Util.removeNonDestructively(atomicPolytope.getFreeVariables(), query));
+				println(
+						"AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: "
+								+ Util.removeNonDestructively(atomicPolytope.getFreeVariables(), query));
 			}
-			
+
 			if (atomicPolytope instanceof Simplex) {
 				println("Simplex bound");
-			}
-			else {
+			} else {
 				println("Bound length: " + atomicPolytope.length());
 			}
 		}
@@ -80,16 +101,26 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 	}
 
 	@Override
-	protected void compareResults(ArrayList<Pair<Iterator<Approximation<Factor>>, Long>> resultsAndTimes, Variable query, FactorNetwork factorNetwork) {
+	protected void compareResults(
+			ArrayList<Pair<Iterator<Approximation<Factor>>, Long>> resultsAndTimes, 
+			Variable query, 
+			FactorNetwork factorNetwork) {
+		
+		var results = mapIntoArrayList(resultsAndTimes, rt -> rt.first.next());
+		
 		for (int i = 0; i != getAlgorithms().size() - 1; i++) {
 			var name1 = getAlgorithms().get(i).first;
 			var name2 = getAlgorithms().get(i + 1).first;
-			var resultAndTime1 = resultsAndTimes.get(i);
-			var resultAndTime2 = resultsAndTimes.get(i + 1);
-			var finalPolytope1 = getFunctionConvexHull(resultAndTime1.first.next(), query);
-			var finalPolytope2 = getFunctionConvexHull(resultAndTime2.first.next(), query);
-			var array1 = ((TableFactor) finalPolytope1.getFactor()).getEntries();
-			var array2 = ((TableFactor) finalPolytope2.getFactor()).getEntries();
+			var result1 = results.get(i);
+			var result2 = results.get(i + 1);
+			var finalPolytope1 = getFunctionConvexHull(result1, query);
+			var finalPolytope2 = getFunctionConvexHull(result2, query);
+			// Since final polytopes are singletons, indices are irrelevant, so we get rid of them if there are any:
+			var finalFactor1 = finalPolytope1.getFactor().sumOut(finalPolytope1.getIndices()).normalize(list(query));
+			var finalFactor2 = finalPolytope2.getFactor().sumOut(finalPolytope2.getIndices()).normalize(list(query));
+			var array1 = ((TableFactor) finalFactor1).getEntries();
+			var array2 = ((TableFactor) finalFactor2).getEntries();
+			println();
 			println("Comparing " + name1 + " and " + name2 + "...");
 			println(name1 + ": " + array1);
 			println(name2 + ": " + array2);

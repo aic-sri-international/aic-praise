@@ -13,7 +13,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.AtomicPolytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
 import com.sri.ai.praise.core.representation.interfacebased.polytope.api.equality.PolytopesEqualityCheck;
-import com.sri.ai.util.Enclosing;
 
 public class IdentityPolytope extends AbstractPolytope {
 
@@ -50,7 +49,9 @@ public class IdentityPolytope extends AbstractPolytope {
 
 	@Override
 	public Polytope unSumOutSimplexVariables(Predicate<? super Variable> shouldNotHaveBeenSummedOut) {
-		throw new Error(IdentityPolytope.class + " does not support " + (new Enclosing(){}).methodName());
+		return this;
+		// The summing out of unsimplified polytopes never produces an IdentityPolytope.
+		// Therefore this is a terminal without subs and there were no summed out simplex variables to unsum.
 	}
 
 //	@Override

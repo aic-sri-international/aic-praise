@@ -38,29 +38,15 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
-import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytope;
-import com.sri.ai.praise.core.representation.interfacebased.polytope.core.MinimumBasedFunctionConvexHullSimplification;
-import com.sri.ai.util.computation.anytime.api.Approximation;
 
-/**
- * An extension of {@link AnytimeExactBPNodeWithIdentitySimplification} using {@link MinimumBasedFunctionConvexHullSimplification}.
- * 
- * @author braz
- *
- */
-public class AnytimeExactBPNodeWithMinimumBasedSimplification<RootType,SubRootType> extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType> {
+public class AnytimeExactBPNodeWithMinimumBasedSimplificationWithForcedSimplification<RootType,SubRootType> 
+extends AnytimeExactBPNodeWithMinimumBasedSimplification<RootType, SubRootType> {
 
-	public AnytimeExactBPNodeWithMinimumBasedSimplification(ExactBPNode<RootType,SubRootType> base) {
+	public AnytimeExactBPNodeWithMinimumBasedSimplificationWithForcedSimplification(ExactBPNode<RootType,SubRootType> base) {
 		super(base);
 	}
 	
 	@Override
-	public Approximation<Factor> simplify(Approximation<Factor> approximation) {
-		var polytope = (Polytope) approximation;
-		return MinimumBasedFunctionConvexHullSimplification.simplify(polytope, getForceSimplification());
-	}
-
 	public boolean getForceSimplification() {
 		return true;
 	}

@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.util.computation.anytime.api.Approximation;
 
-public interface AnytimeExactBPNodeWithSimplification<RootType, SubRootType> extends AnytimeExactBPNode<RootType, SubRootType> {
+public interface AnytimeExactBPNodeWithSimplification<RootType, SubRootType> 
+extends AnytimeExactBPNode<RootType, SubRootType> {
 	
 	Approximation<Factor> 
 	simplify(Approximation<Factor> approximation);

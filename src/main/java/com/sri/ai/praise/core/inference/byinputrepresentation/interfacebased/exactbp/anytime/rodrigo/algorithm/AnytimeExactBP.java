@@ -38,14 +38,14 @@ public class AnytimeExactBP implements AnytimeSolver {
 
 	@Override
 	public Iterator<Approximation<Factor>> apply(Variable query, FactorNetwork factorNetwork) {
-		return newInstance(new ExactBP(query, factorNetwork));
+		return makeRootAnytimeExactBPNode(new ExactBP(query, factorNetwork));
 	}
 
 	/**
-	 * Makes an instance of this or extending class from an {@link ExactBP} object.
+	 * Makes the root {@link AnytimeExactBPNode} for solving this problem.
 	 */
 	@SuppressWarnings("unchecked")
-	protected AnytimeExactBPNode<Variable, Factor> newInstance(ExactBP exactBP) {
+	protected AnytimeExactBPNode<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
 		return anytimeExactBPNodeConstructor.newInstance(exactBP);
 	}
 

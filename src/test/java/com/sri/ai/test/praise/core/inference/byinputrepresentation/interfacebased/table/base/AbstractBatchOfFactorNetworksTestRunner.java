@@ -134,7 +134,8 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 		for (int i = 0; i != getAlgorithms().size(); i++) {
 			var name = getAlgorithms().get(i).first;
 			var resultAndTime = resultsAndTimes.get(i);
-			println(name + " " + resultDescription + ": " + resultAndTimeString(resultAndTime));
+			var effectiveDescription = resultDescription.length() > 0? " " + resultDescription : resultDescription;
+			println(name + effectiveDescription + ": " + resultAndTimeString(resultAndTime));
 		}
 		println();
 	}

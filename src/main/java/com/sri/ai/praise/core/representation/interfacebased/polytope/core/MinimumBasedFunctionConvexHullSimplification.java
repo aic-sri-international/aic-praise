@@ -44,7 +44,6 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.pair;
-import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
@@ -157,23 +156,23 @@ final public class MinimumBasedFunctionConvexHullSimplification {
 			return convexHull;
 		}
 		
-		println();
-		println("Before simplification: " + convexHull.getFactor().summationCost());
-		println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
-		println("       free variables: " + convexHull.getFreeVariables());
-		println("          convex hull: " + convexHull);
+//		println();
+//		println("Before simplification: " + convexHull.getFactor().summationCost());
+//		println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
+//		println("       free variables: " + convexHull.getFreeVariables());
+//		println("          convex hull: " + convexHull);
 		
 		var normalized = convexHull.normalize(convexHull.getFreeVariables());
 		var result = Timer.getResultAndTime(() -> makeMarginSimplex(normalized));
 		
-		println("After  simplification: " + result.first.getFactor().summationCost());
-		println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
-		println("       free variables: " + result.first.getFreeVariables());
+//		println("After  simplification: " + result.first.getFactor().summationCost());
+//		println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
+//		println("       free variables: " + result.first.getFreeVariables());
 		
 		return result.first;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private static String getIndicesCardinalities(FunctionConvexHull functionConvexHull) {
 		return join(mapIntoList((Collection<? extends TableVariable>) functionConvexHull.getIndices(), TableVariable::getCardinality));
 	}

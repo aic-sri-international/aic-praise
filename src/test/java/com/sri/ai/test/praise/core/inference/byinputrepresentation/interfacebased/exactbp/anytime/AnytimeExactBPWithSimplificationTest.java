@@ -3,12 +3,10 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.arrayTableFactor;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
-import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.round;
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +16,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.algorithm.AnytimeExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNodeWithSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithMinimumBasedSimplification;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithMinimumBasedSimplificationWithForcedSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
@@ -41,7 +39,7 @@ public class AnytimeExactBPWithSimplificationTest {
 	}
 
 	@Test
-	public void testNoSimplifications() {
+	public void testSmallCycle() {
 		
 		FactorNetwork factorNetwork;
 		Variable query;
@@ -75,7 +73,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		query = b;
 		
-		var expectedHistory = list(
+		var expectedIdentitySimplificationHistory = list(
 				"", 
 				"Message   : b   <----   phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]", 
 				"Simplified: {(on a, c) phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]}", 
@@ -166,7 +164,101 @@ public class AnytimeExactBPWithSimplificationTest {
 				"to        : {phi[b]: [0.3, 1.7]}"
 				);
 		
-		runTest(query, factorNetwork, expectedHistory);
+		var expectedMinimumBasedSimplificationHistory = list(
+				"",
+				"Message   : b   <----   phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]",
+				"Simplified: {(on a, c) phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]}",
+				"to        : {(on I0) phi[I0, b]: [1.0, 0.0, 0.0, 1.0]}",
+				"",
+				"Message   :    <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [1.0, 0.0, 0.0, 1.0]}",
+				"to        : {(on I0) phi[I0, b]: [1.0, 0.0, 0.0, 1.0]}",
+				"",
+				"Message   : a   <----   phi[a, d]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {(on d) phi[a, d]: [0.2, 0.1, 0.8, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   c",
+				"Updated   : Simplex(c)",
+				"to        : Simplex(c)",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   c",
+				"Simplified: Simplex(c)",
+				"to        : Simplex(c)",
+				"",
+				"Message   : b   <----   phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]",
+				"Simplified: {(on c, I0) phi[I0, b, c]: [0.2, 0.2, 0.8, 0.8, 0.1, 0.1, 0.9, 0.9]}",
+				"to        : {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   :    <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : c   <----   phi[c, d]: [0.3, 0.4, 0.7, 0.6]",
+				"Simplified: {phi[c, d]: [0.3, 0.4, 0.7, 0.6]}",
+				"to        : {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   c",
+				"Simplified: {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"to        : {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"",
+				"Message   : a   <----   phi[a, d]: [0.2, 0.1, 0.8, 0.9]",
+				"Updated   : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : a   <----   phi[a, d]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : b   <----   phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]",
+				"Simplified: {(on I0, I1) phi[I1, I0, b]: [0.2, 0.8, 0.1, 0.9, 0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   :    <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, b]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : d   <----   phi[d]: [0.5, 0.5]",
+				"Simplified: {phi[d]: [0.5, 0.5]}",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[a, d]: [0.2, 0.1, 0.8, 0.9]   <----   d",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[a, d]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {phi[a, d]: [0.2, 0.1, 0.8, 0.9]}",
+				"to        : {(on I0, I1) phi[I0, I1, a, d]: [0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   a",
+				"Simplified: {(on I0, I1) phi[I0, I1, a, d]: [0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45]}",
+				"to        : {(on I0, I1) phi[I0, I1, a, d]: [0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45, 0.1, 0.05, 0.4, 0.45]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   c",
+				"Updated   : {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"to        : {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"",
+				"Message   : phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]   <----   c",
+				"Simplified: {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"to        : {(on I0, I1) phi[I0, I1, c, d]: [0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3, 0.15, 0.2, 0.35, 0.3]}",
+				"",
+				"Message   : b   <----   phi[a, b, c]: [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]",
+				"Simplified: {(on I0, I1) phi[I0, I1, b]: [0.07, 0.42, 0.08, 0.42, 0.07, 0.42, 0.07, 0.42]}",
+				"to        : {(on I0) phi[I0, b]: [0.15, 0.85, 0.15, 0.85]}",
+				"",
+				"Message   :    <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [0.15, 0.85, 0.15, 0.85]}",
+				"to        : {(on I0) phi[I0, b]: [0.15, 0.85, 0.15, 0.85]}");
+
+		runTest(query, factorNetwork, expectedIdentitySimplificationHistory, expectedMinimumBasedSimplificationHistory);
 	}
 
 
@@ -199,7 +291,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		query = q;
 		
-		var expectedHistory = list(
+		var expectedIdentitySimplificationHistory = list(
 				"", 
 				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]", 
 				"Simplified: Identity polytope", 
@@ -246,11 +338,57 @@ public class AnytimeExactBPWithSimplificationTest {
 				"to        : {phi[]: [2.0]}"
 				);
 		
-		runTest(query, factorNetwork, expectedHistory);
+		var expectedMinimumBasedSimplificationHistory = list(
+				"",
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]",
+				"Simplified: Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[a, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {(on b) phi[a, b]: [0.4, 0.3, 0.6, 0.7]}",
+				"to        : {(on I0) phi[I0, a]: [0.4, 0.6, 0.3, 0.7]}",
+				"",
+				"Message   : phi[q, a]: [0.5, 0.5, 0.5, 0.5]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.4, 0.6, 0.3, 0.7]}",
+				"to        : {(on I0) phi[I0, a]: [0.4, 0.6, 0.3, 0.7]}",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]",
+				"Simplified: {(on I0) phi[I0]: [1.0, 1.0]}",
+				"to        : {phi[]: [1.0]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {phi[]: [1.0]}",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[a, b]: [0.4, 0.3, 0.6, 0.7]   <----   b",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[a, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {phi[a]: [0.7, 1.3]}",
+				"to        : {(on I0) phi[I0, a]: [0.35, 0.65, 0.35, 0.65]}",
+				"",
+				"Message   : phi[q, a]: [0.5, 0.5, 0.5, 0.5]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.35, 0.65, 0.35, 0.65]}",
+				"to        : {(on I0) phi[I0, a]: [0.35, 0.65, 0.35, 0.65]}",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.5, 0.5, 0.5, 0.5]",
+				"Simplified: {(on I0) phi[I0]: [1.0, 1.0]}",
+				"to        : {phi[]: [1.0]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {phi[]: [1.0]}",
+				"to        : Identity polytope");
+		
+		runTest(query, factorNetwork, expectedIdentitySimplificationHistory, expectedMinimumBasedSimplificationHistory);
 	}
 
 	@Test
-	public void test() {
+	public void testNoCycle() {
 		
 		FactorNetwork factorNetwork;
 		Variable query;
@@ -285,7 +423,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		query = q;
 		
-		var expectedHistory = list(
+		var expectedIdentitySimplificationHistory = list(
 				"", 
 				"Message   : q   <----   phi[q, a]: [0.8, 0.9, 0.2, 0.1]", 
 				"Simplified: {(on a) phi[q, a]: [0.8, 0.9, 0.2, 0.1]}", 
@@ -372,7 +510,101 @@ public class AnytimeExactBPWithSimplificationTest {
 				"to        : {phi[q]: [1.31, 0.37]}"
 				);
 		
-		runTest(query, factorNetwork, expectedHistory);
+		var expectedMinimumBasedSimplificationHistory = list(
+				"",
+				"Message   : q   <----   phi[q, a]: [0.8, 0.9, 0.2, 0.1]",
+				"Simplified: {(on a) phi[q, a]: [0.8, 0.9, 0.2, 0.1]}",
+				"to        : {(on I0) phi[I0, q]: [0.9, 0.1, 0.8, 0.2]}",
+				"",
+				"Message   : q   <----   phi[q, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {(on b) phi[q, b]: [0.4, 0.3, 0.6, 0.7]}",
+				"to        : {(on I0) phi[I0, q]: [0.4, 0.6, 0.3, 0.7]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.36, 0.06, 0.24, 0.14]}",
+				"to        : {(on I0) phi[I0, q]: [0.86, 0.14, 0.63, 0.37]}",
+				"",
+				"Message   : phi[q, a]: [0.8, 0.9, 0.2, 0.1]   <----   a",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.8, 0.9, 0.2, 0.1]",
+				"Simplified: {phi[q]: [1.7, 0.3]}",
+				"to        : {(on I0) phi[I0, q]: [0.85, 0.15, 0.85, 0.15]}",
+				"",
+				"Message   : q   <----   phi[q, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Updated   : {(on I0) phi[I0, q]: [0.4, 0.6, 0.3, 0.7]}",
+				"to        : {(on I0) phi[I0, q]: [0.4, 0.6, 0.3, 0.7]}",
+				"",
+				"Message   : q   <----   phi[q, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {(on I0) phi[I0, q]: [0.4, 0.6, 0.3, 0.7]}",
+				"to        : {(on I0) phi[I0, q]: [0.4, 0.6, 0.3, 0.7]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.34, 0.09, 0.26, 0.11]}",
+				"to        : {(on I0) phi[I0, q]: [0.79, 0.21, 0.71, 0.29]}",
+				"",
+				"Message   : b   <----   phi[b, c]: [0.9, 0.8, 0.1, 0.2]",
+				"Simplified: {(on c) phi[b, c]: [0.9, 0.8, 0.1, 0.2]}",
+				"to        : {(on I0) phi[I0, b]: [0.9, 0.1, 0.8, 0.2]}",
+				"",
+				"Message   : phi[q, b]: [0.4, 0.3, 0.6, 0.7]   <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [0.9, 0.1, 0.8, 0.2]}",
+				"to        : {(on I0) phi[I0, b]: [0.9, 0.1, 0.8, 0.2]}",
+				"",
+				"Message   : q   <----   phi[q, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {(on I0) phi[I0, q]: [0.39, 0.61, 0.38, 0.62]}",
+				"to        : {(on I0) phi[I0, q]: [0.39, 0.61, 0.38, 0.62]}",
+				"",
+				"Message   : phi[q, a]: [0.8, 0.9, 0.2, 0.1]   <----   a",
+				"Updated   : Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[q, a]: [0.8, 0.9, 0.2, 0.1]   <----   a",
+				"Simplified: Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.8, 0.9, 0.2, 0.1]",
+				"Simplified: {phi[q]: [1.7, 0.3]}",
+				"to        : {(on I0) phi[I0, q]: [0.85, 0.15, 0.85, 0.15]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.33, 0.09, 0.32, 0.09]}",
+				"to        : {(on I0) phi[I0, q]: [0.78, 0.22, 0.78, 0.22]}",
+				"",
+				"Message   : phi[b, c]: [0.9, 0.8, 0.1, 0.2]   <----   c",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : b   <----   phi[b, c]: [0.9, 0.8, 0.1, 0.2]",
+				"Simplified: {phi[b]: [1.7, 0.3]}",
+				"to        : {(on I0) phi[I0, b]: [0.85, 0.15, 0.85, 0.15]}",
+				"",
+				"Message   : phi[q, b]: [0.4, 0.3, 0.6, 0.7]   <----   b",
+				"Simplified: {(on I0) phi[I0, b]: [0.85, 0.15, 0.85, 0.15]}",
+				"to        : {(on I0) phi[I0, b]: [0.85, 0.15, 0.85, 0.15]}",
+				"",
+				"Message   : q   <----   phi[q, b]: [0.4, 0.3, 0.6, 0.7]",
+				"Simplified: {(on I0) phi[I0, q]: [0.39, 0.62, 0.39, 0.62]}",
+				"to        : {(on I0) phi[I0, q]: [0.39, 0.62, 0.39, 0.62]}",
+				"",
+				"Message   : phi[q, a]: [0.8, 0.9, 0.2, 0.1]   <----   a",
+				"Updated   : Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[q, a]: [0.8, 0.9, 0.2, 0.1]   <----   a",
+				"Simplified: Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.8, 0.9, 0.2, 0.1]",
+				"Simplified: {phi[q]: [1.7, 0.3]}",
+				"to        : {(on I0) phi[I0, q]: [0.85, 0.15, 0.85, 0.15]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.33, 0.09, 0.33, 0.09]}",
+				"to        : {(on I0) phi[I0, q]: [0.78, 0.22, 0.78, 0.22]}");
+		
+		runTest(query, factorNetwork, expectedIdentitySimplificationHistory, expectedMinimumBasedSimplificationHistory);
 	}
 
 	@Test
@@ -415,7 +647,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 		query = q;
 		
-		var expectedHistory = list(
+		var expectedIdentitySimplificationHistory = list(
 				"", 
 				"Message   : q   <----   phi[q, a]: [0.2, 0.8, 0.1, 0.9]", 
 				"Simplified: {(on a) phi[q, a]: [0.2, 0.8, 0.1, 0.9]}", 
@@ -502,14 +734,109 @@ public class AnytimeExactBPWithSimplificationTest {
 				"to        : {phi[q]: [1.42, 1.56]}"
 				);
 		
-		runTest(query, factorNetwork, expectedHistory);
+		var expectedMinimumBasedSimplificationHistory = list(
+				"",
+				"Message   : q   <----   phi[q, a]: [0.2, 0.8, 0.1, 0.9]",
+				"Simplified: {(on a) phi[q, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"to        : {(on I0) phi[I0, q]: [0.67, 0.33, 0.47, 0.53]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.67, 0.33, 0.47, 0.53]}",
+				"to        : {(on I0) phi[I0, q]: [0.67, 0.33, 0.47, 0.53]}",
+				"",
+				"Message   : a   <----   phi[a, b]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {(on b) phi[a, b]: [0.2, 0.1, 0.8, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.2, 0.8, 0.1, 0.9]}",
+				"",
+				"Message   : a   <----   phi[c, a]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {(on c) phi[c, a]: [0.2, 0.1, 0.8, 0.9]}",
+				"to        : {(on I0) phi[I0, a]: [0.67, 0.33, 0.47, 0.53]}",
+				"",
+				"Message   : phi[q, a]: [0.2, 0.8, 0.1, 0.9]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.13, 0.27, 0.05, 0.48]}",
+				"to        : {(on I0) phi[I0, a]: [0.33, 0.67, 0.09, 0.91]}",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.2, 0.8, 0.1, 0.9]",
+				"Simplified: {(on I0) phi[I0, q]: [0.6, 0.63, 0.75, 0.83]}",
+				"to        : {(on I0) phi[I0, q]: [0.49, 0.51, 0.47, 0.53]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.49, 0.51, 0.47, 0.53]}",
+				"to        : {(on I0) phi[I0, q]: [0.49, 0.51, 0.47, 0.53]}",
+				"",
+				"Message   : phi[a, b]: [0.2, 0.1, 0.8, 0.9]   <----   b",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[a, b]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {phi[a]: [0.3, 1.7]}",
+				"to        : {(on I0) phi[I0, a]: [0.15, 0.85, 0.15, 0.85]}",
+				"",
+				"Message   : a   <----   phi[c, a]: [0.2, 0.1, 0.8, 0.9]",
+				"Updated   : {(on I0) phi[I0, a]: [0.67, 0.33, 0.47, 0.53]}",
+				"to        : {(on I0) phi[I0, a]: [0.67, 0.33, 0.47, 0.53]}",
+				"",
+				"Message   : a   <----   phi[c, a]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {(on I0) phi[I0, a]: [0.67, 0.33, 0.47, 0.53]}",
+				"to        : {(on I0) phi[I0, a]: [0.67, 0.33, 0.47, 0.53]}",
+				"",
+				"Message   : phi[q, a]: [0.2, 0.8, 0.1, 0.9]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.1, 0.28, 0.07, 0.45]}",
+				"to        : {(on I0) phi[I0, a]: [0.26, 0.74, 0.14, 0.86]}",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.2, 0.8, 0.1, 0.9]",
+				"Simplified: {(on I0) phi[I0, q]: [0.64, 0.69, 0.72, 0.79]}",
+				"to        : {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}",
+				"to        : {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}",
+				"",
+				"Message   : phi[c, a]: [0.2, 0.1, 0.8, 0.9]   <----   c",
+				"Simplified: {1}",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[c, a]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {phi[a]: [1.0, 1.0]}",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[a, b]: [0.2, 0.1, 0.8, 0.9]   <----   b",
+				"Updated   : Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : phi[a, b]: [0.2, 0.1, 0.8, 0.9]   <----   b",
+				"Simplified: Identity polytope",
+				"to        : Identity polytope",
+				"",
+				"Message   : a   <----   phi[a, b]: [0.2, 0.1, 0.8, 0.9]",
+				"Simplified: {phi[a]: [0.3, 1.7]}",
+				"to        : {(on I0) phi[I0, a]: [0.15, 0.85, 0.15, 0.85]}",
+				"",
+				"Message   : phi[q, a]: [0.2, 0.8, 0.1, 0.9]   <----   a",
+				"Simplified: {(on I0) phi[I0, a]: [0.15, 0.85, 0.15, 0.85]}",
+				"to        : {(on I0) phi[I0, a]: [0.15, 0.85, 0.15, 0.85]}",
+				"",
+				"Message   : q   <----   phi[q, a]: [0.2, 0.8, 0.1, 0.9]",
+				"Simplified: {(on I0) phi[I0, q]: [0.71, 0.78, 0.71, 0.78]}",
+				"to        : {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}",
+				"",
+				"Message   :    <----   q",
+				"Simplified: {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}",
+				"to        : {(on I0) phi[I0, q]: [0.48, 0.52, 0.48, 0.52]}");				
+		
+		runTest(query, factorNetwork, expectedIdentitySimplificationHistory, expectedMinimumBasedSimplificationHistory);
 	}
 	
-	private void runTest(Variable query, FactorNetwork factorNetwork, List<String> expectedHistory) {
+	private void runTest(
+			Variable query, 
+			FactorNetwork factorNetwork, 
+			List<String> expectedIdentitySimplificationHistory,
+			List<String> expectedMinimumBasedSimplificationHistory
+			) {
+		
 		println("Exact: ", new ExactBPSolver().apply(query, factorNetwork).normalize());
-		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracing(), query, factorNetwork, expectedHistory);
-//		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracingWrapper(), query, factorNetwork, expectedHistory);
-		//runTest(new AnytimeExactBPWithMinimumBasedSimplificationAndTracing(), query, factorNetwork, expectedHistory);
+		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracing(), query, factorNetwork, expectedIdentitySimplificationHistory);
+		runTest(new AnytimeExactBPWithMinimumBasedSimplificationAndTracing(), query, factorNetwork, expectedMinimumBasedSimplificationHistory);
 	}
 
 	private void runTest(
@@ -528,7 +855,19 @@ public class AnytimeExactBPWithSimplificationTest {
 		println("Trace:");
 		println(join("\n", solver.getTrace()));
 
-		assertEquals(expectedHistory, solver.getTrace());
+		if (expectedHistory != null) {
+			if (! expectedHistory.equals(solver.getTrace())) {
+				printTraceInJava(solver.getTrace());
+			}
+			assertEquals(expectedHistory, solver.getTrace());
+		}
+		else {
+			printTraceInJava(solver.getTrace());
+		}
+	}
+
+	private void printTraceInJava(List<String> trace) {
+		println("list(\n				\"" + join("\",\n				\"", trace) + "\");");
 	}
 	
 	///////////////// TRACING INTERFACES
@@ -542,40 +881,11 @@ public class AnytimeExactBPWithSimplificationTest {
 		List<String> getTrace();
 	}
 
-	///// Solver wrapper
-	
-	@SuppressWarnings("unused")
-	private static class AnytimeExactBPWithIdentitySimplificationAndTracingWrapper
-	extends AnytimeExactBP 
-	implements AnytimeSolverWithTracing
-	{
-		
-		public List<String> trace;
-	
-		public AnytimeExactBPWithIdentitySimplificationAndTracingWrapper() {
-			this.trace = list();
-		}
-	
-		@Override
-		protected AnytimeExactBPNodeWithSimplification<Variable, Factor> newInstance(ExactBP exactBP) {
-			var node = new AnytimeExactBPNodeWithIdentitySimplification<>(exactBP);
-			return new DefaultAnytimeExactBPNodeWithSimplificationAndTracing<>(node, trace);
-		}
-		
-		@Override
-		public List<String> getTrace() {
-			return trace;
-		}
-		
-	}
-
-
 	///////////////// AnytimeSolverWithTracing implementations
 	
 	private static class AnytimeExactBPWithIdentitySimplificationAndTracing 
 	extends AnytimeExactBP 
-	implements AnytimeSolverWithTracing
-	{
+	implements AnytimeSolverWithTracing {
 		
 		public List<String> trace;
 	
@@ -584,7 +894,7 @@ public class AnytimeExactBPWithSimplificationTest {
 		}
 	
 		@Override
-		protected AnytimeExactBPNodeWithIdentitySimplification<Variable, Factor> newInstance(ExactBP exactBP) {
+		protected AnytimeExactBPNodeWithIdentitySimplification<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
 			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<>(exactBP, trace);
 		}
 		
@@ -595,12 +905,11 @@ public class AnytimeExactBPWithSimplificationTest {
 		
 	}
 
-	@SuppressWarnings("unused")
 	private static class AnytimeExactBPWithMinimumBasedSimplificationAndTracing 
 	extends AnytimeExactBPWithIdentitySimplificationAndTracing {
 		
 		@Override
-		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> newInstance(ExactBP exactBP) {
+		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
 			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<>(exactBP, trace);
 		}
 		
@@ -635,131 +944,11 @@ public class AnytimeExactBPWithSimplificationTest {
 		node.getTrace().add("to        : " + updatedApproximation);
 	}
 
-	//// Wrapper
-	
-	private static class DefaultAnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> 
-	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> {
-	
-		private AnytimeExactBPNodeWithSimplification<RootType, SubRootType> base;
-		private List<String> trace;
-	
-		public DefaultAnytimeExactBPNodeWithSimplificationAndTracing(
-				AnytimeExactBPNodeWithSimplification<RootType, SubRootType> base, 
-				List<String> trace) {
-			this.base = base;
-			this.trace = trace;
-		}
-		
-
-		@Override
-		public Approximation<Factor> simplify(Approximation<Factor> approximation) {
-			var simplification = base.simplify(approximation);
-			traceSimplification(this, approximation, simplification);
-			return simplification;
-		}
-	
-		@Override
-		public 
-		Approximation<Factor> 
-		computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(Approximation<Factor> currentApproximation) {
-			var updatedApproximation = base.computeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(currentApproximation);
-			traceComputeUpdatedByItselfApproximationGivenThatExternalContextHasChanged(
-					this,
-					currentApproximation,
-					updatedApproximation);
-			return updatedApproximation;
-		}
-
-		@Override
-		public List<String> getTrace() {
-			return trace;
-		}
-
-
-		@Override
-		public boolean informativeApproximationRequiresAllSubsToBeInformative() {
-			return base.informativeApproximationRequiresAllSubsToBeInformative();
-		}
-
-
-		@Override
-		public boolean informativeApproximationRequiresThatNotAllSubsAreNonInformative() {
-			return base.informativeApproximationRequiresThatNotAllSubsAreNonInformative();
-		}
-		
-		@Override
-		public AnytimeExactBPNodeWithSimplification<SubRootType, RootType> pickNextSubToIterate() {
-			return base.pickNextSubToIterate();
-		}
-
-
-		@Override
-		public ExactBPNode<RootType, SubRootType> getBase() {
-			return base.getBase();
-		}
-
-
-		@Override
-		public ArrayList<? extends AnytimeExactBPNodeWithSimplificationAndTracing<SubRootType, RootType>> getSubs() {
-			return mapIntoArrayList(base.getSubs(), s -> new DefaultAnytimeExactBPNodeWithSimplificationAndTracing<>(s, trace));
-		}
-
-
-		@Override
-		public Approximation<Factor> function(List<Approximation<Factor>> subsApproximations) {
-			return base.function(subsApproximations);
-		}
-
-
-		@Override
-		public void setCurrentApproximation(Approximation<Factor> newCurrentApproximation) {
-			base.setCurrentApproximation(newCurrentApproximation);
-		}
-
-
-		@Override
-		public Approximation<Factor> getTotalIgnorance() {
-			return base.getTotalIgnorance();
-		}
-
-
-		@Override
-		public Approximation<Factor> getCurrentApproximation() {
-			return base.getCurrentApproximation();
-		}
-
-
-		@Override
-		public void refreshFromWithout() {
-			base.refreshFromWithout();
-		}
-
-
-		@Override
-		public void refreshFromWithin() {
-			base.refreshFromWithin();
-		}
-
-
-		@Override
-		public boolean hasNext() {
-			return base.hasNext();
-		}
-
-
-		@Override
-		public Approximation<Factor> next() {
-			return base.next();
-		}
-	}
-
-	
 	//// Implementation for identity simplification
 	
 	private static class AnytimeExactBPNodeWithIdentitySimplificationAndTracing<RootType, SubRootType> 
 	extends AnytimeExactBPNodeWithIdentitySimplification<RootType, SubRootType>
-	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType>
-	{
+	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> {
 	
 		private List<String> trace;
 	
@@ -768,7 +957,6 @@ public class AnytimeExactBPWithSimplificationTest {
 			this.trace = trace;
 		}
 		
-
 		@Override
 		protected
 		<RootType2, SubRootType2>
@@ -808,9 +996,8 @@ public class AnytimeExactBPWithSimplificationTest {
 	//// Implementation for minimum-based simplification
 	
 	private static class AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<RootType, SubRootType> 
-	extends AnytimeExactBPNodeWithMinimumBasedSimplification<RootType, SubRootType> 
-	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType>
-	{
+	extends AnytimeExactBPNodeWithMinimumBasedSimplificationWithForcedSimplification<RootType, SubRootType> 
+	implements AnytimeExactBPNodeWithSimplificationAndTracing<RootType, SubRootType> {
 	
 		private List<String> trace;
 	
