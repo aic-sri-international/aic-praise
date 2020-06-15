@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.MinFillEliminationOrdering;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -30,7 +30,7 @@ class FulltimeAlgorithmsOnRandomTableFactorNetworksTest {
 					pair("VE_MI_ND", new NDArraySolver(new VariableEliminationSolver(new MinFillEliminationOrdering()))),
 					//,
 					// pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering())),
-					pair("  EBP_AL", new ArrayListSolver(new ExactBPSolver()))
+					pair("  EBP_AL", new ArrayListSolver(new ExactBP()))
 					//				pair("  EBP_ND", new NDArraySolver(new ExactBPSolver()))
 					);
 

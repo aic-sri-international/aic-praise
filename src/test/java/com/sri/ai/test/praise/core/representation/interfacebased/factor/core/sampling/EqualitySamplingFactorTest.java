@@ -10,7 +10,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -31,7 +31,7 @@ public class EqualitySamplingFactorTest {
 	private ImportanceFactory importanceFactory = new DoubleImportanceFactory();
 	private PotentialFactory potentialFactory = new DoublePotentialFactory();
 	private DefaultFactorNetwork network;
-	private ExactBP solver;
+	private ExactBPRootNode solver;
 	private SamplingFactor marginalOfX;
 
 	@Test
@@ -164,7 +164,7 @@ public class EqualitySamplingFactorTest {
 		runEqualityTest(numberOfSamples, x, y, xEqualsY);
 
 		network = new DefaultFactorNetwork(list(xEqualsY));
-		solver = new ExactBP(x, network);
+		solver = new ExactBPRootNode(x, network);
 		marginalOfX = (SamplingFactor) solver.apply();
 
 		runEqualityTest(numberOfSamples, x, y, marginalOfX);

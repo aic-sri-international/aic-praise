@@ -18,8 +18,8 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exa
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithMinimumBasedSimplificationWithForcedSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPSolver;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -834,7 +834,7 @@ public class AnytimeExactBPWithSimplificationTest {
 			List<String> expectedMinimumBasedSimplificationHistory
 			) {
 		
-		println("Exact: ", new ExactBPSolver().apply(query, factorNetwork).normalize());
+		println("Exact: ", new ExactBP().apply(query, factorNetwork).normalize());
 		runTest(new AnytimeExactBPWithIdentitySimplificationAndTracing(), query, factorNetwork, expectedIdentitySimplificationHistory);
 		runTest(new AnytimeExactBPWithMinimumBasedSimplificationAndTracing(), query, factorNetwork, expectedMinimumBasedSimplificationHistory);
 	}
@@ -894,8 +894,8 @@ public class AnytimeExactBPWithSimplificationTest {
 		}
 	
 		@Override
-		protected AnytimeExactBPNodeWithIdentitySimplification<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
-			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<>(exactBP, trace);
+		protected AnytimeExactBPNodeWithIdentitySimplification<Variable, Factor> makeRootAnytimeExactBPRootNodeNode(ExactBPRootNode exactBPRootNode) {
+			return new AnytimeExactBPNodeWithIdentitySimplificationAndTracing<>(exactBPRootNode, trace);
 		}
 		
 		@Override
@@ -909,8 +909,8 @@ public class AnytimeExactBPWithSimplificationTest {
 	extends AnytimeExactBPWithIdentitySimplificationAndTracing {
 		
 		@Override
-		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
-			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<>(exactBP, trace);
+		protected AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<Variable, Factor> makeRootAnytimeExactBPRootNodeNode(ExactBPRootNode exactBPRootNode) {
+			return new AnytimeExactBPNodeWithMinimumBasedSimplificationAndTracing<>(exactBPRootNode, trace);
 		}
 		
 	}

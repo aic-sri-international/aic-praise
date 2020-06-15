@@ -1,11 +1,12 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base;
 
 import static com.sri.ai.util.Util.actualFreeMemory;
-import static com.sri.ai.util.Util.compareNumbersComponentWise;
+import static com.sri.ai.util.Util.assertEqualsComponentWise;
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.removeNonDestructively;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,7 +21,6 @@ import com.sri.ai.praise.core.representation.interfacebased.polytope.api.Polytop
 import com.sri.ai.praise.core.representation.interfacebased.polytope.core.Simplex;
 import com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base.configuration.ConfigurationForBatchOfFactorNetworksTest;
 import com.sri.ai.util.Timer;
-import com.sri.ai.util.Util;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.Pair;
 import com.sri.ai.util.computation.anytime.api.Approximation;
@@ -80,29 +80,29 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			Variable query,
 			FactorNetwork factorNetwork) {
 
-		Approximation<Factor> current = null;
+		Polytope latestPolytopeApproximation = null;
 		while (anytimeIterator.hasNext()) {
-
-			current = anytimeIterator.next();
-			Polytope polytope = (Polytope) current;
-
-			if (polytope.getFreeVariables().size() > 1) {
-				println(
-						"Warning: AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: Final polytope has variable other than query: "
-								+ Util.removeNonDestructively(polytope.getFreeVariables(), query)
-								+ ": polytope: " + polytope);
-			}
-
-			String boundDescription;
-			if (polytope instanceof Simplex) {
-				boundDescription = "Simplex bound";
-			} else {
-				boundDescription = "Bound length: " + polytope.length();
-			}
-			println(boundDescription + ", " + actualFreeMemory());
+			latestPolytopeApproximation = (Polytope) anytimeIterator.next();
+			checkForNonQueryVariables(latestPolytopeApproximation, query);
+			println(makeStatusDescription(latestPolytopeApproximation));
 			
 		}
-		return current;
+		return latestPolytopeApproximation;
+	}
+
+	private void checkForNonQueryVariables(Polytope polytope, Variable query) {
+		if (polytope.getFreeVariables().size() > 1) {
+			println("Warning: AbstractAnytimeAlgorithmOnBatchOfFactorNetworksTestRunner: "
+					+ "Final polytope has variable other than query: "
+					+ removeNonDestructively(polytope.getFreeVariables(), query)
+					+ ": polytope: " + polytope);
+		}
+	}
+
+	private String makeStatusDescription(Polytope polytope) {
+		String status = polytope instanceof Simplex? "Simplex bound" : "Bound length: " + polytope.length();
+		status += ", " + actualFreeMemory()/1000000 + " MB of free memory";
+		return status;
 	}
 
 	@Override
@@ -125,11 +125,17 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			var finalFactor2 = finalPolytope2.getFactor().sumOut(finalPolytope2.getIndices()).normalize(list(query));
 			var array1 = ((TableFactor) finalFactor1).getEntries();
 			var array2 = ((TableFactor) finalFactor2).getEntries();
-			println();
-			println("Comparing " + name1 + " and " + name2 + "...");
-			println(name1 + ": " + array1);
-			println(name2 + ": " + array2);
-			compareNumbersComponentWise(array1, array2, getConfiguration().getMaximumComponentwiseError());
+			try {
+			assertEqualsComponentWise(array1, array2, getConfiguration().getMaximumComponentwiseError());
+			}
+			catch (AssertionError e) {
+				var message = 
+						"Comparison failed between " + name1 + " and " + name2 + "...\n" +
+								name1 + ": " + array1 + "\n" +
+								name2 + ": " + array2;
+				println("\n" + message);
+				throw new AssertionError(message, e);
+			}
 		}
 		println();
 	}

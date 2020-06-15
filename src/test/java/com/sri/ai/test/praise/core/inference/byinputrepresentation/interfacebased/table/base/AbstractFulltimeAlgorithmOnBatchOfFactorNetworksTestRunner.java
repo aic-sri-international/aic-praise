@@ -1,6 +1,6 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.base;
 
-import static com.sri.ai.util.Util.compareNumbersComponentWise;
+import static com.sri.ai.util.Util.assertEqualsComponentWise;
 import static com.sri.ai.util.Util.println;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Factor, Configuration> {
 			var array1 = ((TableFactor) resultAndTime1.first).getEntries();
 			var array2 = ((TableFactor) resultAndTime2.first).getEntries();
 			println("Comparing " + name1 + " and " + name2 + "...");
-			compareNumbersComponentWise(array1, array2, 0.001);
+			assertEqualsComponentWise(array1, array2, 0.001);
 		}
 		println();
 	}

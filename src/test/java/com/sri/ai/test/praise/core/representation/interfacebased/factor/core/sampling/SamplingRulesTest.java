@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -35,7 +35,7 @@ public class SamplingRulesTest {
 	private Variable y;
 	private Variable z;
 	private DefaultFactorNetwork network;
-	private ExactBP solver;
+	private ExactBPRootNode solver;
 	private SamplingFactor marginalOfZ;
 	private SamplingFactor factor;
 	private double meanOfZ;
@@ -59,7 +59,7 @@ public class SamplingRulesTest {
 
 		setXYZModel();
 
-		solver = new ExactBP(z, network);
+		solver = new ExactBPRootNode(z, network);
 		marginalOfZ = (SamplingFactor) solver.apply();
 		println(marginalOfZ.nestedString(true));
 

@@ -9,7 +9,7 @@ import java.io.StringReader;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIModel;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.parsing.UAIModelReader;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -25,7 +25,7 @@ class FromUAIToTableFactorsTest {
 			UAIModel uaiModel = UAIModelReader.read(new StringReader(modelString));
 			FactorNetwork network = fromUAIModelToTableFactorNetwork(uaiModel, (v,e) -> new ArrayTableFactor(v,e));
 			Variable queryVariable = getFirst(network.getVariables());
-			ExactBP solver = new ExactBP(queryVariable, network);
+			ExactBPRootNode solver = new ExactBPRootNode(queryVariable, network);
 			Factor queryResult = solver.apply();
 			println(queryResult);
 		} catch (IOException e) {

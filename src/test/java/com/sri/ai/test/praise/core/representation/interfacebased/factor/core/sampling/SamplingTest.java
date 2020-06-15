@@ -11,7 +11,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -49,7 +49,7 @@ public class SamplingTest {
 	private PotentialFactory potentialFactory = new DoublePotentialFactory();
 	private ArithmeticDoubleFactory numberFactory = new ArithmeticDoubleFactory();
 	private DefaultFactorNetwork network;
-	private ExactBP solver;
+	private ExactBPRootNode solver;
 	private SamplingFactor marginalOfX;
 	private SamplingFactor marginalOfZ;
 	private double meanOfZ;
@@ -78,11 +78,11 @@ public class SamplingTest {
 			
 			setXYZModel();
 
-			solver = new ExactBP(x, network);
+			solver = new ExactBPRootNode(x, network);
 			marginalOfX = (SamplingFactor) solver.apply();
 			runTest(numberOfSamples, x, marginalOfX, meanOfZ, 0.1, expectedVarianceOfMarginalOfX, 0.1, importanceFactory, potentialFactory, numberFactory);
 
-			solver = new ExactBP(z, network);
+			solver = new ExactBPRootNode(z, network);
 			marginalOfZ = (SamplingFactor) solver.apply();
 			runTest(numberOfSamples, z, marginalOfZ, meanOfZ, 0.1, varianceOfZ, 0.1, importanceFactory, potentialFactory, numberFactory);
 			
@@ -154,7 +154,7 @@ public class SamplingTest {
 			NormalWithFixedMeanAndStandardDeviation normal2OnX = new NormalWithFixedMeanAndStandardDeviation(x, mean2, standardDeviation2, random);
 			network = new DefaultFactorNetwork(list(normal1OnX, normal2OnX));
 
-			solver = new ExactBP(x, network);
+			solver = new ExactBPRootNode(x, network);
 			marginalOfX = (SamplingFactor) solver.apply();
 
 			// Brute-force calculation:

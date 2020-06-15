@@ -11,7 +11,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -31,7 +31,7 @@ public class ConstantSamplingFactorTest {
 	private ImportanceFactory importanceFactory = new DoubleImportanceFactory();
 	private PotentialFactory potentialFactory = new DoublePotentialFactory();
 	private DefaultFactorNetwork network;
-	private ExactBP solver;
+	private ExactBPRootNode solver;
 	private SamplingFactor marginalOfX;
 	
 	@Test
@@ -46,7 +46,7 @@ public class ConstantSamplingFactorTest {
 		runConstantSamplingFactorTest(numberOfSamples, x, factorOnX);
 
 		network = new DefaultFactorNetwork(list(factorOnX));
-		solver = new ExactBP(x, network);
+		solver = new ExactBPRootNode(x, network);
 		marginalOfX = (SamplingFactor) solver.apply();
 
 		runConstantSamplingFactorTest(numberOfSamples, x, marginalOfX);

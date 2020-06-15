@@ -8,7 +8,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -38,15 +38,15 @@ public class AnytimeExactBP implements AnytimeSolver {
 
 	@Override
 	public Iterator<Approximation<Factor>> apply(Variable query, FactorNetwork factorNetwork) {
-		return makeRootAnytimeExactBPNode(new ExactBP(query, factorNetwork));
+		return makeRootAnytimeExactBPRootNodeNode(new ExactBPRootNode(query, factorNetwork));
 	}
 
 	/**
 	 * Makes the root {@link AnytimeExactBPNode} for solving this problem.
 	 */
 	@SuppressWarnings("unchecked")
-	protected AnytimeExactBPNode<Variable, Factor> makeRootAnytimeExactBPNode(ExactBP exactBP) {
-		return anytimeExactBPNodeConstructor.newInstance(exactBP);
+	protected AnytimeExactBPNode<Variable, Factor> makeRootAnytimeExactBPRootNodeNode(ExactBPRootNode exactBPRootNode) {
+		return anytimeExactBPNodeConstructor.newInstance(exactBPRootNode);
 	}
 
 }

@@ -54,7 +54,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.util.explanation.tree.DefaultExplanationTree;
 
 /**
- * A wrapper around {@link ExactBP} that normalizes its marginal.
+ * A wrapper around {@link ExactBPRootNode} that normalizes its marginal.
  * It requires that the {@link Problem} be defined in {@link ExpressionFactor}s that use {@link ExpressionVariable}s.
  * 
  * @author braz
@@ -69,9 +69,9 @@ public class SolverAdapterForExactBPThatReturnsUnnormalizedExpressionFactor impl
 		public ExpressionFactor unnormalizedMarginal;
 		
 		public QueryUnnormalizedMarginalAndContext(Problem problem) {
-			ExactBP exactBP = new ExactBP(problem);
+			ExactBPRootNode exactBPRootNode = new ExactBPRootNode(problem);
 			queryVariable = (ExpressionVariable) problem.getQueryVariable();
-			factor = exactBP.apply();
+			factor = exactBPRootNode.apply();
 			context = getContext(problem);
 			unnormalizedMarginal = getUnnormalizedExpressionFactor(factor, context);
 		}

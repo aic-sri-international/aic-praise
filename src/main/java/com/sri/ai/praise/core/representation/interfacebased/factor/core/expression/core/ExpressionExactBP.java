@@ -40,17 +40,17 @@ package com.sri.ai.praise.core.representation.interfacebased.factor.core.express
 import java.util.function.Predicate;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultProblem;
 
 
 /**
- * A convenience class for creating a {@link ExactBP} based on expressions.
+ * A convenience class for creating a {@link ExactBPRootNode} based on expressions.
  * @author braz
  *
  */
-public class ExpressionExactBP extends ExactBP {
+public class ExpressionExactBP extends ExactBPRootNode {
 
 	public ExpressionExactBP(Expression query, ExpressionFactorNetwork factorNetwork) {
 		this(DefaultExpressionVariable.expressionVariable(query), factorNetwork, v -> false);

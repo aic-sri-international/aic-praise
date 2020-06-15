@@ -30,7 +30,7 @@ public class LargeProblems<Result> extends DefaultConfigurationForRandomTableFac
 				/* tableFactorMaker = */ 
 					// (v,e) -> new NDArrayTableFactor(v,e);
 					(v,e) -> new ArrayTableFactor(v,e),
-				/* random = */ new Random(System.currentTimeMillis()) // fixed seed since we usually want to compare performance between runs
+				/* random = */ new Random(0) // fixed seed since we usually want to compare performance between runs
 				);
 	}
 }

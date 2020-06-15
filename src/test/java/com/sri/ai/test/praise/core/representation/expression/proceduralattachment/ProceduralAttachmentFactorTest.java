@@ -20,7 +20,7 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.grinder.core.TrueContext;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.DefaultExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.core.ExpressionFactorNetwork;
@@ -125,7 +125,7 @@ public class ProceduralAttachmentFactorTest {
 
 		network = expressionFactorNetwork(factorExpressions, proceduralAttachments, context);
 		
-		ExactBP algorithm = new ExactBP(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
+		ExactBPRootNode algorithm = new ExactBPRootNode(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
 		queryResult = algorithm.apply();
 		println("Result computed for query V1.");
 		println("Result: " + queryResult);
@@ -216,7 +216,7 @@ public class ProceduralAttachmentFactorTest {
 
 		network = expressionFactorNetwork(factorExpressions, proceduralAttachments, context);
 		
-		ExactBP algorithm = new ExactBP(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
+		ExactBPRootNode algorithm = new ExactBPRootNode(DefaultExpressionVariable.expressionVariable(parse("V1")), network);
 		queryResult = algorithm.apply();
 		println("Result computed for query V1.");
 		println("Result: " + queryResult);

@@ -12,7 +12,7 @@ import java.util.function.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -98,7 +98,7 @@ public abstract class AbstractSolverAdapterForSampling implements Solver {
 
 	private SamplingFactor getUnnormalizedSamplingFactor(Factor unnormalizedMarginal) {
 		SamplingFactor unnormalizedSamplingFactor = (SamplingFactor) unnormalizedMarginal; 
-		myAssert(isDefinedOnExpressionVariables(unnormalizedSamplingFactor), () -> getClass() + " requires " + ExactBP.class.getSimpleName() + " to return " + SamplingFactor.class.getSimpleName() + " defined on " + ExpressionVariable.class.getSimpleName() + "s only.");
+		myAssert(isDefinedOnExpressionVariables(unnormalizedSamplingFactor), () -> getClass() + " requires " + ExactBPRootNode.class.getSimpleName() + " to return " + SamplingFactor.class.getSimpleName() + " defined on " + ExpressionVariable.class.getSimpleName() + "s only.");
 		return unnormalizedSamplingFactor;
 	}
 

@@ -46,6 +46,7 @@ import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.pair;
+import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.thereExists;
 import static com.sri.ai.util.Util.unionOfResults;
@@ -128,7 +129,10 @@ import com.sri.ai.util.base.Wrapper;
  */
 final public class MinimumBasedSimplification {
 	
+	private static final boolean debug = false;
 	
+	private static final boolean USE_SIMPLICES_OPTIMIZATION = true;
+
 	public static Polytope simplify(Polytope polytope, boolean forced) {
 		if (polytope.isIdentity()) {
 			return IDENTITY_POLYTOPE;
@@ -160,23 +164,30 @@ final public class MinimumBasedSimplification {
 	}
 
 	private static Polytope simplifyConnectedSet(Set<? extends AtomicPolytope> connectedSet, boolean forced) {
-		if (thereExists(connectedSet, isInstanceOf(Simplex.class))) {
-			return simplifyConnectedSetWithSimplices(connectedSet);
+		if (USE_SIMPLICES_OPTIMIZATION && thereExists(connectedSet, isInstanceOf(Simplex.class))) {
+			if (forced) {
+				return simplifyConnectedSetWithSimplicesOptimization(connectedSet);
+			}
+			else {
+				// No point simplifying to a trivial bound!
+				return ProductPolytope.makeEquivalentToProductOf(connectedSet);
+			}
 		}
 		else {
-			return simplifyConnectedSetWithoutSimplices(connectedSet, forced);
+			return simplifyConnectedSetWithoutSimplicesOptimization(connectedSet, forced);
 		}
 	}
 
-	private static Polytope simplifyConnectedSetWithSimplices(Set<? extends AtomicPolytope> connectedSet) {
+	private static Polytope simplifyConnectedSetWithSimplicesOptimization(Set<? extends AtomicPolytope> connectedSet) {
 		var connectedSetFreeVariables = unionOfResults(connectedSet, Polytope::getFreeVariables);
 		return productOfSimplices(connectedSetFreeVariables);
 	}
 
-	private static Polytope simplifyConnectedSetWithoutSimplices(
-			Set<? extends AtomicPolytope> connectedSetWithoutSimplices,
+	private static Polytope simplifyConnectedSetWithoutSimplicesOptimization(
+			Set<? extends AtomicPolytope> connectedSet,
 			boolean forced) {
-		var setProduct = makeEquivalentToProductOf(connectedSetWithoutSimplices);
+		
+		var setProduct = makeEquivalentToProductOf(connectedSet);
 		var atomicPolytope = setProduct.getEquivalentAtomicPolytope();
 		var result = simplify(atomicPolytope, forced);
 		return result;
@@ -204,18 +215,22 @@ final public class MinimumBasedSimplification {
 			return convexHull;
 		}
 		
-//		println();
-//		println("Before simplification: " + convexHull.getFactor().summationCost());
-//		println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
-//		println("       free variables: " + convexHull.getFreeVariables());
-//		println("          convex hull: " + convexHull);
-		
+		if (debug) {
+			println();
+			println("Before simplification: " + convexHull.getFactor().summationCost());
+			println("              indices: " + convexHull.getIndices() + " with cardinalities " + getIndicesCardinalities(convexHull));
+			println("       free variables: " + convexHull.getFreeVariables());
+			println("          convex hull: " + convexHull);
+		}
+
 		var normalized = convexHull.normalize(convexHull.getFreeVariables());
 		var result = Timer.getResultAndTime(() -> makeMarginSimplex(normalized));
-		
-//		println("After  simplification: " + result.first.getFactor().summationCost());
-//		println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
-//		println("       free variables: " + result.first.getFreeVariables());
+
+		if (debug) {
+			println("After  simplification: " + result.first.getFactor().summationCost());
+			println("              indices: " + result.first.getIndices() + " with cardinalities " + getIndicesCardinalities(result.first));
+			println("       free variables: " + result.first.getFreeVariables());
+		}
 		
 		return result.first;
 	}

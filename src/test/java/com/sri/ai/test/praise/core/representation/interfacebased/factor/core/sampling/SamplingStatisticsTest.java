@@ -8,7 +8,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultVariable;
@@ -42,7 +42,7 @@ public class SamplingStatisticsTest {
 	PotentialFactory potentialFactory = new DoublePotentialFactory();
 	ArithmeticDoubleFactory numberFactory = new ArithmeticDoubleFactory();
 	DefaultFactorNetwork network;
-	ExactBP solver;
+	ExactBPRootNode solver;
 	MeanAndVariance meanAndVariance;
 	Statistic<ArithmeticNumber, ArithmeticNumber> varianceOfMean;
 
@@ -52,7 +52,7 @@ public class SamplingStatisticsTest {
 		variable = new DefaultVariable("x");
 		normal = new NormalWithFixedMeanAndStandardDeviation(variable, 10, 2, random);
 		network = new DefaultFactorNetwork(list(normal));
-		solver = new ExactBP(variable, network);
+		solver = new ExactBPRootNode(variable, network);
 		factor = (SamplingFactor) solver.apply();
 
 		println(factor);

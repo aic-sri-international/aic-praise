@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ConstantFactor;
@@ -28,9 +28,9 @@ import com.sri.ai.util.computation.anytime.api.Approximation;
 import com.sri.ai.util.computation.treecomputation.anytime.gradientdescent.core.AbstractAnytimeTreeComputationWithGradientDescent;
 
 /**
- * An anytime version of {@link ExactBP} algorithms.
+ * An anytime version of {@link ExactBPRootNode} algorithms.
  * This is implemented as a anytime tree computation with gradient-based picking of subs 
- * based on an {@link ExactBP}, which is gradually expanded.
+ * based on an {@link ExactBPRootNode}, which is gradually expanded.
  * <p>
  * It uses {@link Simplex} as an initial approximation,
  * and computes an approximation to the base's answer by not summing out the indices whose sub-messages

@@ -45,14 +45,14 @@ import java.util.function.Function;
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.Solver;
-import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBPRootNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Problem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expression.api.ExpressionVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 
 /**
- * A {@link Solver} adapter based on {@link ExactBP} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
+ * A {@link Solver} adapter based on {@link ExactBPRootNode} for {@link Problem}s using {@link SamplingFactor}s defined on {@link ExpressionVariable}s.
  * 
  * @author braz
  *
@@ -76,7 +76,7 @@ public class SolverAdapterForExactBPOnSamplingFactors extends AbstractSolverAdap
 	}
 
 	private Factor useExactBP(Problem problem) {
-		Factor unnormalizedMarginal = new ExactBP(problem).apply();
+		Factor unnormalizedMarginal = new ExactBPRootNode(problem).apply();
 		println("ExactBP result:");
 		if (unnormalizedMarginal instanceof SamplingFactor) {
 			println(((SamplingFactor)unnormalizedMarginal).nestedString(true));
