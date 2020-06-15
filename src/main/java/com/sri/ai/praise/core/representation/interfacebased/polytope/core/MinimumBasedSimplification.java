@@ -235,7 +235,7 @@ final public class MinimumBasedSimplification {
 		return result.first;
 	}
 
-	@SuppressWarnings({ "unchecked", "unused" })
+	@SuppressWarnings("unchecked")
 	private static String getIndicesCardinalities(FunctionConvexHull functionConvexHull) {
 		return join(mapIntoList((Collection<? extends TableVariable>) functionConvexHull.getIndices(), TableVariable::getCardinality));
 	}
