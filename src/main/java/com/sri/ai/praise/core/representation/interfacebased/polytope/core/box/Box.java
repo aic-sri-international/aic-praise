@@ -225,4 +225,8 @@ public class Box extends AbstractFunctionConvexHull {
 		
 	}*/
 	
+	@Override
+	public int memory() {
+		throw new Error((new Enclosing()).methodName() + " not implemented for " + getClass());
+	}
 }

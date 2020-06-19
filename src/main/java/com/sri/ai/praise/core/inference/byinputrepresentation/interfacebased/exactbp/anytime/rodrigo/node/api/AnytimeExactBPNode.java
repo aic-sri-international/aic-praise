@@ -30,4 +30,10 @@ public interface AnytimeExactBPNode<RootType, SubRootType> extends AnytimeEagerT
 	@Override
 	void setCurrentApproximation(Approximation<Factor> newCurrentApproximation);
 
+	/**
+	 * Returns an integer proportional to the memory occupied by the object
+	 * (in comparison to other instances of this class).
+	 */
+	int memory();
+	
 }

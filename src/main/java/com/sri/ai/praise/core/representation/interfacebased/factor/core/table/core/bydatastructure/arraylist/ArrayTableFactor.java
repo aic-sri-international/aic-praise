@@ -6,6 +6,7 @@ import static com.sri.ai.util.Util.arrayListFilledWith;
 import static com.sri.ai.util.Util.castOrThrowError;
 import static com.sri.ai.util.Util.in;
 import static com.sri.ai.util.Util.intersection;
+import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.listFrom;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -109,7 +110,16 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	private static double[] allocate(Collection<? extends TableVariable> variables) {
 		var numberOfEntries = numberOfEntries(variables);
 		//println("Creating array table factor on " + variables + ", " + numberOfEntries + " entries");
-		return new double[numberOfEntries];
+		double[] result;
+		try {
+			result = new double[numberOfEntries];
+		} catch (OutOfMemoryError e) {
+			throw 
+			new OutOfMemoryError(
+					"Out of memory allocating table factor with " + numberOfEntries + " entries on variables "
+							+ join(variables) + ". " + e.getMessage());
+		}
+		return result;
 	}
 
 	public ArrayTableFactor(Collection<? extends TableVariable> variables, double[] parameters) {

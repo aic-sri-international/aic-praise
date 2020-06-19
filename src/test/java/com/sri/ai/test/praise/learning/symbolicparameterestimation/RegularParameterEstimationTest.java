@@ -26,7 +26,7 @@ public class RegularParameterEstimationTest {
 	/**
 	 * Tests for my report
 	 */
-	@Test
+	// @Test Taking too long
 	public void testReport() {
 		
 		long startTime = System.nanoTime();

@@ -1407,7 +1407,7 @@ public class HOGMMultiQuerySamplingProblemSolverTest {
 		runTest(model, query, expected, initialNumberOfSamples, numberOfDiscreteValues, true);
 	}
 
-	@Test
+	// @Test Taking too long
 	public void smallCountiesWithIntegerExternalVariableSamplingTest() {
 	
 		String model = "" +

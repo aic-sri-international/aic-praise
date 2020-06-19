@@ -141,4 +141,10 @@ public interface Polytope extends Approximation<Factor> {
 	boolean equalsModuloPermutations(Object another);
 	
 	PolytopesEqualityCheck checkEquality(Polytope another);
+	
+	/**
+	 * Returns an integer proportional to the memory occupied by the object
+	 * (in comparison to other instances of this class).
+	 */
+	int memory();
 }

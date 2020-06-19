@@ -50,8 +50,10 @@ import static com.sri.ai.util.Util.println;
 import static com.sri.ai.util.Util.setFrom;
 import static com.sri.ai.util.Util.sortByString;
 import static com.sri.ai.util.Util.subtract;
+import static com.sri.ai.util.Util.sum;
 import static com.sri.ai.util.Util.union;
 import static com.sri.ai.util.base.ConstructorByLazyReflection.constructorByLazyReflectionOfClassAndParameters;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNodeWithSimplification;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.api.ExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -382,4 +385,22 @@ implements AnytimeExactBPNodeWithSimplification<RootType, SubRootType> {
 		return simplexVariables;
 	}
 
+	@Override
+	public int memory() {
+		var totalMemory = polytopeMemory(getCurrentApproximation());
+		if (getUnsimplifiedApproximationOrNull() != null) {
+			totalMemory += polytopeMemory(getUnsimplifiedApproximationOrNull());
+		}
+		if (!subsHaveNotYetBeenMade()) {
+			totalMemory += sum(functionIterator(getSubs(), AnytimeExactBPNode::memory)).intValue();
+		}
+		return totalMemory;
+	}
+
+	private int polytopeMemory(Approximation<Factor> approximation) {
+		// TODO: this assumes the only type of approximation is Polytope
+		// We must create an AnytimeExactBPApproximation interface with the 'memory' method
+		// (as opposed to adding that method to Approximation, which should not be polluted with that).
+		return ((Polytope) approximation).memory();
+	}
 }

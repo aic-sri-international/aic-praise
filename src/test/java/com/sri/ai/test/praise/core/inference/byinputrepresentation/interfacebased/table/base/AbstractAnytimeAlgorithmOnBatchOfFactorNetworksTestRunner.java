@@ -2,6 +2,7 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebas
 
 import static com.sri.ai.util.Util.actualFreeMemory;
 import static com.sri.ai.util.Util.assertEqualsComponentWise;
+import static com.sri.ai.util.Util.humanReadableByMagnitude;
 import static com.sri.ai.util.Util.iterator;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.mapIntoArrayList;
@@ -11,6 +12,7 @@ import static com.sri.ai.util.Util.removeNonDestructively;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNode;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
@@ -84,7 +86,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 		while (anytimeIterator.hasNext()) {
 			latestPolytopeApproximation = (Polytope) anytimeIterator.next();
 			checkForNonQueryVariables(latestPolytopeApproximation, query);
-			println(makeStatusDescription(latestPolytopeApproximation));
+			println(makeStatusDescription(latestPolytopeApproximation, anytimeIterator));
 			
 		}
 		return latestPolytopeApproximation;
@@ -99,9 +101,14 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 		}
 	}
 
-	private String makeStatusDescription(Polytope polytope) {
+	private String makeStatusDescription(Polytope polytope, Iterator<Approximation<Factor>> anytimeIterator) {
 		String status = polytope instanceof Simplex? "Simplex bound" : "Bound length: " + polytope.length();
 		status += ", " + actualFreeMemory()/1000000 + " MB of free memory";
+		if (anytimeIterator instanceof AnytimeExactBPNode) {
+			@SuppressWarnings("unchecked")
+			var anytimeExactBPNode = (AnytimeExactBPNode<Variable, Factor>) anytimeIterator;
+			status += ", " + humanReadableByMagnitude(anytimeExactBPNode.memory()) + " factor entries in entire tree";
+		}
 		return status;
 	}
 

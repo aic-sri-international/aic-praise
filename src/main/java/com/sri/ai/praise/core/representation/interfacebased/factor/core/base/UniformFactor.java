@@ -88,4 +88,8 @@ public class UniformFactor extends AbstractFactorWithVariables {
 		return new UniformFactor(remaining);
 	}
 
+	@Override
+	public int memory() {
+		return 0;
+	}
 }

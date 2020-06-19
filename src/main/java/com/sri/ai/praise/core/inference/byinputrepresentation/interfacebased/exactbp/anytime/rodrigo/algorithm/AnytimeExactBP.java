@@ -2,8 +2,6 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.ex
 
 import static com.sri.ai.util.base.ConstructorByLazyReflection.constructorByLazyReflectionOfClassAndParameters;
 
-import java.util.Iterator;
-
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api.AnytimeSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.api.AnytimeExactBPNode;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.anytime.rodrigo.node.core.AnytimeExactBPNodeWithIdentitySimplification;
@@ -14,7 +12,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.util.base.BinaryFunction;
 import com.sri.ai.util.base.ConstructorByLazyReflection;
-import com.sri.ai.util.computation.anytime.api.Approximation;
 
 /**
  * An adapter from a given {@link AnytimeExactBPNode} class
@@ -37,7 +34,7 @@ public class AnytimeExactBP implements AnytimeSolver {
 	}
 
 	@Override
-	public Iterator<Approximation<Factor>> apply(Variable query, FactorNetwork factorNetwork) {
+	public AnytimeExactBPNode<Variable, Factor> apply(Variable query, FactorNetwork factorNetwork) {
 		return makeRootAnytimeExactBPRootNodeNode(new ExactBPRootNode(query, factorNetwork));
 	}
 
@@ -48,5 +45,4 @@ public class AnytimeExactBP implements AnytimeSolver {
 	protected AnytimeExactBPNode<Variable, Factor> makeRootAnytimeExactBPRootNodeNode(ExactBPRootNode exactBPRootNode) {
 		return anytimeExactBPNodeConstructor.newInstance(exactBPRootNode);
 	}
-
 }

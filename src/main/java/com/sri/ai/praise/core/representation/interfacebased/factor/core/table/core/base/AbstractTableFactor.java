@@ -166,10 +166,14 @@ public abstract class AbstractTableFactor implements TableFactor {
 		return numberOfEntries();
 	}
 	
-	
 	@Override
 	public EmptyTableFactor emptyVersion() {
 		return new EmptyTableFactor(this);
+	}
+
+	@Override
+	public int memory() {
+		return numberOfEntries();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////

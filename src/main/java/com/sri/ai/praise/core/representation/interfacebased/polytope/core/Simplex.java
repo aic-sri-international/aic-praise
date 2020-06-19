@@ -172,4 +172,9 @@ public class Simplex extends AbstractAtomicPolytope {
 	public static Polytope productOfSimplices(Collection<? extends Variable> variables) {
 		return makeEquivalentToProductOf(mapIntoList(variables, Simplex::simplex));
 	}
+
+	@Override
+	public int memory() {
+		return 0;
+	}
 }

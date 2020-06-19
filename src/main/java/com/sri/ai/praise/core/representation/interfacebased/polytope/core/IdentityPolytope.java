@@ -90,6 +90,11 @@ public class IdentityPolytope extends AbstractPolytope {
 	}
 	
 	@Override
+	public int memory() {
+		return 0;
+	}
+
+	@Override
 	public String toString() {
 		return "Identity polytope";
 	}

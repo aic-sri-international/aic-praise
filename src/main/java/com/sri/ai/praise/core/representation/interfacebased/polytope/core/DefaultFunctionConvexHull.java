@@ -127,4 +127,9 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 		var result = normalizedHullFactor.potentialRange(getIndices());
 		return result;
 	}
+
+	@Override
+	public int memory() {
+		return getFactor().memory();
+	}
 }

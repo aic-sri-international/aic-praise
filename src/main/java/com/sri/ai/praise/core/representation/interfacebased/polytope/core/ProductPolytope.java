@@ -55,11 +55,13 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.mapIntoSet;
 import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.product;
 import static com.sri.ai.util.Util.subtract;
 import static com.sri.ai.util.Util.unionOfCollections;
 import static com.sri.ai.util.Util.unionOfResults;
 import static com.sri.ai.util.base.IsInstanceOf.isInstanceOf;
 import static com.sri.ai.util.base.Pair.pair;
+import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -660,5 +662,10 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 	@Override
 	public Polytope normalize(Collection<? extends Variable> variablesToNormalize) {
 		throw new Error("normalize is not valid for ProductPolytope");
+	}
+
+	@Override
+	public int memory() {
+		return product(functionIterator(getAtomicPolytopes(), Polytope::memory)).intValue();
 	}
 }

@@ -134,4 +134,12 @@ public interface Factor {
 	boolean mathematicallyEquals(Factor another);
 	
 	FactorsEqualityCheck checkEquality(Factor another);
+	
+	/**
+	 * Returns an integer proportional to the memory occupied by the object
+	 * (in comparison to other instances of this class).
+	 */
+	default int memory() {
+		throw new Error((new Enclosing(){}).methodName() + " not implemented for " + getClass());
+	}
 }

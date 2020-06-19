@@ -277,4 +277,9 @@ public class ConstantFactor extends AbstractFactorWithVariables {
 			return new DefaultFactorsAreOfIncomparableClasses<>(this, another);
 		}
 	}
+
+	@Override
+	public int memory() {
+		return 0;
+	}
 }
