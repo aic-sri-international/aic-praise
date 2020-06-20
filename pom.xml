@@ -131,7 +131,7 @@
 		</dependency>
 
 		<!--  JavaFX-related libraries that had to be updated to run with Java 11
-		      but break the code. fontawesomefx in particular seem abandoned.
+		      but break the code. fontawesomefx in particular seems abandoned.
 		      So I am keeping the Java 8 versions here so the code compiles even though it does not work.
 		      I am also keeping the new versions commented out in case I have time to try to fix this.
 		 -->
