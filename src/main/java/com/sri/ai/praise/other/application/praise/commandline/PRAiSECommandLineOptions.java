@@ -39,8 +39,8 @@ package com.sri.ai.praise.other.application.praise.commandline;
 
 import static com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer.getModelPagesFromURI;
 import static com.sri.ai.util.Util.collect;
-import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.getFirst;
+import static com.sri.ai.util.Util.getFirstNonNullResultOrNull;
 import static com.sri.ai.util.Util.join;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.thereExists;
@@ -114,7 +114,7 @@ public class PRAiSECommandLineOptions {
 
 		languageOptionSpec   = parser.accepts("language",   "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		queryOptionSpec      = parser.accepts("query",      "query to run over all input models").withRequiredArg().ofType(String.class);
-							   parser.accepts("model",      "show solved model in output");
+							   parser.accepts("no-model",   "do not show solved model in output");
 		                       parser.accepts("count",      "inform how many summations have been performed for each query");
 		                       parser.accepts("summations", "shows number of summations and integrations performed, if they are being counted (with --count)");
 		outputFileOptionSpec = parser.accepts("output",     "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
@@ -123,17 +123,17 @@ public class PRAiSECommandLineOptions {
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();
 
 		usage =
-				"java " + PRAiSECommandLineOptions.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] [--debug] inputModelFile ..."
+				"java " + PRAiSE.class.getName() + " [--help] [--language language_code] [--query global_query_string] [--output output_file_name] [--debug] inputModelFile ..."
 				+ "\n\n"
 				+ "This command reads a set of models from input files and executes a set of queries on each of them.\n\n"
 				+ "The models are obtained in the following manner:\n"
-				+ "- input files may be one or more; they can be .praise files (saved from the PRAiSE editor and solver) or plain text files.\n"
-				+ "- each .praise input file contains possibly multiple pages, each with a model and a set of queries for it (see PRAiSE editor and solver).\n"
+				+ "- input files may be one or more; they can be .praise files (saved from the PRAiSE GUI application) or plain text files.\n"
+				+ "- each .praise input file contains possibly multiple pages, each with a model and a set of queries for it (see PRAiSE GUI application).\n"
 				+ "- multiple plain text input files are combined into a single model (not combined with .praise models).\n\n"
 				+ "The queries are obtained in the following manner:\n"
 				+ "- each page in each .praise file contains a list of queries for its specific model\n"
 				+ "- queries specified with --query option will apply to all models from all .praise files and to the model from combined plain text input files.\n\n"
-				+ "Evidence can be encoded as deterministic statements (see examples in PRAiSE editor and solver).\n"
+				+ "Evidence can be encoded as deterministic statements (see examples in PRAiSE GUI application).\n"
 						;
 
 		setupParameters(args);
@@ -144,7 +144,7 @@ public class PRAiSECommandLineOptions {
 	private void setupParameters(String[] args) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			parseArguments(args);
-			setDebugOutput();
+			setDisplayAttributes();
 			setRecordingOfSummations();
 			showHelpMessageAndExitIfRequested();
 			setGlobalQueries();
@@ -162,12 +162,12 @@ public class PRAiSECommandLineOptions {
 		options = parser.parse(args);
 	}
 
-	private void setDebugOutput() {
+	private void setDisplayAttributes() {
 		showDebugOutput = options.has(debugOptionSpec);
+		showModel = !options.has("no-model");
 	}
 
 	private void setRecordingOfSummations() {
-		showModel = options.has("model");
 		countSummations = options.has("count");
 		showSummations = options.has("summations");
 		if (showSummations && !countSummations) {
@@ -203,7 +203,7 @@ public class PRAiSECommandLineOptions {
 
 	private void checkIfThereAreInputFiles() {
 		if (inputFiles.size() == 0) {
-			errors.add("No input files specified");
+			errors.add("No input files were specified or found");
 		}
 	}
 
@@ -329,7 +329,7 @@ public class PRAiSECommandLineOptions {
 	}
 
 	private ModelPage makeModelPage(String unionModel) {
-		return new ModelPage(inputLanguage, "FactorNetwork from concatenation of non-container input files", unionModel, globalQueries);
+		return new ModelPage(inputLanguage, "Model from plain text input files", unionModel, globalQueries);
 	}
 
 	private static String getLegalModelLanguageCodesDescription() {

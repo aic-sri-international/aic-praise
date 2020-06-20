@@ -37,6 +37,7 @@
  */
 package com.sri.ai.praise.other.application.praise.commandline;
 
+import static com.sri.ai.util.Util.isNonNullAndNonEmptyString;
 import static com.sri.ai.util.Util.toHoursMinutesAndSecondsString;
 
 import java.io.FileNotFoundException;
@@ -76,7 +77,7 @@ public class PRAiSE {
 		ExpressoConfiguration.setDisplayNumericsExactlyForSymbols(false);
 		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInApproximateRepresentationOfNumericalSymbols(3);
 		try {
-			parseArguments(args);
+			setOptions(args);
 			solveAllModels();
 		}
 		catch (Exception exception) {
@@ -87,7 +88,7 @@ public class PRAiSE {
 		}
 	}
 
-	private void parseArguments(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
+	private void setOptions(String[] args) throws UnsupportedEncodingException, FileNotFoundException, IOException {
 		options = new PRAiSECommandLineOptions(args);
 	}
 
@@ -107,9 +108,12 @@ public class PRAiSE {
 
 	private void outputModel(ModelPage modelPage) {
 		if (options.showModel) {
-			options.out.print  ("Model name: ");
-			options.out.println(modelPage.getName());
-			options.out.println("Model     : ");
+			var string = modelPage.getName();
+			if (isNonNullAndNonEmptyString(string)) {
+				options.out.print  ("Model name: ");
+				options.out.println(string);
+			}
+			options.out.println("Model: ");
 			options.out.println(modelPage.getModelString());
 		}
 	}
@@ -130,29 +134,41 @@ public class PRAiSE {
 	private void output(HOGMMultiQueryProblemSolver solver, HOGMProblemResult modelQueryResult) {
 		options.out.print("Query : ");
 		options.out.println(modelQueryResult.getQueryString());
-		options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);
-		if (modelQueryResult.getResult() != null) {
-			options.out.println(solver.simplifyAnswer(modelQueryResult.getResult(), modelQueryResult.getQueryExpression()));
-			options.out.print("Took  : ");
-			options.out.println(toHoursMinutesAndSecondsString(modelQueryResult.getMillisecondsToCompute()));
-			if (options.countSummations) {
-				options.out.print("Took  : ");
-				options.out.println(modelQueryResult.getNumberOfSummations() + " summations");
-				if (options.showSummations) {
-					for (Integration summation : modelQueryResult.getSummations()) {
-						options.out.println(summation);
-					}
-				}
-			}
-		}
+		outputResult(solver, modelQueryResult);
 		modelQueryResult.getErrors().forEach(error -> outputError(error));
 		options.out.println();
 	}
 
+	private void outputResult(HOGMMultiQueryProblemSolver solver, HOGMProblemResult modelQueryResult) {
+		if (modelQueryResult.getResult() != null) {
+			options.out.print(RESULT_PREFIX_DEFINED_AS_CONSTANT_SO_DETECTORS_CAN_REFER_TO_IT);
+			options.out.println(solver.simplifyAnswer(modelQueryResult.getResult(), modelQueryResult.getQueryExpression()));
+			options.out.print("Took  : ");
+			options.out.println(toHoursMinutesAndSecondsString(modelQueryResult.getMillisecondsToCompute()));
+			outputSummationsCount(modelQueryResult);
+		}
+	}
+
+	private void outputSummationsCount(HOGMProblemResult modelQueryResult) {
+		if (options.countSummations) {
+			options.out.print("Took  : ");
+			options.out.println(modelQueryResult.getNumberOfSummations() + " summations");
+			showSummations(modelQueryResult);
+		}
+	}
+
+	private void showSummations(HOGMProblemResult modelQueryResult) {
+		if (options.showSummations) {
+			for (Integration summation : modelQueryResult.getSummations()) {
+				options.out.println(summation);
+			}
+		}
+	}
+
 	private void outputError(HOGMProblemError error) {
-		options.out.println("ERROR = " + error.getErrorMessage());
+		options.out.println("ERROR: " + error.getErrorMessage());
 		if (options.showDebugOutput && error.getThrowable() != null) {
-			options.out.println("THROWABLE = ");
+			options.out.println("THROWABLE: ");
 			error.getThrowable().printStackTrace(options.out);
 		}
 	}
