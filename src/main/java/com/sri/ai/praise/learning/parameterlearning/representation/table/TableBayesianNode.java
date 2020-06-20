@@ -55,6 +55,7 @@ public class TableBayesianNode extends ArrayTableFactor implements BayesianNode 
 		return allVariables;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setInitialCountsForAllPossibleChildAndParentsAssignments() {
 		this.reinitializeEntries(1.0); // the initial count is 1 for all possible childAndParentsAssignments
