@@ -101,8 +101,8 @@ public class PRAiSE {
 	private void solveModel(ModelPage modelPage) {
 		outputModel(modelPage);
 		startSummationCounting();
-		HOGMMultiQueryProblemSolver solver = new HOGMMultiQueryProblemSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
-		List<? extends HOGMProblemResult> modelPageResults = solver.getResults();
+		var solver = new HOGMMultiQueryProblemSolver(modelPage.getModelString(), modelPage.getDefaultQueriesToRun());
+		var modelPageResults = solver.getResults();
 		outputModelResults(solver, modelPageResults);
 	}
 

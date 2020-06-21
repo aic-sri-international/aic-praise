@@ -141,6 +141,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	public static interface ParameterFunction {
 		double apply(int[] values);
 	}
+	public static interface ParameterFunction0 { double apply(); }
 	public static interface ParameterFunction1 { double apply(int v1); }
 	public static interface ParameterFunction2 { double apply(int v1, int v2); }
 	public static interface ParameterFunction3 { double apply(int v1, int v2, int v3); }
@@ -156,6 +157,15 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		var index = factor.makeArrayIndex(variables);
 		do {
 			factor.parameters[index.offset] = parameterFunction.apply(index.index);
+		} while (index.incrementIfPossible());
+		return factor;
+	}
+	
+	public static ArrayTableFactor arrayTableFactor(Collection<? extends TableVariable> variables, ParameterFunction0 parameterFunction) {
+		var factor = new ArrayTableFactor(variables, 0.0);
+		var index = factor.makeArrayIndex(variables);
+		do {
+			factor.parameters[index.offset] = parameterFunction.apply();
 		} while (index.incrementIfPossible());
 		return factor;
 	}

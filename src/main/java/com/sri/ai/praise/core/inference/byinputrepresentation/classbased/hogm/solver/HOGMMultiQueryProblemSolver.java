@@ -149,7 +149,13 @@ public class HOGMMultiQueryProblemSolver {
 	 */
 	private void processQuery(String query, List<? extends HOGMProblemError> modelErrors) {
 		explanationBlock("Processing query ", query, code(() -> {
-			HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver = new HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(query, expressionBasedSolver, hogmModel, expressionBasedModel, modelErrors);
+			HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing problemSolver = 
+					new HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing(
+							query, 
+							expressionBasedSolver, 
+							hogmModel, 
+							expressionBasedModel, 
+							modelErrors);
 			List<HOGMProblemResult> queryResult = problemSolver.getResults();
 			results.addAll(queryResult);
 			return queryResult;

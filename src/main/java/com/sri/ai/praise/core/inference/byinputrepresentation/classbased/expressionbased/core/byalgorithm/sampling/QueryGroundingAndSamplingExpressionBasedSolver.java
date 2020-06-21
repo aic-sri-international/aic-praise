@@ -41,11 +41,11 @@ import java.util.Random;
 import java.util.function.Function;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.GroundingExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.querygrounding.QueryGroundingExpressionBasedSolver;
 
-public class GroundingAndSamplingExpressionBasedSolver extends GroundingExpressionBasedSolver {
+public class QueryGroundingAndSamplingExpressionBasedSolver extends QueryGroundingExpressionBasedSolver {
 
-	public GroundingAndSamplingExpressionBasedSolver(
+	public QueryGroundingAndSamplingExpressionBasedSolver(
 			SolverType solverType, 
 			Function<Expression, Integer> fromVariableToNumberOfDiscreteValues, 
 			int initialNumberOfSamples, 

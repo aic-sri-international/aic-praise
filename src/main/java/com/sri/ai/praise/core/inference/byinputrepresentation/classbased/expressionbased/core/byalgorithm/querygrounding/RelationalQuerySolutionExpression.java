@@ -1,7 +1,7 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.querygrounding;
 
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndices;
-import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.VariableMaskingExpressionWithProbabilityFunction.mask;
+import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.querygrounding.VariableMaskingExpressionWithProbabilityFunction.mask;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.VariableExpressionDiscretization.makeSetOfVariablesWithRanges;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
 import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
@@ -34,7 +34,7 @@ import com.sri.ai.util.function.core.functions.AggregatorFunction;
 
 /**
  * A {@link ExpressionWithProbabilityFunction}
- * that serves as the solution from a {@link GroundingExpressionBasedSolver}.
+ * that serves as the solution from a {@link QueryGroundingExpressionBasedSolver}.
  * It takes the following construction arguments:
  * <ul>
  * <li> a possibly relational {@link ExpressionBasedProblem} whose model is a {@link HOGMExpressionBasedModel},

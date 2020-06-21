@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
+package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.querygrounding;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
@@ -7,7 +7,8 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
 
 /**
- * An {@link ExpressionBasedSolver} specific for possibly relational {@link HOGMExpressionBasedProblem}s.
+ * An {@link ExpressionBasedSolver} specific for {@link HOGMExpressionBasedProblem}s
+ * with relational queries (that is, queries with free variables).
  * <p>
  * This solver is constructed based on a given {@link ExpressionBasedSolver} for grounded 
  * {@link HOGMExpressionBasedProblem}s
@@ -21,7 +22,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
  * @author braz
  *
  */
-public class GroundingExpressionBasedSolver implements ExpressionBasedSolver {
+public class QueryGroundingExpressionBasedSolver implements ExpressionBasedSolver {
 
 	//////////////
 	
@@ -29,7 +30,7 @@ public class GroundingExpressionBasedSolver implements ExpressionBasedSolver {
 	
 	//////////////
 	
-	public GroundingExpressionBasedSolver(ExpressionBasedSolver expressionBasedSolver) {
+	public QueryGroundingExpressionBasedSolver(ExpressionBasedSolver expressionBasedSolver) {
 		this.expressionBasedSolver = expressionBasedSolver;
 	}
 

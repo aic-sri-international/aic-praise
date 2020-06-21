@@ -64,7 +64,7 @@ import com.sri.ai.util.base.Pair;
 public class HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModelParsing {
 	
 	private HOGModel hogmModel = null;
-	private List<HOGMProblemResult> results = new ArrayList<>();
+	private List<HOGMProblemResult> results;
 	private boolean canceled = false;
 	private ExpressionBasedModel expressionBasedModel;
 	private ExpressionBasedSolver expressionBasedSolver;
@@ -79,6 +79,8 @@ public class HOGMSingleQueryProblemSolverThatUsesResultsOfPreviouslyDoneHOGModel
 		this.expressionBasedSolver = expressionBasedSolver;
 		this.hogmModel = hogmModel;
 		this.expressionBasedModel = expressionBasedModel;
+		this.results = new ArrayList<>();
+		
 		HOGMQueryParsing queryParsing = new HOGMQueryParsing(query, hogmModel, modelErrors);
 		if (queryParsing.succeeded()) {
 			collectInferenceResult(query, queryParsing);
