@@ -735,7 +735,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Override
-	public ArrayTableFactor normalize(Collection<? extends Variable> variablesToNormalize) {
+	public ArrayTableFactor normalizeBySummingOverThese(Collection<? extends Variable> variablesToNormalize) {
 
 		if (variablesToNormalize.isEmpty()) {
 			// This means each element is normalized by itself, so we return a table of 1's.
@@ -767,7 +767,16 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		// Right now I am leaving it since normalization is not used very often anyway.
 	}
 
-
+	@Override
+	public ArrayTableFactor normalize(Collection<? extends Variable> variablesToBeANormalizedDistributionOn) {
+		return (ArrayTableFactor) super.normalize(variablesToBeANormalizedDistributionOn);
+	}
+	
+	@Override
+	public ArrayTableFactor normalize(Variable variable) {
+		return (ArrayTableFactor) super.normalize(variable);
+	}
+	
 	private ArrayTableFactor divideByTableFactor(TableFactor another) {
 		
 		// ATTENTION: THIS IS BASICALLY A COPY OF multiplyTableFactor.

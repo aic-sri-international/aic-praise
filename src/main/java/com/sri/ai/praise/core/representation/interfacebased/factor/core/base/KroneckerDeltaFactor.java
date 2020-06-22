@@ -61,7 +61,7 @@ public class KroneckerDeltaFactor extends AbstractFactorWithVariables {
 	}
 
 	@Override
-	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+	public Factor normalizeBySummingOverThese(Collection<? extends Variable> variablesToNormalize) {
 		return sumOut(variablesToNormalize); // turns out to be the same as summing out
 	}
 }

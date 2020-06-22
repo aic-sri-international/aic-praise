@@ -210,7 +210,7 @@ public class ConstantFactor extends AbstractFactorWithVariables {
 	}
 
 	@Override
-	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+	public Factor normalizeBySummingOverThese(Collection<? extends Variable> variablesToNormalize) {
 		var remaining = subtract(getVariables(), variablesToNormalize, arrayList());
 		return new UniformFactor(remaining);
 	}

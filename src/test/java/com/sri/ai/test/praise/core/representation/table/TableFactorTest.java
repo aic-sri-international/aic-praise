@@ -409,7 +409,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<? extends TableVariable> variablesToNormalize = f2.getVariables();
-		ArrayTableFactor normalizedF2 = f2.normalize(variablesToNormalize);
+		ArrayTableFactor normalizedF2 = f2.normalizeBySummingOverThese(variablesToNormalize);
 		normalizedF2.setName("normalizedF2");
 		
 		println(normalizedF2);
@@ -431,7 +431,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<? extends TableVariable> variablesToNormalize = arrayList(V2);
-		ArrayTableFactor normalizedF2OnV2 = f2.normalize(variablesToNormalize);
+		ArrayTableFactor normalizedF2OnV2 = f2.normalizeBySummingOverThese(variablesToNormalize);
 		normalizedF2OnV2.setName("normalizedF2OnV2");
 		
 		println(normalizedF2OnV2);
@@ -453,7 +453,7 @@ public class TableFactorTest {
 		println("------------------");
 
 		ArrayList<? extends TableVariable> variablesToNormalize = arrayList();
-		ArrayTableFactor normalizedF2OnNoVariables = f2.normalize(variablesToNormalize);
+		ArrayTableFactor normalizedF2OnNoVariables = f2.normalizeBySummingOverThese(variablesToNormalize);
 		normalizedF2OnNoVariables.setName("normalizedF2OnNoVariables");
 		
 		println(normalizedF2OnNoVariables);

@@ -228,7 +228,7 @@ public abstract class AbstractFunctionConvexHull extends AbstractAtomicPolytope 
 
 	@Override
 	public FunctionConvexHull normalize(Collection<? extends Variable> variables) {
-		return newInstance(getIndices(), getFactor().normalize(variables));
+		return newInstance(getIndices(), getFactor().normalizeBySummingOverThese(variables));
 	}
 
 	//////////////////////// ANCILLARY

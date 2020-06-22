@@ -2,11 +2,11 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.classbased.e
 
 import static com.sri.ai.praise.PRAiSEUtil.arrayTableFactorFrom;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor.arrayTableFactor;
+import static com.sri.ai.util.Timer.timeStringInSeconds;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.map;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
-import static com.sri.ai.util.Util.round;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -76,8 +76,8 @@ class ExpressionToArrayTableFactorGrounderTest {
 		println("Expected factor: ", expectedFactor);
 		println("Actual   factor by brute force interpreter: ", bruteForceActualFactorAndTime.first);
 		println("Actual   factor by fast interpreter       : ", fastActualFactorAndTime.first);
-		println("Time by brute force interpreter: ", round(bruteForceActualFactorAndTime.second/1000., 2) + " seconds");
-		println("Time by fast interpreter       : ", round(fastActualFactorAndTime.second/1000., 2) + " seconds");
+		println("Time by brute force interpreter: ", timeStringInSeconds(bruteForceActualFactorAndTime, 2));
+		println("Time by fast interpreter       : ", timeStringInSeconds(fastActualFactorAndTime, 2));
 		assertEquals(expectedFactor, bruteForceActualFactorAndTime.first);
 		assertEquals(expectedFactor, fastActualFactorAndTime.first);
 	}

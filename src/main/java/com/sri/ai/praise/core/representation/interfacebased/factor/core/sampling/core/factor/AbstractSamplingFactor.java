@@ -125,7 +125,7 @@ public abstract class AbstractSamplingFactor implements SamplingFactor {
 	}
 
 	@Override
-	public Factor normalize(Collection<? extends Variable> variablesToNormalize) {
+	public Factor normalizeBySummingOverThese(Collection<? extends Variable> variablesToNormalize) {
 		throw new Error("normalize not supported for " + getClass());
 	}
 

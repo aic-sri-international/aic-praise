@@ -123,7 +123,7 @@ final public class DefaultFunctionConvexHull extends AbstractFunctionConvexHull 
 
 	@Override
 	public Factor probabilityRange() {
-		var normalizedHullFactor = getFactor().normalize(getFreeVariables());
+		var normalizedHullFactor = getFactor().normalizeBySummingOverThese(getFreeVariables());
 		var result = normalizedHullFactor.potentialRange(getIndices());
 		return result;
 	}

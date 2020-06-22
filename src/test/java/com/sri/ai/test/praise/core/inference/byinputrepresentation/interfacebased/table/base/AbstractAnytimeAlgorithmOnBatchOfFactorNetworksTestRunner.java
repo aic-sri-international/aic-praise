@@ -128,8 +128,8 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			var finalPolytope1 = getFunctionConvexHull(result1, query);
 			var finalPolytope2 = getFunctionConvexHull(result2, query);
 			// Since final polytopes are singletons, indices are irrelevant, so we get rid of them if there are any:
-			var finalFactor1 = finalPolytope1.getFactor().sumOut(finalPolytope1.getIndices()).normalize(list(query));
-			var finalFactor2 = finalPolytope2.getFactor().sumOut(finalPolytope2.getIndices()).normalize(list(query));
+			var finalFactor1 = finalPolytope1.getFactor().sumOut(finalPolytope1.getIndices()).normalizeBySummingOverThese(list(query));
+			var finalFactor2 = finalPolytope2.getFactor().sumOut(finalPolytope2.getIndices()).normalizeBySummingOverThese(list(query));
 			var array1 = ((TableFactor) finalFactor1).getEntries();
 			var array2 = ((TableFactor) finalFactor2).getEntries();
 			try {

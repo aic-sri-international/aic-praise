@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
-import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.interpreter.BruteForceCommonInterpreter;
 import com.sri.ai.grinder.interpreter.ContextAssignmentLookup;
@@ -29,34 +28,40 @@ public class ExpressionToArrayTableFactorGrounder {
 			BinaryFunction<Expression, Context, Expression> interpreter,
 			Context context) {
 		
-		var grounder = new ExpressionToArrayTableFactorGrounder(expression, interpreter, context);
-		return grounder.result;
+		var grounder = new ExpressionToArrayTableFactorGrounder(interpreter, context);
+		var result = grounder.ground(expression);
+		return result;
 	}
 	
 	private Expression expression;
 	private BinaryFunction<Expression, Context, Expression> interpreter = new BruteForceCommonInterpreter();
 	private Context context;
 	private ArrayList<? extends Expression> variables;
-	private ArrayList<? extends TableVariable> tableVariables;
-	private ArrayTableFactor result;
 	
-	private ExpressionToArrayTableFactorGrounder(
-			Expression expression, 
+	public ExpressionToArrayTableFactorGrounder(
 			BinaryFunction<Expression, Context, Expression> interpreter, 
 			Context context) {
 		
-		this.expression = expression;
 		this.interpreter = interpreter;
 		this.context = context;
+	}
+
+	public ArrayTableFactor ground(Expression expression) {
+		this.expression = expression;
 		this.variables = arrayListFrom(Expressions.getVariablesBeingReferenced(expression, context));
-		this.tableVariables = mapIntoArrayList(variables, this::makeTableVariable);
-		this.result = ArrayTableFactor.fromFunctionOnIndicesArray(tableVariables, this::computeEntry);
+		var tableVariables = mapIntoArrayList(variables, this::makeTableVariable);
+		var result = ArrayTableFactor.fromFunctionOnIndicesArray(tableVariables, this::computeEntry);
+		return result;
 	}
 	
-	private TableVariable makeTableVariable(Expression variable) {
-		var type = (IntegerInterval) context.getTypeOfRegisteredSymbol(variable);
-		var cardinality = type.cardinality().intValue();
+	public TableVariable makeTableVariable(Expression variable) {
+		var cardinality = getCardinalityOfIntegerIntervalTypedRegisteredSymbol(variable);
 		return new TableVariable(variable.toString(), cardinality);
+	}
+
+	private int getCardinalityOfIntegerIntervalTypedRegisteredSymbol(Expression symbol) {
+		var cardinality = context.getCardinalityOfIntegerIntervalTypedRegisteredSymbol(symbol);
+		return cardinality;
 	}
 	
 	private double computeEntry(int[] indices) {

@@ -41,6 +41,7 @@ import static com.sri.ai.praise.core.representation.interfacebased.factor.core.b
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.base.ZeroFactor.ZERO_FACTOR;
 import static com.sri.ai.util.Util.accumulate;
 import static com.sri.ai.util.Util.list;
+import static com.sri.ai.util.Util.subtract;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -105,9 +106,18 @@ public interface Factor {
 	
 	/** 
 	 * Returns the factor obtained by normalizing all its factor elements according to the variables provided
-	 * (those are the ones we sum over, not the ones whose distribution becomes normalized).
+	 * (those are the ones we sum over, not the ones whose distribution becomes normalized
+	 * which is consistent with other aggregation operations -- see {@link #normalize(Collection)}).
 	 */
-	Factor normalize(Collection<? extends Variable> variablesToNormalize);
+	Factor normalizeBySummingOverThese(Collection<? extends Variable> variablesToNormalize);
+	
+	default Factor normalize(Collection<? extends Variable> variablesToBeANormalizedDistributionOn) {
+		return normalizeBySummingOverThese(subtract(getVariables(), variablesToBeANormalizedDistributionOn));
+	}
+	
+	default Factor normalize(Variable variableToBeANormalizedDistributionOn) {
+		return normalize(list(variableToBeANormalizedDistributionOn));
+	}
 	
 	/** returns the factor obtained by maximizing according to the variables provided */
 	Factor max(Collection<? extends Variable> variablesToMaximize);

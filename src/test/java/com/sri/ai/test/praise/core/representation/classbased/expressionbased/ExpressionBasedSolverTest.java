@@ -1037,8 +1037,8 @@ public class ExpressionBasedSolverTest {
 		println("query: " + problem.getQueryExpression());
 		println("expected: " + expected);
 		println("actual: " + marginal);
-		marginal = Expressions.roundToAGivenPrecision(marginal, 9, context);
-		expected = Expressions.roundToAGivenPrecision(expected, 9, context);
+		marginal = Expressions.roundAll(marginal, 9, context);
+		expected = Expressions.roundAll(expected, 9, context);
 		if (expected.equals(marginal)) {
 			println(solver + " on " + queryExpression + ": passed");
 		}
