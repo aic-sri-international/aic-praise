@@ -7,18 +7,21 @@ import static com.sri.ai.util.Util.mapIntoList;
 
 import java.util.Map;
 
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.util.base.BinaryFunction;
 
 public class ArrayTableFactorFromExpression {
 
 	public
 	static
 	ArrayTableFactor
-	arrayTableFactorFrom(String expressionString, Map<String, Integer> variableDefinitions) {
+	arrayTableFactorFrom(String expressionString, BinaryFunction<Expression, Context, Expression> interpreter, Map<String, Integer> variableDefinitions) {
 		var expression = parse(expressionString);
 		var hogModel = makeModel(variableDefinitions);
-		var actualFactor = ground(expression, hogModel.getContext());
+		var actualFactor = ground(expression, interpreter, hogModel.getContext());
 		return actualFactor;
 	}
 

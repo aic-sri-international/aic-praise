@@ -152,7 +152,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 	public static interface ParameterFunction8 { double apply(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8); }
 	public static interface ParameterFunction9 { double apply(int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8, int v9); }
 	
-	public static ArrayTableFactor fromFunctionOnArray(Collection<? extends TableVariable> variables, ParameterFunction parameterFunction) {
+	public static ArrayTableFactor fromFunctionOnIndicesArray(Collection<? extends TableVariable> variables, ParameterFunction parameterFunction) {
 		var factor = new ArrayTableFactor(variables, 0.0);
 		var index = factor.makeArrayIndex(variables);
 		do {

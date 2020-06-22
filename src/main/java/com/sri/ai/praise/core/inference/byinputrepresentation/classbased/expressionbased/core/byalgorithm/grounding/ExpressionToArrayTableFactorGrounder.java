@@ -12,30 +12,45 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.interpreter.BruteForceCommonInterpreter;
 import com.sri.ai.grinder.interpreter.ContextAssignmentLookup;
-import com.sri.ai.grinder.rewriter.api.Rewriter;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
+import com.sri.ai.util.base.BinaryFunction;
 
+/**
+ * A converter from an expression to an equivalent {@link ArrayTableFactor}.
+ * The types of variables must be registered in the given context.
+ * The interpreter must be able to take into account the variable assignments according to {@link ContextAssignmentLookup}.
+ * @author braz
+ */
 public class ExpressionToArrayTableFactorGrounder {
 
-	public static ArrayTableFactor ground(Expression expression, Context context) {
-		var grounder = new ExpressionToArrayTableFactorGrounder(expression, context);
+	public static ArrayTableFactor ground(
+			Expression expression,
+			BinaryFunction<Expression, Context, Expression> interpreter,
+			Context context) {
+		
+		var grounder = new ExpressionToArrayTableFactorGrounder(expression, interpreter, context);
 		return grounder.result;
 	}
 	
 	private Expression expression;
+	private BinaryFunction<Expression, Context, Expression> interpreter = new BruteForceCommonInterpreter();
 	private Context context;
 	private ArrayList<? extends Expression> variables;
 	private ArrayList<? extends TableVariable> tableVariables;
 	private ArrayTableFactor result;
-	private Rewriter interpreter = new BruteForceCommonInterpreter();
 	
-	private ExpressionToArrayTableFactorGrounder(Expression expression, Context context) {
+	private ExpressionToArrayTableFactorGrounder(
+			Expression expression, 
+			BinaryFunction<Expression, Context, Expression> interpreter, 
+			Context context) {
+		
 		this.expression = expression;
+		this.interpreter = interpreter;
 		this.context = context;
 		this.variables = arrayListFrom(Expressions.getVariablesBeingReferenced(expression, context));
 		this.tableVariables = mapIntoArrayList(variables, this::makeTableVariable);
-		this.result = ArrayTableFactor.fromFunctionOnArray(tableVariables, this::computeEntry);
+		this.result = ArrayTableFactor.fromFunctionOnIndicesArray(tableVariables, this::computeEntry);
 	}
 	
 	private TableVariable makeTableVariable(Expression variable) {
