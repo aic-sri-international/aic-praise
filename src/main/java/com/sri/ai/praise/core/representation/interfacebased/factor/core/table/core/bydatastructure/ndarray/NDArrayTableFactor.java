@@ -215,16 +215,16 @@ public class NDArrayTableFactor extends AbstractTableFactor {
 	static INDArray graphicalModelProduct(INDArray a1, INDArray a2, int numberOfLastCommonDimensions) {
 		// This is a bit tricky to visualize
 		// The idea I used was the following:
-		// Imagine a reshaping of the second array into a vector.
-		// It is composed of vectors for the shared dimensions c, one for each assignment to the unique variables u2 of a2.
-		// If c(u2_i) is vector on the shared dimensions for the i-th assignment of u2, we have a2 = c(u2_1), ..., c(u2_n). 
-		// Likewise, a1 is c(u1_1), ..., c(u1_m).
+		// Imagine a reshaping of the first array into a vector.
+		// It is composed of vectors for the shared dimensions c, one for each assignment to the unique variables u1 of a1.
+		// If c(u1_i) is vector on the shared dimensions for the i-th assignment of u1, we have a1 = c(u1_1), ..., c(u1_n). 
+		// Likewise, a2 is c(u2_1), ..., c(u2_m).
 		// The result is the array ( c(u1_i) * c(u2_j) )_{i,j} for each i, j.
-		// The way we achieve this is by making a 'factor2' vector from broadcasting a2 as many times as there assignments to u1,
+		// The way we achieve this is by making a 'factor2' vector from broadcasting a2 as many times as there are assignments to u1,
 		// and making a 'factor1' vector by broadcasting **each** c(u1_i) as many times as there are assignments to u2.
 		// The latter means broadcasting at the u1-th dimension, but since ND4j only broadcasts at the initial dimension,
 		// this requires shifting the u1 dimensions "out of the way", broadcasting, and shifting them back.
-		// factor1 and factor 2 have length equal to the result and the elements are matched, so we just multiply them component-wise,
+		// factor1 and factor2 have length equal to the result and the elements are matched, so we just multiply them component-wise,
 		// and finally reshape them according to the dimensions for the final result.
 		
 		int numberOfExternalDimensionsInA1 = a1.rank() - numberOfLastCommonDimensions;
