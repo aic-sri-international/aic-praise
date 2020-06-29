@@ -24,10 +24,10 @@ import com.sri.ai.util.collect.IntegerIterator;
  * @author braz
  *
  */
-public abstract class AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor<T> 
+public abstract class AbstractAssocCommutRGWithInverseFromOperationOnOtherArgsNotEqualToAbsorbingElSamplingFactor<T> 
 extends AbstractAssociativeCommutativeSemiRingSamplingFactor<T> {
 
-	public AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
+	public AbstractAssocCommutRGWithInverseFromOperationOnOtherArgsNotEqualToAbsorbingElSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);
 	}
 
