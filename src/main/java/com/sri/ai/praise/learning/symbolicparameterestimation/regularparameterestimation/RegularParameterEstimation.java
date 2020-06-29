@@ -78,7 +78,7 @@ public class RegularParameterEstimation {
 	public PointValuePair optimizeModel() {
 		
 		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE, 
-				new SimpleValueChecker(1e-13, 1e-13));
+				new SimpleValueChecker(1e-6, 1e-6));
 		
 		final LoglikelihoodToOptimize f = new LoglikelihoodToOptimize(expressionBasedModel, queries);
 		final GradientLoglikelihoodToOptimize gradientToOptimize = new GradientLoglikelihoodToOptimize(expressionBasedModel, queries);

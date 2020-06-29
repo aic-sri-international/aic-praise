@@ -197,7 +197,7 @@ public class RegularSymbolicParameterEstimation implements ParameterEstimation {
 	public PointValuePair optimize(Expression expressionToOptimize, Vector<Expression> gradient) {
 		
 		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(NonLinearConjugateGradientOptimizer.Formula.POLAK_RIBIERE, 
-				new SimpleValueChecker(1e-13, 1e-13));
+				new SimpleValueChecker(1e-6, 1e-6));
 		
 		final FunctionToOptimize f = new FunctionToOptimize(expressionToOptimize);
 		final GradientToOptimize gradientToOptimize = new GradientToOptimize(expressionToOptimize, gradient);

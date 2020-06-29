@@ -13,7 +13,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling
  * @author braz
  *
  */
-public class MultiplicationSamplingFactor extends AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor<Double> {
+public class MultiplicationSamplingFactor extends AbstractAssocCommutRGWithInverseFromOperationOnOtherArgsNotEqualToAbsorbingElSamplingFactor<Double> {
 
 	public MultiplicationSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);

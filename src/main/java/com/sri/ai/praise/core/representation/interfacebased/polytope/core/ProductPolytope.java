@@ -401,15 +401,16 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 	private static Pair<List<? extends Simplex>, Collection<? extends FunctionConvexHull>> 
 	separateSimplicesAndFunctionConvexHulls(Collection<? extends AtomicPolytope> atomicPolytopes) {
 		
-		List<AtomicPolytope> simplexPolytopes = list();
-		List<AtomicPolytope> functionConvexHullPolytopes = list();
-		collect(atomicPolytopes, p -> p instanceof Simplex, simplexPolytopes, functionConvexHullPolytopes);
-	
-		@SuppressWarnings("unchecked")
-		List<? extends Simplex> simplices = (List<? extends Simplex>) simplexPolytopes;
-
-		@SuppressWarnings("unchecked")
-		var functionConvexHulls = (Collection<? extends FunctionConvexHull>) functionConvexHullPolytopes;
+		List<Simplex> simplices = list();
+		List<FunctionConvexHull> functionConvexHulls = list();
+		for (var p : atomicPolytopes) {
+			if (p instanceof Simplex) {
+				simplices.add((Simplex) p);
+			}
+			else {
+				functionConvexHulls.add((FunctionConvexHull) p);
+			}
+		}
 
 		return pair(simplices, functionConvexHulls);
 	}
@@ -666,6 +667,6 @@ public class ProductPolytope extends AbstractNonIdentityPolytope implements Poly
 
 	@Override
 	public int memory() {
-		return product(functionIterator(getAtomicPolytopes(), Polytope::memory)).intValue();
+		return Util.product(functionIterator(getAtomicPolytopes(), Polytope::memory)).intValue();
 	}
 }

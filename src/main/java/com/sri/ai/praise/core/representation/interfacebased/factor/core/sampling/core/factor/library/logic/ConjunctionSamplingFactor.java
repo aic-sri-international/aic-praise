@@ -1,18 +1,18 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.logic;
 
-import java.util.List;
-import java.util.Random;
-
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.base.AbstractAssociativeCommutativeSemiRingSamplingFactor;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor;
+import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.library.number.AbstractAssocCommutRGWithInverseFromOperationOnOtherArgsNotEqualToAbsorbingElSamplingFactor;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * A {@link AbstractAssociativeCommutativeSemiRingSamplingFactor} instantiated for conjunction.  
  * @author braz
  *
  */
-public class ConjunctionSamplingFactor extends AbstractAssociativeCommutativeSemiRingWithInverseDependingOnOperationOnOtherArgumentBeingDifferentFromAbsorbingElementSamplingFactor<Boolean> {
+public class ConjunctionSamplingFactor extends AbstractAssocCommutRGWithInverseFromOperationOnOtherArgsNotEqualToAbsorbingElSamplingFactor<Boolean> {
 
 	public ConjunctionSamplingFactor(Variable result, List<? extends Variable> arguments, Random random) {
 		super(result, arguments, random);
