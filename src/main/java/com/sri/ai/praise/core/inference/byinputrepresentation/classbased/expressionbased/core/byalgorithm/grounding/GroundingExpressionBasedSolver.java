@@ -37,9 +37,9 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 
 	@Override
 	protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
-		var grounder = new ExpressionToArrayTableFactorGrounder(interpreter, problem.getContext());
-		var groundedFactorNetwork = getResultAndTime(() -> makeGroundedFactorNetwork(grounder, problem));
-		var queryVariable = grounder.makeTableVariable(problem.getQuerySymbol());
+		var factorGrounder = new ExpressionToArrayTableFactorGrounder(interpreter, problem.getContext());
+		var groundedFactorNetwork = getResultAndTime(() -> makeGroundedFactorNetwork(factorGrounder, problem));
+		var queryVariable = factorGrounder.makeTableVariable(problem.getQuerySymbol());
 		var solutionFactor = getResultAndTime(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
 		var solutionExpression = getResultAndTime(() -> makeSolutionExpression(queryVariable, solutionFactor.first, problem));
 		println("Time for grounding      : ", Timer.timeStringInSeconds(groundedFactorNetwork, 3));
@@ -49,11 +49,11 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 	}
 
 	private FactorNetwork makeGroundedFactorNetwork(
-			ExpressionToArrayTableFactorGrounder grounder, 
+			ExpressionToArrayTableFactorGrounder factorGrounder,
 			ExpressionBasedProblem problem) {
 		
 		var factorExpressions = problem.getFactorExpressionsIncludingQueryDefinitionIfAny();
-		var tables = mapIntoList(factorExpressions, grounder::ground);
+		var tables = mapIntoList(factorExpressions, factorGrounder::ground);
 		var groundedFactorNetwork = new DefaultFactorNetwork(tables);
 		return groundedFactorNetwork;
 	}
