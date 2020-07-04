@@ -37,19 +37,14 @@
  */
 package com.sri.ai.praise;
 
+import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
+import com.sri.ai.grinder.api.Context;
+
 import static com.sri.ai.expresso.helper.Expressions.TRUE;
 import static com.sri.ai.expresso.helper.Expressions.apply;
 import static com.sri.ai.grinder.library.FunctorConstants.DIVISION;
 import static com.sri.ai.grinder.library.FunctorConstants.SUM;
-
-import java.util.Map;
-
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.core.DefaultIntensionalMultiSet;
-import com.sri.ai.grinder.api.Context;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
-import com.sri.ai.praise.other.helper.ArrayTableFactorFromExpression;
-import com.sri.ai.util.base.BinaryFunction;
 
 
 /**
@@ -76,10 +71,4 @@ public class PRAiSEUtil {
 		return result;
 	}
 
-	public
-	static
-	ArrayTableFactor
-	arrayTableFactorFrom(String expressionString, BinaryFunction<Expression, Context, Expression> interpreter, Map<String, Integer> variableDefinitions) {
-		return ArrayTableFactorFromExpression.arrayTableFactorFrom(expressionString, interpreter, variableDefinitions);
-	}
 }
