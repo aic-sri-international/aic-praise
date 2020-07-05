@@ -2,7 +2,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.interpreter.FastInterpreter;
+import com.sri.ai.grinder.interpreter.HardCodedInterpreter;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.AbstractExpressionBasedSolver;
@@ -27,7 +27,7 @@ import static com.sri.ai.util.Util.println;
 
 public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
-	private static final BinaryFunction<Expression, Context, Expression> interpreter = new FastInterpreter();
+	private static final BinaryFunction<Expression, Context, Expression> interpreter = new HardCodedInterpreter();
 	
 	private static final BinaryFunction<Variable, FactorNetwork, Factor> solver = new VariableEliminationSolver();
 	

@@ -5,10 +5,8 @@ import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.interpreter.BruteForceCommonInterpreter;
 import com.sri.ai.grinder.interpreter.CompilationEvaluator;
 import com.sri.ai.grinder.interpreter.CompilationIncrementalEvaluator;
-import com.sri.ai.grinder.interpreter.FastInterpreter;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.ExpressionToArrayTableFactorGrounder;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder;
+import com.sri.ai.grinder.interpreter.HardCodedInterpreter;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.*;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
@@ -40,10 +38,10 @@ class ExpressionToArrayTableFactorGrounderTest {
                             (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
                                     new BruteForceCommonInterpreter(), c),
 
-                    "FastInterpreter",
+                    "HardCodedInterpreter",
                     (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
                             (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
-                                    new FastInterpreter(), c),
+                                    new HardCodedInterpreter(), c),
 
                     "CompilationEvaluator",
                     (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
@@ -59,6 +57,13 @@ class ExpressionToArrayTableFactorGrounderTest {
                                 return array -> ((Number)evaluator.apply(array)).doubleValue();
                             },
 
+                    "HardCodedIncrementalDiscreteExpressionEvaluator",
+                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
+                            (e, c) -> {
+                                var evaluator = new HardCodedIncrementalDiscreteExpressionEvaluator(e, c);
+                                return array -> evaluator.evaluate(array);
+                            },
+
                     "BruteForceInterpreter2",
                     (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
                             (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
@@ -67,7 +72,7 @@ class ExpressionToArrayTableFactorGrounderTest {
                     "FastInterpreter2",
                     (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
                             (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
-                                    new FastInterpreter(), c)
+                                    new HardCodedInterpreter(), c)
                     );
 
     @Test
@@ -153,6 +158,7 @@ class ExpressionToArrayTableFactorGrounderTest {
                         expressionString, variableDefinitions, fromExpressionAndContextToEvaluator);
         var actualFactor = actualFactorAndTime.first;
 
+        println();
         println("Actual factor by " + name + ": ", actualFactor);
         println("Time by " + name + ": ", timeStringInSeconds(actualFactorAndTime, 2));
         var equalityCheck = expectedFactor.checkEquality(actualFactor);
