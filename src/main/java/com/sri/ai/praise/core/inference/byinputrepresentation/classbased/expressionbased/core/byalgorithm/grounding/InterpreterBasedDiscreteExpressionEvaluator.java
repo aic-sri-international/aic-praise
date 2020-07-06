@@ -11,22 +11,23 @@ import java.util.ArrayList;
 import static com.sri.ai.expresso.api.Symbol.makeSymbol;
 import static com.sri.ai.util.Util.arrayListFrom;
 
-public class InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder implements DiscreteExpressionEvaluator {
+public class InterpreterBasedDiscreteExpressionEvaluator implements DiscreteExpressionEvaluator {
 
     private Expression expression;
     private BinaryFunction<Expression, Context, Expression> interpreter;
     private Context context;
     private ArrayList<? extends Expression> variables;
 
-    public InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(
+    public InterpreterBasedDiscreteExpressionEvaluator(
             Expression expression,
+            ArrayList<? extends Expression> variables,
             BinaryFunction<Expression, Context, Expression> interpreter,
             Context context) {
 
         this.expression = expression;
+        this.variables = variables;
         this.interpreter = interpreter;
         this.context = context;
-        this.variables = arrayListFrom(Expressions.getVariablesBeingReferenced(expression, context));
     }
 
     @Override

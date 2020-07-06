@@ -26,14 +26,18 @@ public class HardCodedIncrementalDiscreteExpressionEvaluator
      * It therefore does NOT actually use values stored in the context as a normal {@link HardCodedDiscreteExpressionEvaluator} would.
      */
 
-    private ArrayList<Expression> variables;
+    private ArrayList<? extends Expression> variables;
     private Map<Expression, Integer> variableIndices;
     private Map<Expression, Object> cache = map();
     private Map<Expression, Integer> maxVariableIndex = map();
 
-    public HardCodedIncrementalDiscreteExpressionEvaluator(Expression expression, Context context) {
+    public HardCodedIncrementalDiscreteExpressionEvaluator(
+            Expression expression,
+            ArrayList<? extends Expression> variables,
+            Context context) {
+
         super(expression, context);
-        this.variables = arrayListFrom(Expressions.getVariablesBeingReferenced(expression, context));
+        this.variables = variables;
         this.variableIndices = map();
         for (int i = 0; i != variables.size(); i++) {
             variableIndices.put(variables.get(i), i);

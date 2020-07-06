@@ -8,12 +8,13 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.util.base.BinaryFunction;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.function.Function;
 
-import static com.sri.ai.expresso.api.Symbol.makeSymbol;
-import static com.sri.ai.util.Util.arrayListFrom;
-import static com.sri.ai.util.Util.mapIntoArrayList;
+import static com.sri.ai.expresso.helper.Expressions.getMaxDepthOfOccurrences;
+import static com.sri.ai.expresso.helper.Expressions.getVariablesBeingReferenced;
+import static com.sri.ai.util.Util.*;
+import static java.util.Comparator.comparing;
 
 /**
  * A converter from an expression to an equivalent {@link ArrayTableFactor}.
@@ -27,23 +28,36 @@ import static com.sri.ai.util.Util.mapIntoArrayList;
  */
 public class ExpressionToArrayTableFactorGrounder {
 
-	private Function<Expression, DiscreteExpressionEvaluator> fromExpressionToEvaluator;
+	private BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator>
+			fromExpressionAndVariablesToEvaluator;
 	private Context context;
 
 	public ExpressionToArrayTableFactorGrounder(
-			Function<Expression, DiscreteExpressionEvaluator> fromExpressionToEvaluator,
+			BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator>
+					fromExpressionAndVariablesToEvaluator,
 			Context context) {
 
-		this.fromExpressionToEvaluator = fromExpressionToEvaluator;
+		this.fromExpressionAndVariablesToEvaluator = fromExpressionAndVariablesToEvaluator;
 		this.context = context;
 	}
 
 	public ArrayTableFactor ground(Expression expression) {
-		var evaluator = fromExpressionToEvaluator.apply(expression);
-		var variables = arrayListFrom(Expressions.getVariablesBeingReferenced(expression, context));
+		var variables = extractVariablesInChosenOrder(expression);
+		var evaluator = fromExpressionAndVariablesToEvaluator.apply(expression, variables);
 		var tableVariables = mapIntoArrayList(variables, this::makeTableVariable);
 		var result = ArrayTableFactor.fromFunctionOnIndicesArray(tableVariables, evaluator::evaluate);
 		return result;
+	}
+
+	private ArrayList<Expression> extractVariablesInChosenOrder(Expression expression) {
+		// We want the deeper variables to be the first ones in 'variables' (most significant)
+		// so that they change less often as assignments are iterated.
+		// This will make incremental evaluators more efficient as they will
+		// need to recompute sub-expressions less often.
+		var variables = arrayListFrom(getVariablesBeingReferenced(expression, context));
+		var depthMap = mapIntoMap(variables, e -> getMaxDepthOfOccurrences(e, expression));
+		variables.sort(comparing(depthMap::get).reversed());
+		return variables;
 	}
 
 	public TableVariable makeTableVariable(Expression variable) {

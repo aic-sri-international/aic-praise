@@ -12,7 +12,6 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
@@ -38,13 +37,13 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 
 	@Override
 	protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
-		Function<Expression, DiscreteExpressionEvaluator> fromExpressionToEvaluator =
-				e -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e, interpreter, problem.getContext());
+		BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator> fromExpressionToEvaluator =
+				(e, vs) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs, interpreter, problem.getContext());
 		var factorGrounder = new ExpressionToArrayTableFactorGrounder(fromExpressionToEvaluator, problem.getContext());
 		var groundedFactorNetwork = getResultAndTime(() -> makeGroundedFactorNetwork(e -> factorGrounder.ground(e), problem));
 		var queryVariable = factorGrounder.makeTableVariable(problem.getQuerySymbol());
 		var solutionFactor = getResultAndTime(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
-		var solutionExpression = getResultAndTime(() -> makeSolutionExpression(queryVariable, solutionFactor.first, problem));
+		var solutionExpression = getResultAndTime(() -> makeSolutionExpression(solutionFactor.first, problem));
 		println("Time for grounding      : ", Timer.timeStringInSeconds(groundedFactorNetwork, 3));
 		println("Time for solving        : ", Timer.timeStringInSeconds(solutionFactor, 3));
 		println("Time for converting back: ", Timer.timeStringInSeconds(solutionExpression, 3));
@@ -61,17 +60,17 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 		return groundedFactorNetwork;
 	}
 
-	private Expression makeSolutionExpression(TableVariable queryVariable, Factor factor, ExpressionBasedProblem problem) {
+	private Expression makeSolutionExpression(Factor factor, ExpressionBasedProblem problem) {
 		if (factor instanceof ArrayTableFactor) {
 			var table = (ArrayTableFactor) factor;
-			return makeSolutionExpressionForArrayTableFactor(queryVariable, table, problem);
+			return makeSolutionExpressionForArrayTableFactor(table, problem);
 		}
 		else {
 			return makeUniformSolutionExpression(problem);
 		}
 	}
 
-	private Expression makeSolutionExpressionForArrayTableFactor(TableVariable queryVariable, ArrayTableFactor table, ExpressionBasedProblem problem) {
+	private Expression makeSolutionExpressionForArrayTableFactor(ArrayTableFactor table, ExpressionBasedProblem problem) {
 		var probabilitiesTable = table.normalize();
 		var query = problem.getQuerySymbol();
 		var probabilities = probabilitiesTable.getEntries();

@@ -28,50 +28,47 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class ExpressionToArrayTableFactorGrounderTest {
 
-    Map<String, FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder>
+    Map<String, FromExpressionAndContextToDiscreteExpressionEvaluator>
 
             evaluatorMakers =
             Util.map(
                     // repeating interpreter for JVM burn-in (second time around is faster)
                     "BruteForceInterpreter",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs,
                                     new BruteForceCommonInterpreter(), c),
 
                     "HardCodedInterpreter",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs,
                                     new HardCodedInterpreter(), c),
 
                     "CompilationEvaluator",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> {
-                                var evaluator = CompilationEvaluator.makeEvaluatorForVariablesInOccurrenceOrderIn(e);
-                                return array -> ((Number)evaluator.apply(array)).doubleValue();
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> {
+                                var evaluator = CompilationEvaluator.makeEvaluator(e, vs);
+                                return assignment -> ((Number)evaluator.apply(assignment)).doubleValue();
                             },
 
                     "CompilationIncrementalEvaluator",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> {
-                                var evaluator = CompilationIncrementalEvaluator.makeEvaluatorForVariablesInOccurrenceOrderIn(e);
-                                return array -> ((Number)evaluator.apply(array)).doubleValue();
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> {
+                                var evaluator = CompilationIncrementalEvaluator.makeEvaluator(e, vs);
+                                return assignment -> ((Number)evaluator.apply(assignment)).doubleValue();
                             },
 
                     "HardCodedIncrementalDiscreteExpressionEvaluator",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> {
-                                var evaluator = new HardCodedIncrementalDiscreteExpressionEvaluator(e, c);
-                                return array -> evaluator.evaluate(array);
-                            },
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> new HardCodedIncrementalDiscreteExpressionEvaluator(e, vs, c)::evaluate,
 
                     "BruteForceInterpreter2",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs,
                                     new BruteForceCommonInterpreter(), c),
 
-                    "FastInterpreter2",
-                    (FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder)
-                            (e, c) -> new InterpreterBasedDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder(e,
+                    "HardCodedInterpreter2",
+                    (FromExpressionAndContextToDiscreteExpressionEvaluator)
+                            (e, vs, c) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs,
                                     new HardCodedInterpreter(), c)
                     );
 
@@ -123,8 +120,34 @@ class ExpressionToArrayTableFactorGrounderTest {
         runTest(expressionString, variableDefinitions, expectedFactor);
     }
 
+    @Test // takes several minutes
+    void performanceWith3VariablesTest() {
+
+        ArrayTableFactor.maximumNumberOfEntriesToShow = 50;
+
+        Map<String, Integer> variableDefinitions = map("i", 50, "j", 50, "k", 50);
+        var def = variableDefinitions;
+
+        String expressionString;
+        ArrayTableFactor expectedFactor;
+
+        expressionString = "if i < 3 and j = 4 then 0.3 else 0.7";
+        expectedFactor = arrayTableFactor(vars("i, j", def), (vi, vj) -> vi < 3 && vj == 4 ? 0.3 : 0.7);
+        runTest(expressionString, variableDefinitions, expectedFactor);
+
+        expressionString = "if i < 3 and j != 4 then if i > 0 or j = 3 then 0.3 else 0.5 else 0.7";
+        expectedFactor = arrayTableFactor(vars("i, j", def), (vi, vj) -> vi < 3 && vj != 4 ? (vi > 0 || vj == 3? 0.3 : 0.5) : 0.7);
+        runTest(expressionString, variableDefinitions, expectedFactor);
+
+        expressionString = "if i < 3 and j != 4 then if i > 0 or j = 3 then 0.3 else if k > 20 then 0.5 else 0.1 else if i = 2 and j = 1 then 0.1 else if k < 50 then 0.2 else 0.3";
+        expectedFactor = arrayTableFactor(vars("i, j, k", def), (vi, vj, vk) -> vi < 3 && vj != 4 ? (vi > 0 || vj == 3? 0.3 : (vk > 20? 0.5 : 0.1)) : vi == 2 && vj == 1? 0.1 : (vk < 50? 0.2 : 0.3));
+        runTest(expressionString, variableDefinitions, expectedFactor);
+    }
+
     private List<TableVariable> vars(String variables, Map<String, Integer> variableDefinitions) {
         var variableNamesArray = variables.split("\\s*,\\s*");
+        var notDefined = Util.getFirstSatisfyingPredicateOrNull(variableNamesArray, n -> ! variableDefinitions.containsKey(n));
+        if (notDefined != null) throw new Error("Undefined variable " + notDefined);
         return mapIntoList(variableNamesArray, name -> new TableVariable(name, variableDefinitions.get(name)));
     }
 
@@ -151,7 +174,9 @@ class ExpressionToArrayTableFactorGrounderTest {
             Map<String, Integer> variableDefinitions,
             ArrayTableFactor expectedFactor,
             String name,
-            FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder fromExpressionAndContextToEvaluator) {
+            FromExpressionAndContextToDiscreteExpressionEvaluator fromExpressionAndContextToEvaluator) {
+
+        println("\nSolving with " + name);
 
         var actualFactorAndTime =
                 arrayTableFactorFromExpressionAndVariableDefinitions(
@@ -172,7 +197,7 @@ class ExpressionToArrayTableFactorGrounderTest {
     arrayTableFactorFromExpressionAndVariableDefinitions(
             String expressionString,
             Map<String, Integer> variableDefinitions,
-            FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder fromExpressionAndContextToEvaluator) {
+            FromExpressionAndContextToDiscreteExpressionEvaluator fromExpressionAndContextToEvaluator) {
 
         var expressionAndHOGModel = getExpressionAndHOGModel(expressionString, variableDefinitions);
         Expression expression = expressionAndHOGModel.first;
@@ -185,9 +210,9 @@ class ExpressionToArrayTableFactorGrounderTest {
     private static ArrayTableFactor arrayTableFactorFromModelAndContext(
             Expression expression,
             Context context,
-            FromExpressionAndContextToDiscreteExpressionEvaluatorOnVariablesInOccurrenceOrder evaluatorMaker) {
+            FromExpressionAndContextToDiscreteExpressionEvaluator evaluatorMaker) {
 
-        var grounder = new ExpressionToArrayTableFactorGrounder(e -> evaluatorMaker.apply(e, context), context);
+        var grounder = new ExpressionToArrayTableFactorGrounder((e, vs) -> evaluatorMaker.apply(e, vs, context), context);
         var actualFactor = grounder.ground(expression);
         return actualFactor;
     }
