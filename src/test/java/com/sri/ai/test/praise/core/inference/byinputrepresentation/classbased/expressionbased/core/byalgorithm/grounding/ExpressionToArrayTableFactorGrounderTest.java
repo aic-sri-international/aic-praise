@@ -104,7 +104,7 @@ class ExpressionToArrayTableFactorGrounderTest {
         runTest(expressionString, variableDefinitions, expectedFactor);
     }
 
-    @Test // takes several minutes
+    // @Test // takes several minutes
     void performanceWith3VariablesTest() {
 
         ArrayTableFactor.maximumNumberOfEntriesToShow = 50;
