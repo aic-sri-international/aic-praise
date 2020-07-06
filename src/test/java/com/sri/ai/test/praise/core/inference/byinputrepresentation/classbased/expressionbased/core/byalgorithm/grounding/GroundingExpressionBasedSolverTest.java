@@ -29,16 +29,24 @@ class GroundingExpressionBasedSolverTest {
 				+ "";
 		queryString = "temp";
 		runTest(modelString, queryString);
+	}
 
-//		modelString = ""
-//				+ "random day: 0..299;"
-//				+ "random temp: 0..129;"
-//				+ "if day < 50 "
-//				+ "    then if temp < 20 then 0.01 else 0.04"
-//				+ "    else if temp < 20 then 0.02 else 0.03;"
-//				+ "";
-//		queryString = "temp";
-//		runTest(modelString, queryString);
+	@Test
+	void testLarger() {
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(2);
+
+		String modelString;
+		String queryString;
+
+		modelString = ""
+				+ "random day: 0..299;"
+				+ "random temp: 0..129;"
+				+ "if day < 50 "
+				+ "    then if temp < 20 then 0.01 else 0.04"
+				+ "    else if temp < 20 then 0.02 else 0.03;"
+				+ "";
+		queryString = "temp";
+		runTest(modelString, queryString);
 	}
 
 	private void runTest(String modelString, String queryString) {

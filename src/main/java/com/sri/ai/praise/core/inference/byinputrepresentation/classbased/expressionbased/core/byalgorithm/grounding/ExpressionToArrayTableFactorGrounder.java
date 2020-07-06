@@ -4,15 +4,14 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.interpreter.ContextAssignmentLookup;
-import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base.TableVariable;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.DiscreteExpressionEvaluatorMaker;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
-import com.sri.ai.util.base.BinaryFunction;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static com.sri.ai.expresso.helper.Expressions.getMaxDepthOfOccurrences;
 import static com.sri.ai.expresso.helper.Expressions.getVariablesBeingReferenced;
+import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.TableVariableMaker.getTableVariables;
 import static com.sri.ai.util.Util.*;
 import static java.util.Comparator.comparing;
 
@@ -28,23 +27,21 @@ import static java.util.Comparator.comparing;
  */
 public class ExpressionToArrayTableFactorGrounder {
 
-	private BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator>
-			fromExpressionAndVariablesToEvaluator;
+	private DiscreteExpressionEvaluatorMaker evaluatorMaker;
 	private Context context;
 
 	public ExpressionToArrayTableFactorGrounder(
-			BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator>
-					fromExpressionAndVariablesToEvaluator,
+			DiscreteExpressionEvaluatorMaker evaluatorMaker,
 			Context context) {
 
-		this.fromExpressionAndVariablesToEvaluator = fromExpressionAndVariablesToEvaluator;
+		this.evaluatorMaker = evaluatorMaker;
 		this.context = context;
 	}
 
 	public ArrayTableFactor ground(Expression expression) {
 		var variables = extractVariablesInChosenOrder(expression);
-		var evaluator = fromExpressionAndVariablesToEvaluator.apply(expression, variables);
-		var tableVariables = mapIntoArrayList(variables, this::makeTableVariable);
+		var evaluator = evaluatorMaker.apply(expression, variables, context);
+		var tableVariables = getTableVariables(variables, context);
 		var result = ArrayTableFactor.fromFunctionOnIndicesArray(tableVariables, evaluator::evaluate);
 		return result;
 	}
@@ -58,15 +55,5 @@ public class ExpressionToArrayTableFactorGrounder {
 		var depthMap = mapIntoMap(variables, e -> getMaxDepthOfOccurrences(e, expression));
 		variables.sort(comparing(depthMap::get).reversed());
 		return variables;
-	}
-
-	public TableVariable makeTableVariable(Expression variable) {
-		var cardinality = getCardinalityOfIntegerIntervalTypedRegisteredSymbol(variable);
-		return new TableVariable(variable.toString(), cardinality);
-	}
-
-	private int getCardinalityOfIntegerIntervalTypedRegisteredSymbol(Expression symbol) {
-		var cardinality = context.getCardinalityOfIntegerIntervalTypedRegisteredSymbol(symbol);
-		return cardinality;
 	}
 }

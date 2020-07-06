@@ -1,11 +1,11 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
 
 import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.grinder.api.Context;
-import com.sri.ai.grinder.interpreter.HardCodedInterpreter;
 import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.AbstractExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.DiscreteExpressionEvaluatorMaker;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.SizeBasedDiscreteExpressionEvaluatorMaker;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -26,8 +26,8 @@ import static com.sri.ai.util.Util.println;
 
 public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
-	private static final BinaryFunction<Expression, Context, Expression> interpreter = new HardCodedInterpreter();
-	
+	private static final DiscreteExpressionEvaluatorMaker evaluatorMaker = new SizeBasedDiscreteExpressionEvaluatorMaker();
+
 	private static final BinaryFunction<Variable, FactorNetwork, Factor> solver = new VariableEliminationSolver();
 	
 	@Override
@@ -37,11 +37,9 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 
 	@Override
 	protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
-		BinaryFunction<Expression, ArrayList<? extends Expression>, DiscreteExpressionEvaluator> fromExpressionToEvaluator =
-				(e, vs) -> new InterpreterBasedDiscreteExpressionEvaluator(e, vs, interpreter, problem.getContext());
-		var factorGrounder = new ExpressionToArrayTableFactorGrounder(fromExpressionToEvaluator, problem.getContext());
+		var factorGrounder = new ExpressionToArrayTableFactorGrounder(evaluatorMaker, problem.getContext());
 		var groundedFactorNetwork = getResultAndTime(() -> makeGroundedFactorNetwork(e -> factorGrounder.ground(e), problem));
-		var queryVariable = factorGrounder.makeTableVariable(problem.getQuerySymbol());
+		var queryVariable = TableVariableMaker.makeTableVariable(problem.getQuerySymbol(), problem.getContext());
 		var solutionFactor = getResultAndTime(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
 		var solutionExpression = getResultAndTime(() -> makeSolutionExpression(solutionFactor.first, problem));
 		println("Time for grounding      : ", Timer.timeStringInSeconds(groundedFactorNetwork, 3));
