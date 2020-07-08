@@ -60,6 +60,9 @@ import java.util.function.Function;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.GroundingExpressionBasedSolver;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.praise.core.inference.externalprocesssolver.core.praise.PRAiSESolver;
 import com.sri.ai.praise.core.representation.classbased.modelscontainer.ModelPage;
 import com.sri.ai.praise.core.representation.classbased.modelscontainer.PagedModelContainer;
@@ -84,6 +87,7 @@ public class PRAiSECommandLineOptions {
 	private static final Charset FILE_CHARSET  = Charsets.UTF_8;
 	private static final ModelLanguage DEFAULT_LANGUAGE = ModelLanguage.HOGMv1;
 
+	public ExpressionBasedSolver expressionBasedSolver;
 	public List<ModelPage> modelPages;
 	public PrintStream   out = System.out;        // --output   (optional - 0 or 1)
 	public boolean showModel = false;
@@ -114,12 +118,14 @@ public class PRAiSECommandLineOptions {
 
 		languageOptionSpec   = parser.accepts("language",   "input model language (code), allowed values are " + getLegalModelLanguageCodesDescription()).withRequiredArg().ofType(String.class);
 		queryOptionSpec      = parser.accepts("query",      "query to run over all input models").withRequiredArg().ofType(String.class);
-							   parser.accepts("no-model",   "do not show solved model in output");
+		                       parser.accepts("solver",     "solver to use (currently either the default 'symbolic' or 'grounding')").withOptionalArg().ofType(String.class);
+		                       parser.accepts("show-configuration",    "shows configuration options before proceeding");
+		                       parser.accepts("no-model",   "do not show solved model in output");
 		                       parser.accepts("count",      "inform how many summations have been performed for each query");
 		                       parser.accepts("summations", "shows number of summations and integrations performed, if they are being counted (with --count)");
 		outputFileOptionSpec = parser.accepts("output",     "output file name (defaults to stdout).").withRequiredArg().ofType(File.class);
 
-		debugOptionSpec = parser.accepts("debug", "Output detailed error messaages with stack traces when available");
+		debugOptionSpec = parser.accepts("debug", "Output detailed error messages with stack traces when available");
 		helpOptionSpec = parser.accepts("help", "command line options help").forHelp();
 
 		usage =
@@ -144,9 +150,10 @@ public class PRAiSECommandLineOptions {
 	private void setupParameters(String[] args) throws IOException, FileNotFoundException, UnsupportedEncodingException {
 		try {
 			parseArguments(args);
-			setDisplayAttributes();
-			setRecordingOfSummations();
 			showHelpMessageAndExitIfRequested();
+			setDisplayAttributes();
+			setExpressionBasedSolver();
+			setRecordingOfSummations();
 			setGlobalQueries();
 			collectInputFiles();
 			setInputLanguage();
@@ -162,9 +169,29 @@ public class PRAiSECommandLineOptions {
 		options = parser.parse(args);
 	}
 
+	private void showHelpMessageAndExitIfRequested() throws IOException {
+		if (options.has(helpOptionSpec)) {
+			System.out.println(usage);
+			parser.printHelpOn(System.out);
+			System.exit(0);
+		}
+	}
+
 	private void setDisplayAttributes() {
 		showDebugOutput = options.has(debugOptionSpec);
 		showModel = !options.has("no-model");
+	}
+
+	private void setExpressionBasedSolver() {
+		if (!options.has("solver") || options.valueOf("solver").equals("symbolic")) {
+			expressionBasedSolver = HOGMMultiQueryProblemSolver.getDefaultExpressionBasedSolver();
+		}
+		else if (options.valueOf("solver").equals("grounding")) {
+			expressionBasedSolver = new GroundingExpressionBasedSolver();
+		}
+		else {
+			throw new Error("Unrecognized solver description: " + options.valueOf("solver"));
+		}
 	}
 
 	private void setRecordingOfSummations() {
@@ -172,14 +199,6 @@ public class PRAiSECommandLineOptions {
 		showSummations = options.has("summations");
 		if (showSummations && !countSummations) {
 			errors.add("Cannot show summations (option --summations) if not counting them (option --count)");
-		}
-	}
-
-	private void showHelpMessageAndExitIfRequested() throws IOException {
-		if (options.has(helpOptionSpec)) {
-			System.out.println(usage);
-			parser.printHelpOn(System.out);
-			System.exit(0);
 		}
 	}
 

@@ -26,9 +26,11 @@ import static com.sri.ai.util.Util.println;
 
 public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
-	private static final DiscreteExpressionEvaluatorMaker evaluatorMaker = new SizeBasedDiscreteExpressionEvaluatorMaker();
+	private static final DiscreteExpressionEvaluatorMaker evaluatorMaker =
+			new SizeBasedDiscreteExpressionEvaluatorMaker();
 
-	private static final BinaryFunction<Variable, FactorNetwork, Factor> solver = new VariableEliminationSolver();
+	private static final BinaryFunction<Variable, FactorNetwork, Factor> solver =
+			new VariableEliminationSolver();
 	
 	@Override
 	public void interrupt() {
@@ -51,7 +53,7 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 	private FactorNetwork makeGroundedFactorNetwork(
 			Function<Expression, ArrayTableFactor> grounder,
 			ExpressionBasedProblem problem) {
-		
+
 		var factorExpressions = problem.getFactorExpressionsIncludingQueryDefinitionIfAny();
 		var tables = mapIntoList(factorExpressions, e -> grounder.apply(e));
 		var groundedFactorNetwork = new DefaultFactorNetwork(tables);

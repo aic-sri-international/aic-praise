@@ -59,6 +59,7 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAttachments;
 import com.sri.ai.praise.other.integration.proceduralattachment.api.Procedure;
 import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProceduralAttachments;
+import org.jetbrains.annotations.NotNull;
 
 @Beta
 /**
@@ -71,7 +72,16 @@ import com.sri.ai.praise.other.integration.proceduralattachment.core.DefaultProc
  *
  */
 public class HOGMMultiQueryProblemSolver {
-	
+
+	private static ExpressionBasedSolver defaultExpressionBasedSolver = null;
+	@NotNull
+	public static ExpressionBasedSolver getDefaultExpressionBasedSolver() {
+		if (defaultExpressionBasedSolver == null) {
+			defaultExpressionBasedSolver = new ExactBPOnExpressionFactorsExpressionBasedSolver();
+		}
+		return defaultExpressionBasedSolver;
+	}
+
 	private String modelString;
 	private List<String> queries;
 	
@@ -94,12 +104,19 @@ public class HOGMMultiQueryProblemSolver {
 		this(model, list(query), expressionBasedSolver);
 	}
 	
-	public HOGMMultiQueryProblemSolver(String model, List<String> queries, ExpressionBasedSolver expressionBasedSolver) {
+	public HOGMMultiQueryProblemSolver(
+			String model,
+			List<String> queries,
+			ExpressionBasedSolver expressionBasedSolver) {
+
 		this.modelString = model;
 		this.queries = queries;
-		this.expressionBasedSolver = expressionBasedSolver == null? new ExactBPOnExpressionFactorsExpressionBasedSolver() : expressionBasedSolver;
+		this.expressionBasedSolver =
+				expressionBasedSolver == null?
+						getDefaultExpressionBasedSolver() :
+						expressionBasedSolver;
 	}
-	
+
 	public void setProceduralAttachments(ProceduralAttachments proceduralAttachments) {
 		this.proceduralAttachments = proceduralAttachments;
 	}

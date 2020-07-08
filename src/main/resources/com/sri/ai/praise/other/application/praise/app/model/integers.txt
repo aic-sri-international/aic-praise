@@ -1,0 +1,4 @@
+random i: 0..100;
+random j: 0..100;
+
+if i < 80 then 0.3 else 0.7;
