@@ -52,7 +52,7 @@ class ExpressionToArrayTableFactorGrounderTest {
                     new HardCodedIncrementalDiscreteExpressionEvaluatorMaker(),
 
                     "SizeBased",
-                    new SizeBasedDiscreteExpressionEvaluatorMaker()
+                    new SizeDependentDiscreteExpressionEvaluatorMaker()
 
                     );
 
@@ -66,6 +66,14 @@ class ExpressionToArrayTableFactorGrounderTest {
 
         String expressionString;
         ArrayTableFactor expectedFactor;
+
+        expressionString = "if false != false and i < 3 and j < 4 then 0.7 else 0.1";
+        expectedFactor = arrayTableFactor(vars("i, j", def), (vi, vj) -> 0.1);
+        runTest(expressionString, variableDefinitions, expectedFactor);
+
+        expressionString = "if i < 3 and true then if j < 4 then 0.3 else 0.7 else 0.1";
+        expectedFactor = arrayTableFactor(vars("i, j", def), (vi, vj) -> vi < 3 ? vj < 4? 0.3 : 0.7 : 0.1);
+        runTest(expressionString, variableDefinitions, expectedFactor);
 
         expressionString = "if i < 3 then if j < 4 then 0.3 else 0.7 else 0.1";
         expectedFactor = arrayTableFactor(vars("i, j", def), (vi, vj) -> vi < 3 ? vj < 4? 0.3 : 0.7 : 0.1);
@@ -133,8 +141,8 @@ class ExpressionToArrayTableFactorGrounderTest {
             ArrayTableFactor expectedFactor) {
 
         println();
-        println("Variables and cardinalities : ", variableDefinitions);
         println("Expression: ", expressionString);
+        println("Variables and cardinalities : ", variableDefinitions);
         println("Expected factor: ", expectedFactor);
 
         for (var entry: evaluatorMakers.entrySet()) {

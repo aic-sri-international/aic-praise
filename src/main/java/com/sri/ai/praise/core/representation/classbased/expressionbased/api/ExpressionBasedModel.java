@@ -29,6 +29,11 @@ public interface ExpressionBasedModel extends Cloneable, Model {
 
 	Map<String, String> getMapFromCategoricalTypeNameToSizeString();
 
+	/**
+	 * Types that are not the type of any declared random variable but may be necessary.
+	 * One possible case is those in which there are random variables of a functional type,
+	 * where the type for each parameter must be known by the system.
+	 */
 	Collection<Type> getAdditionalTypes();
 
 	boolean isKnownToBeBayesianNetwork();

@@ -40,9 +40,9 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 	protected Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 	protected Map<String, String> mapFromCategoricalTypeNameToSizeString = new LinkedHashMap<>();
-	protected Collection<Type> additionalTypes = new LinkedList<>();
-	protected boolean isKnownToBeBayesianNetwork = false;
-	protected Theory theory = null;
+	protected Collection<Type> additionalTypes;
+	protected boolean isKnownToBeBayesianNetwork;
+	protected Theory theory;
 	protected ProceduralAttachments proceduralAttachments = new DefaultProceduralAttachments();
 	
 	private List<Expression> randomVariables;
@@ -51,7 +51,6 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 		public Parameters() {
 		}
 		public List<Expression> factors = new ArrayList<>();
-		public List<Expression> randomVariables;
 		public Map<String, String> mapFromRandomVariableNameToTypeName = new LinkedHashMap<>();
 		public Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();
 		public Map<String, String> mapFromUniquelyNamedConstantNameToTypeName = new LinkedHashMap<>();

@@ -5,7 +5,7 @@ import com.sri.ai.grinder.library.Equality;
 import com.sri.ai.grinder.library.controlflow.IfThenElse;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.AbstractExpressionBasedSolver;
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.DiscreteExpressionEvaluatorMaker;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.SizeBasedDiscreteExpressionEvaluatorMaker;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding.evaluatormaker.SizeDependentDiscreteExpressionEvaluatorMaker;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.VariableEliminationSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor;
@@ -27,7 +27,7 @@ import static com.sri.ai.util.Util.println;
 public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
 	private static final DiscreteExpressionEvaluatorMaker evaluatorMaker =
-			new SizeBasedDiscreteExpressionEvaluatorMaker();
+			new SizeDependentDiscreteExpressionEvaluatorMaker();
 
 	private static final BinaryFunction<Variable, FactorNetwork, Factor> solver =
 			new VariableEliminationSolver();

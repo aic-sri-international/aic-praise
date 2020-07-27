@@ -1,6 +1,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.grounding;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Symbol;
 import com.sri.ai.expresso.helper.Expressions;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.core.TrueContext;
@@ -8,6 +9,7 @@ import com.sri.ai.grinder.helper.UniquelyNamedConstantIncludingBooleansAndNumber
 import com.sri.ai.grinder.interpreter.ContextAssignmentLookup;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.base.BinaryFunction;
+import com.sri.ai.util.math.Rational;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -83,7 +85,7 @@ public class HardCodedDiscreteExpressionEvaluator
 	@Override
 	public double evaluate(int[] assignment) {
 		currentAssignment = assignment;
-		return ((Double) apply(expression, context)).doubleValue();
+		return ((Rational) apply(expression, context)).doubleValue();
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class HardCodedDiscreteExpressionEvaluator
 			return evaluateVariable(expression, context);
 		}
 		else {
-			return expression.doubleValue();
+			return expression.getValue();
 		}
 	}
 
@@ -182,11 +184,32 @@ public class HardCodedDiscreteExpressionEvaluator
 	}
 
 	private Boolean evaluateEqualTo(ArrayList<Object> evaluatedArguments) {
-		return evaluateRelationalOperatorOnNumbers((d1, d2) -> d1.doubleValue() == d2.doubleValue(), "=", evaluatedArguments);
+		return evaluateRelationalOperatorOnObjects(this::equalityOfPossiblyNumberObjects, "=", evaluatedArguments);
 	}
 
 	private Boolean evaluateNotEqualTo(ArrayList<Object> evaluatedArguments) {
-		return evaluateRelationalOperatorOnNumbers((d1, d2) -> d1.doubleValue() != d2.doubleValue(), "!=", evaluatedArguments);
+		return evaluateRelationalOperatorOnObjects(this::disequalityOfPossiblyNumberObjects, "!=", evaluatedArguments);
+	}
+
+	private Boolean equalityOfPossiblyNumberObjects(Object o1, Object o2) {
+		if (o1 instanceof Number) {
+			if (o2 instanceof Number) {
+				return ((Number) o1).doubleValue() == ((Number) o2).doubleValue();
+			}
+			else {
+				throw new Error(HardCodedDiscreteExpressionEvaluator.class + " comparing two values but only one is a number: " + o1 + ", " + o2);
+			}
+		}
+		else if (o2 instanceof Number) {
+			throw new Error(HardCodedDiscreteExpressionEvaluator.class + " comparing two values but only one is a number: " + o1 + ", " + o2);
+		}
+		else {
+			return o1 == o2;
+		}
+	}
+
+	private Boolean disequalityOfPossiblyNumberObjects(Object o1, Object o2) {
+		return ! equalityOfPossiblyNumberObjects(o1, o2);
 	}
 
 	private Boolean evaluateRelationalOperatorOnNumbers(
@@ -199,7 +222,17 @@ public class HardCodedDiscreteExpressionEvaluator
 		var result = binaryOperator.apply(numericValues.get(0), numericValues.get(1));
 		return result;
 	}
-	
+
+	private Boolean evaluateRelationalOperatorOnObjects(
+			BinaryFunction<Object, Object, Boolean> binaryOperator,
+			String operatorName,
+			ArrayList<Object> evaluatedArguments) {
+
+		myAssert(evaluatedArguments.size() == 2, () -> operatorName + " applied to more than two arguments: " + evaluatedArguments);
+		var result = binaryOperator.apply(evaluatedArguments.get(0), evaluatedArguments.get(1));
+		return result;
+	}
+
 	public static void main(String[] args) {
 		Map<Expression, Expression> assignments = map(parse("y"), makeSymbol(10), parse("x"), makeSymbol(2));
 		var expression = Expressions.parse(
