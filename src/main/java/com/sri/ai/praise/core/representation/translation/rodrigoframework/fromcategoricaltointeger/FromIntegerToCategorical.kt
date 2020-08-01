@@ -3,7 +3,6 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromc
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.expresso.helper.Expressions
 import com.sri.ai.expresso.type.Categorical
-import com.sri.ai.grinder.application.CommonTheory
 import com.sri.ai.grinder.helper.GrinderUtil
 import com.sri.ai.grinder.library.FunctorConstants
 import com.sri.ai.grinder.library.boole.Not
@@ -65,7 +64,7 @@ class FromIntegerToCategorical(
 
         val constant = getConstant(expression, variableIndex)
         return if (type.name == "Boolean") {
-            translateBooleanEqualityBack(variable, constant)
+            translateBooleanEqualityBack(variable, constant, type)
         } else {
             translateNonBooleanCategoricalEqualityBack(variable, constant, variableIndex, type)
         }
@@ -76,8 +75,8 @@ class FromIntegerToCategorical(
         return equality.get(constantIndex)
     }
 
-    private fun translateBooleanEqualityBack(variable: Expression, constant: Expression) =
-            if (constant == Expressions.ZERO) variable else Not.make(variable)
+    private fun translateBooleanEqualityBack(variable: Expression, constant: Expression, booleanType: Categorical) =
+            if (booleanType.constantOfIndex(constant.intValue()) == Expressions.TRUE) variable else Not.make(variable)
 
     private fun translateNonBooleanCategoricalEqualityBack(
             variable: Expression,

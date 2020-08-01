@@ -39,10 +39,10 @@ class FromIntegerToCategoricalTest {
 						"false and true or (not p) and true then 0.1 else 0.9;"
 		);
 
-		// TODO: using string because (p = 0) = (1 = 0) gets parsed as p = 0 = (1 = 0); need to fix that.
+		// TODO: using string because (p = 1) = false gets parsed as p = 1 = false; need to fix that.
 		integerExpressionString =
-				"if (p = 0) and ((p = 0) = false) and (boss = 1) and (3 = day) and " +
-						"false and true or ((p = 0) = false) and true then 0.1 else 0.9";
+				"if (p = 1) and ((p = 1) = false) and (boss = 1) and (3 = day) and " +
+						"false and true or ((p = 1) = false) and true then 0.1 else 0.9";
 		expectedExpressionString =
 				"if p and (p = false) and (boss = mary) and (wednesday = day) and " +
 						"false and true or (p = false) and true then 0.1 else 0.9";

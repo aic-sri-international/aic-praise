@@ -30,10 +30,10 @@ class FromCategoricalToIntegerTest {
 						"false and true or (not p) and true then 0.1 else 0.9;"
 		);
 
-		// TODO: using string because (p = 0) = (1 = 0) gets parsed as p = 0 = (1 = 0); need to fix that.
+		// TODO: using string because (p = 1) = false gets parsed as p = 1 = false; need to fix that.
 		String expected =
-				"if (p = 0) and ((p = 0) = false) and (boss = 1) and (3 = day) and " +
-				"false and true or not (p = 0) and true then 0.1 else 0.9";
+				"if (p = 1) and ((p = 1) = false) and (boss = 1) and (3 = day) and " +
+				"false and true or not (p = 1) and true then 0.1 else 0.9";
 
 		FromCategoricalToInteger translator = new FromCategoricalToInteger(model);
 		String actual = translator.getTranslation().getFactors().get(0).toString();
