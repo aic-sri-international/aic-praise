@@ -2,16 +2,12 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromc
 
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.expresso.helper.Expressions
-import com.sri.ai.expresso.helper.Expressions.TRUE
-import com.sri.ai.expresso.helper.Expressions.FALSE
-import com.sri.ai.expresso.helper.Expressions.ONE
-import com.sri.ai.expresso.helper.Expressions.ZERO
+import com.sri.ai.expresso.helper.Expressions.*
 import com.sri.ai.expresso.type.Categorical
 import com.sri.ai.grinder.helper.GrinderUtil
 import com.sri.ai.grinder.library.FunctorConstants.EQUALITY
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel
-import com.sri.ai.util.Util.getValuePossiblyCreatingIt
 
 class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
 
@@ -48,16 +44,16 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
         )
     }
 
-    private fun replaceCategoricalTypeNameByIntegerIntervalTypeName(entry: Map.Entry<String, String>): String {
-        val type = expressionBasedModel.context.getType(entry.value)
+    private fun replaceCategoricalTypeNameByIntegerIntervalTypeName(symbolAndTypeName: Map.Entry<String, String>): String {
+        val type = expressionBasedModel.context.getType(symbolAndTypeName.value)
         return if (type is Categorical) {
             "0..${type.cardinality().intValue() - 1}"
         } else {
-            entry.value
+            symbolAndTypeName.value
         }
     }
 
-    private val categoricalConstantTranslation: Map<Expression, Expression> by lazy {
+    private val categoricalConstantTranslation: MutableMap<Expression, Expression> by lazy {
         var categoricalConstantTranslation = mutableMapOf<Expression, Expression>()
         expressionBasedModel.context.types
                 .filterIsInstance<Categorical>()
@@ -98,19 +94,27 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
     }
 
     private fun replaceCategoricalConstants(expression: Expression): Expression {
-        return getValuePossiblyCreatingIt(categoricalConstantTranslation, expression, ::translateExpression)
+        return categoricalConstantTranslation.getOrElse(expression) {
+            val newTranslation = translateExpression(expression)
+            if (newTranslation != expression) {
+                categoricalConstantTranslation[expression] = newTranslation
+                newTranslation
+            }
+            else {
+                expression
+            }
+        }
     }
 
-    private fun translateExpression(expression: Expression?): Expression? {
-        var nonNullExpression = expression!!
-        return if (isTranslatableSymbol(nonNullExpression)) {
-            translateSymbol(nonNullExpression)
+    private fun translateExpression(expression: Expression): Expression {
+        return if (isTranslatableSymbol(expression)) {
+            translateSymbol(expression)
         } else {
             expression
         }
     }
 
-    private fun translateSymbol(expression: Expression): Expression? {
+    private fun translateSymbol(expression: Expression): Expression {
         val type = GrinderUtil.getTypeOfExpression(expression, expressionBasedModel.context)
         return if (type is Categorical) {
             translateCategoricalSymbol(expression, type)
@@ -119,7 +123,7 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
         }
     }
 
-    private fun translateCategoricalSymbol(expression: Expression, type: Categorical): Expression? {
+    private fun translateCategoricalSymbol(expression: Expression, type: Categorical): Expression {
         return when {
             type.name == "Boolean" -> {
                 // we know here expression is a variable because Boolean constants

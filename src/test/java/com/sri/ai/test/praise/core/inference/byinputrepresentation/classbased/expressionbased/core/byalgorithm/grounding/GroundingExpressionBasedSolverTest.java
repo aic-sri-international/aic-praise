@@ -49,6 +49,26 @@ class GroundingExpressionBasedSolverTest {
 		runTest(modelString, queryString);
 	}
 
+	@Test
+	void testCategorical() {
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(2);
+
+		String modelString;
+		String queryString;
+
+		modelString = ""
+				+ "sort Strength: 3, weak, medium, strong;"
+				+ "random earthquake: Strength;"
+				+ "random burglary: Boolean;"
+				+ "random temp: 0..15;"
+				+ "random alarm: Boolean;"
+				+ "earthquake = strong or earthquake = medium;"
+				+ "if burglary then alarm 0.9 else if earthquake = strong then alarm 0.7 else if temp > 10 then alarm 0.2 else alarm 0.1;"
+				+ "";
+		queryString = "alarm";
+		runTest(modelString, queryString);
+	}
+
 	private void runTest(String modelString, String queryString) {
 		println();
 		var resultsAndTime = 

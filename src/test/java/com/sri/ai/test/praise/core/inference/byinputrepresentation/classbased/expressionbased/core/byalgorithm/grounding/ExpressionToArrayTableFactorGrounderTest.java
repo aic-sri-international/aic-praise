@@ -52,7 +52,7 @@ class ExpressionToArrayTableFactorGrounderTest {
                     new HardCodedIncrementalDiscreteExpressionEvaluatorMaker(),
 
                     "SizeBased",
-                    new SizeDependentDiscreteExpressionEvaluatorMaker()
+                    new SizeConditionalDiscreteExpressionEvaluatorMaker()
 
                     );
 

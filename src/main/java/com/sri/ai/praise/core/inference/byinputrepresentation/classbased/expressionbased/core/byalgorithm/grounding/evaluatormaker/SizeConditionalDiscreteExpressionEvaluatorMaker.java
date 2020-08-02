@@ -16,13 +16,13 @@ import static com.sri.ai.util.collect.FunctionIterator.functionIterator;
 /**
  * A {@link DiscreteExpressionEvaluatorMaker} that provides a
  * {@link CompilationIncrementalEvaluator} if the number of entries to be evaluated
- * is greater than {@link SizeDependentDiscreteExpressionEvaluatorMaker#MIN_NUMBER_OF_ENTRIES_FOR_COMPILATION}
+ * is greater than {@link SizeConditionalDiscreteExpressionEvaluatorMaker#MIN_NUMBER_OF_ENTRIES_FOR_COMPILATION}
  * (10,000) or a {@link HardCodedIncrementalDiscreteExpressionEvaluator} otherwise.
  * <p>
  * This is motivated by the compilation taking a long but fixed time (in terms of number of entries),
  * so it is useful only when a large number of entries will need to be evaluated.
  */
-public class SizeDependentDiscreteExpressionEvaluatorMaker
+public class SizeConditionalDiscreteExpressionEvaluatorMaker
     implements DiscreteExpressionEvaluatorMaker {
 
     public final int MIN_NUMBER_OF_ENTRIES_FOR_COMPILATION = 10000;
