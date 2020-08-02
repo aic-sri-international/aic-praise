@@ -2,12 +2,12 @@ package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromc
 
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.expresso.helper.Expressions
-import com.sri.ai.expresso.helper.Expressions.FALSE
 import com.sri.ai.expresso.helper.Expressions.TRUE
+import com.sri.ai.expresso.helper.Expressions.FALSE
+import com.sri.ai.expresso.helper.Expressions.ONE
+import com.sri.ai.expresso.helper.Expressions.ZERO
 import com.sri.ai.expresso.type.Categorical
 import com.sri.ai.grinder.helper.GrinderUtil
-import com.sri.ai.grinder.library.Equality
-import com.sri.ai.grinder.library.FunctorConstants
 import com.sri.ai.grinder.library.FunctorConstants.EQUALITY
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel
@@ -86,7 +86,7 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
                             // in arbitrary functions.
                         }
                         else {
-                            categoricalConstantTranslation[known] = indexExpression(categorical, known)
+                            categoricalConstantTranslation[known] = integerCodeExpression(categorical, known)
                         }
                     }
                 }
@@ -127,10 +127,10 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
                 // We must replace a Boolean variable p by p = <integer constant of true>
                 // because it may be in a boolean condition such as if p then 2 else 3
                 // and leaving it as-is would not be legal when it is converted to an integer.
-                Expressions.apply(EQUALITY, expression, indexExpression(type, TRUE))
+                Expressions.apply(EQUALITY, expression, integerCodeExpression(type, TRUE))
             }
             !expressionBasedModel.context.isVariable(expression) -> {
-                indexExpression(type, expression)
+                integerCodeExpression(type, expression)
             }
             else -> {
                 expression
@@ -152,7 +152,12 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
                 expressionBasedModel.context.theory.expressionKnownToBeSymbolIsInterpretedInThisTheory(expression)
     }
 
-    private fun indexExpression(categoricalType: Categorical, knownConstant: Expression?) =
-            Expressions.makeSymbol(categoricalType.indexOfConstant(knownConstant))
+    private fun integerCodeExpression(categoricalType: Categorical, knownConstant: Expression?) =
+            if (categoricalType.name == "Boolean") {
+                if (knownConstant == TRUE) ONE else ZERO
+            }
+            else {
+                Expressions.makeSymbol(categoricalType.indexOfConstant(knownConstant))
+            }
 
 }
