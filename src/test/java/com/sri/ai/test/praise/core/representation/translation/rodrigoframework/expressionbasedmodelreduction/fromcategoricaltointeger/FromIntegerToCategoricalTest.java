@@ -1,16 +1,10 @@
-package com.sri.ai.test.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger;
+package com.sri.ai.test.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger;
 
-import com.sri.ai.expresso.api.Expression;
-import com.sri.ai.expresso.api.Type;
-import com.sri.ai.expresso.type.Categorical;
-import com.sri.ai.expresso.type.IntegerInterval;
-import com.sri.ai.grinder.api.Context;
 import com.sri.ai.grinder.application.CommonTheory;
-import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.api.ExpressionBasedSolver;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger.FromCategoricalToInteger;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger.FromIntegerToCategorical;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToInteger;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromIntegerToCategorical;
 import org.junit.jupiter.api.Test;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;

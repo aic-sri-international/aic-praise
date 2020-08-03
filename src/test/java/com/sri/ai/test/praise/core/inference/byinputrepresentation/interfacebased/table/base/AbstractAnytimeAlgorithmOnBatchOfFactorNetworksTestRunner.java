@@ -66,7 +66,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			Pair<Iterator<Approximation<Factor>>, Long> resultAndTime) {
 		
 		var realResultAndTime =
-				Timer.getResultAndTime(
+				Timer.timed(
 						() -> iterate(resultAndTime.first, algorithmName, algorithm, query, factorNetwork));
 		resultAndTime.first = iterator(realResultAndTime.first);
 		resultAndTime.second = realResultAndTime.second;

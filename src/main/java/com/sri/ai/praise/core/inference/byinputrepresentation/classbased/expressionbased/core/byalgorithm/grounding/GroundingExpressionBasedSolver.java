@@ -14,17 +14,17 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.api.FactorNet
 import com.sri.ai.praise.core.representation.interfacebased.factor.api.Variable;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.base.DefaultFactorNetwork;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.bydatastructure.arraylist.ArrayTableFactor;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger.FromCategoricalToInteger;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger.FromIntegerToCategorical;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReducer;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReduction;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.CategoricalIntegerReducer;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
-import com.sri.ai.util.base.Pair;
 
 import java.util.ArrayList;
 import java.util.function.Function;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
-import static com.sri.ai.util.Timer.getResultAndTime;
+import static com.sri.ai.util.Timer.timed;
 import static com.sri.ai.util.Util.mapIntoList;
 import static com.sri.ai.util.Util.println;
 
@@ -36,6 +36,8 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
     private static final BinaryFunction<Variable, FactorNetwork, Factor> solver =
             new VariableEliminationSolver();
 
+    private static final ExpressionBasedModelReducer normalizer = new CategoricalIntegerReducer();
+
     @Override
     public void interrupt() {
         // TODO Move to abstract level
@@ -43,43 +45,35 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 
     @Override
     protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
-        var normalizedProblem = normalizeProblem(problem);
-        var factorGrounder = new ExpressionToArrayTableFactorGrounder(evaluatorMaker, normalizedProblem.getContext());
-        var groundedFactorNetwork = getResultAndTime(() -> makeGroundedFactorNetwork(e -> factorGrounder.ground(e), normalizedProblem));
-        var queryVariable = TableVariableMaker.makeTableVariable(normalizedProblem.getQuerySymbol(), normalizedProblem.getContext());
-        var solutionFactor = getResultAndTime(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
-        var normalizedSolutionExpression = getResultAndTime(() -> makeSolutionExpression(solutionFactor.first, normalizedProblem));
-        println("Time for grounding      : ", Timer.timeStringInSeconds(groundedFactorNetwork, 3));
-        println("Time for solving        : ", Timer.timeStringInSeconds(solutionFactor, 3));
-        println("Time for converting back: ", Timer.timeStringInSeconds(normalizedSolutionExpression, 3));
-        Expression solution =
-                denormalizeSolutionExpression(
-                        normalizedSolutionExpression.first,
-                        problem,
-                        normalizedProblem);
+        var reduction = normalizer.invoke(problem.getOriginalExpressionBasedModel());
+        var normalizedProblem = makeNormalizedProblem(reduction, problem);
+        var normalizedSolution = solveForQuerySymbolDefinedByNormalizedExpressionBasedProblem(normalizedProblem);
+        var solution = reduction.translateBack(normalizedSolution);
         return solution;
     }
 
-    private ExpressionBasedProblem normalizeProblem(ExpressionBasedProblem problem) {
-        var translator = new FromCategoricalToInteger(problem.getOriginalExpressionBasedModel());
+    private ExpressionBasedProblem makeNormalizedProblem(
+            ExpressionBasedModelReduction reduction,
+            ExpressionBasedProblem problem) {
+
+        var translatedExpressionBasedModel = reduction.getTranslation();
         var normalizedProblem =
                 new DefaultExpressionBasedProblem(
                         problem.getQueryExpression(),
-                        translator.getTranslation());
+                        translatedExpressionBasedModel);
         return normalizedProblem;
     }
 
-    private Expression denormalizeSolutionExpression(
-            Expression normalizedSolutionExpression,
-            ExpressionBasedProblem problem,
-            ExpressionBasedProblem normalizedProblem) {
-
-        var translator =
-                new FromIntegerToCategorical(
-                        problem.getOriginalExpressionBasedModel(),
-                        normalizedProblem.getOriginalExpressionBasedModel());
-
-        return translator.translateBack(normalizedSolutionExpression);
+    private Expression solveForQuerySymbolDefinedByNormalizedExpressionBasedProblem(ExpressionBasedProblem problem) {
+        var factorGrounder = new ExpressionToArrayTableFactorGrounder(evaluatorMaker, problem.getContext());
+        var groundedFactorNetwork = timed(() -> makeGroundedFactorNetwork(e -> factorGrounder.ground(e), problem));
+        var queryVariable = TableVariableMaker.makeTableVariable(problem.getQuerySymbol(), problem.getContext());
+        var solutionFactor = timed(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
+        var normalizedSolutionExpression = timed(() -> makeSolutionExpression(solutionFactor.first, problem));
+        println("Time for grounding      : ", Timer.timeStringInSeconds(groundedFactorNetwork, 3));
+        println("Time for solving        : ", Timer.timeStringInSeconds(solutionFactor, 3));
+        println("Time for converting back: ", Timer.timeStringInSeconds(normalizedSolutionExpression, 3));
+        return normalizedSolutionExpression.first;
     }
 
     private FactorNetwork makeGroundedFactorNetwork(

@@ -113,7 +113,7 @@ public abstract class AbstractBatchOfFactorNetworksTestRunner<Result, Configurat
 			FactorNetwork factorNetwork) {
 		
 		beforeExecution(algorithmName, algorithm, query, factorNetwork);
-		var resultAndTime = Timer.getResultAndTime(() -> algorithm.apply(query, factorNetwork));
+		var resultAndTime = Timer.timed(() -> algorithm.apply(query, factorNetwork));
 		resultAndTime = afterExecution(algorithmName, algorithm, query, factorNetwork, resultAndTime);
 		return resultAndTime;
 	}

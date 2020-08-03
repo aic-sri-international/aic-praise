@@ -224,7 +224,7 @@ final public class MinimumBasedSimplification {
 		}
 
 		var normalized = convexHull.normalize(convexHull.getFreeVariables());
-		var result = Timer.getResultAndTime(() -> makeMarginSimplex(normalized));
+		var result = Timer.timed(() -> makeMarginSimplex(normalized));
 
 		if (debug) {
 			println("After  simplification: " + result.first.getFactor().summationCost());

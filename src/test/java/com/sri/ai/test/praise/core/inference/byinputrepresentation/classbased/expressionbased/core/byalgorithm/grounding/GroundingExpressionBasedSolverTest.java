@@ -72,7 +72,7 @@ class GroundingExpressionBasedSolverTest {
 	private void runTest(String modelString, String queryString) {
 		println();
 		var resultsAndTime = 
-				Timer.getResultAndTime(
+				Timer.timed(
 						() -> 
 						new HOGMMultiQueryProblemSolver(modelString, queryString, new GroundingExpressionBasedSolver())
 						.getResults());

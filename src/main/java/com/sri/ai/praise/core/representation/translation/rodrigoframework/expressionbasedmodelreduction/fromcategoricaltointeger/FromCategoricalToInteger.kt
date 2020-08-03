@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger
+package com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger
 
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.expresso.helper.Expressions
@@ -7,49 +7,33 @@ import com.sri.ai.expresso.type.Categorical
 import com.sri.ai.grinder.helper.GrinderUtil
 import com.sri.ai.grinder.library.FunctorConstants.EQUALITY
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
-import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.base.AbstractExpressionBasedModelDownReduction
 
-class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
+class FromCategoricalToInteger(expressionBasedModel: ExpressionBasedModel)
+    : AbstractExpressionBasedModelDownReduction(expressionBasedModel) {
 
-    val translation: ExpressionBasedModel by lazy {
+    override fun processTypeName(typeName: String) = replaceCategoricalTypeNameByIntegerIntervalTypeName(typeName)
 
-        val factors = expressionBasedModel.factors.map(::replaceAllCategoricalConstants)
-
-        val mapFromRandomVariableNameToTypeName =
-                expressionBasedModel
-                        .mapFromRandomVariableNameToTypeName
-                        .mapValues(::replaceCategoricalTypeNameByIntegerIntervalTypeName)
-
-        val mapFromNonUniquelyNamedConstantNameToTypeName =
-                expressionBasedModel
-                        .mapFromNonUniquelyNamedConstantNameToTypeName
-                        .mapValues(::replaceCategoricalTypeNameByIntegerIntervalTypeName)
-
-        val mapFromUniquelyNamedConstantNameToTypeName =
-                expressionBasedModel
-                        .mapFromUniquelyNamedConstantNameToTypeName
-                        .mapValues(::replaceCategoricalTypeNameByIntegerIntervalTypeName)
-
-        val mapFromCategoricalTypeNameToSizeString = mapOf<String, String>()
-
-        DefaultExpressionBasedModel(
-                factors,
-                mapFromRandomVariableNameToTypeName,
-                mapFromNonUniquelyNamedConstantNameToTypeName,
-                mapFromUniquelyNamedConstantNameToTypeName,
-                mapFromCategoricalTypeNameToSizeString,
-                expressionBasedModel.additionalTypes,
-                expressionBasedModel.isKnownToBeBayesianNetwork,
-                expressionBasedModel.theory
-        )
-    }
-
-    private fun replaceCategoricalTypeNameByIntegerIntervalTypeName(symbolAndTypeName: Map.Entry<String, String>): String {
-        val type = expressionBasedModel.context.getType(symbolAndTypeName.value)
+    private fun replaceCategoricalTypeNameByIntegerIntervalTypeName(typeName: String): String {
+        val type = expressionBasedModel.context.getType(typeName)
         return if (type is Categorical) {
             "0..${type.cardinality().intValue() - 1}"
         } else {
-            symbolAndTypeName.value
+            typeName
+        }
+    }
+
+    override fun processSubExpression(subExpression: Expression) = replaceCategoricalConstants(subExpression)
+
+    private fun replaceCategoricalConstants(subExpression: Expression): Expression {
+        return categoricalConstantTranslation.getOrElse(subExpression) {
+            val newTranslation = translateExpression(subExpression)
+            if (newTranslation != subExpression) {
+                categoricalConstantTranslation[subExpression] = newTranslation
+                newTranslation
+            } else {
+                subExpression
+            }
         }
     }
 
@@ -87,23 +71,6 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
                     }
                 }
         categoricalConstantTranslation
-    }
-
-    private fun replaceAllCategoricalConstants(expression: Expression): Expression {
-        return expression.replaceAllOccurrences({replaceCategoricalConstants(it!!)}, expressionBasedModel.context)
-    }
-
-    private fun replaceCategoricalConstants(expression: Expression): Expression {
-        return categoricalConstantTranslation.getOrElse(expression) {
-            val newTranslation = translateExpression(expression)
-            if (newTranslation != expression) {
-                categoricalConstantTranslation[expression] = newTranslation
-                newTranslation
-            }
-            else {
-                expression
-            }
-        }
     }
 
     private fun translateExpression(expression: Expression): Expression {
@@ -161,7 +128,7 @@ class FromCategoricalToInteger(val expressionBasedModel: ExpressionBasedModel) {
                 if (knownConstant == TRUE) ONE else ZERO
             }
             else {
-                Expressions.makeSymbol(categoricalType.indexOfConstant(knownConstant))
+                makeSymbol(categoricalType.indexOfConstant(knownConstant))
             }
 
 }

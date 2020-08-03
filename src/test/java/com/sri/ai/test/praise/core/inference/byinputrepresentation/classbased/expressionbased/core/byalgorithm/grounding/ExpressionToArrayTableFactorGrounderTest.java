@@ -186,7 +186,7 @@ class ExpressionToArrayTableFactorGrounderTest {
         var expressionAndHOGModel = getExpressionAndHOGModel(expressionString, variableDefinitions);
         Expression expression = expressionAndHOGModel.first;
         Context context = expressionAndHOGModel.second.getContext();
-        return Timer.getResultAndTime(
+        return Timer.timed(
                 () -> arrayTableFactorFromModelAndContext(expression, context, fromExpressionAndContextToEvaluator)
         );
     }

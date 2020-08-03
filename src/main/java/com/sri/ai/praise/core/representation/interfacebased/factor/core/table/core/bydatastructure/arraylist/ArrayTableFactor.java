@@ -593,7 +593,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 //		if (summationCost() > 1000000)
 //			println("ArrayTableFactor.sumOut summation cost: " + summationCost());
 		
-		var resultAndTime = Timer.getResultAndTime(() -> aggregate((a, v) -> a + v, 0, eliminated, remaining));
+		var resultAndTime = Timer.timed(() -> aggregate((a, v) -> a + v, 0, eliminated, remaining));
 
 //		if (summationCost() > 1000000)
 //			println("ArrayTableFactor.sumOut done, time: " + resultAndTime.second + " ms.") ;
@@ -747,7 +747,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 //		if (summationCost() > 1000000)
 //			println("ArrayTableFactor.NORMALIZATION summation cost: " + summationCost());
 
-		var resultAndTime = Timer.getResultAndTime(() -> divideByTableFactor(sumOut(listFrom(variablesToNormalize))));
+		var resultAndTime = Timer.timed(() -> divideByTableFactor(sumOut(listFrom(variablesToNormalize))));
 
 //		if (summationCost() > 1000000)
 //			println("ArrayTableFactor.NORMALIZATION done, time: " + resultAndTime.second + " ms.") ;

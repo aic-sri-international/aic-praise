@@ -1,4 +1,4 @@
-package com.sri.ai.praise.core.representation.translation.rodrigoframework.fromcategoricaltointeger
+package com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger
 
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.expresso.helper.Expressions
@@ -8,6 +8,7 @@ import com.sri.ai.grinder.helper.GrinderUtil
 import com.sri.ai.grinder.library.FunctorConstants
 import com.sri.ai.grinder.library.boole.Not
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.base.AbstractExpressionBasedModelUpReduction
 
 /**
  * Given an {@link ExpressionBasedModel} containing categorical variables,
@@ -16,14 +17,10 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
  */
 class FromIntegerToCategorical(
         private val categoricalExpressionBasedModel: ExpressionBasedModel,
-        private val integerExpressionBasedModel: ExpressionBasedModel
-        ) {
+        integerExpressionBasedModel: ExpressionBasedModel
+        ) : AbstractExpressionBasedModelUpReduction(categoricalExpressionBasedModel, integerExpressionBasedModel) {
 
-    fun translateBack(expression: Expression): Expression {
-        return expression.replaceAllOccurrences(this::translateSubExpressionBack, integerExpressionBasedModel.context)
-    }
-
-    private fun translateSubExpressionBack(expression: Expression?) =
+    override fun translateSubExpressionBack(expression: Expression?) =
             if (expression!!.hasFunctor(FunctorConstants.EQUALITY)) {
                 translateEqualityBack(expression)
             } else {
