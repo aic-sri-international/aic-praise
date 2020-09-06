@@ -47,7 +47,7 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.api
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForDynamicSampling;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForExactBPOnSamplingFactors;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.sampling.SolverAdapterForStaticSampling;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
+import com.sri.ai.praise.core.representation.translation.fromexpressionstosamplingfactors.ExpressionBasedProblemToSamplingFactorInterfaceBasedProblemConversion;
 
 public class SamplingPropositionalExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 

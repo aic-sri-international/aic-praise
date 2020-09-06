@@ -26,7 +26,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.DynamicSamplingProductFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.sample.DefaultSample;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
+import com.sri.ai.praise.core.representation.translation.NonBooleanFactorError;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.functions.Functions;

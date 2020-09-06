@@ -1,6 +1,6 @@
 package com.sri.ai.praise.core.representation.interfacebased.factor.core.table.core.base;
 
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromuaitofactors.FromUAIModelToTableFactors.fromUAIModelToTableFactors;
+import static com.sri.ai.praise.core.representation.translation.fromuaitofactors.FromUAIModelToTableFactors.fromUAIModelToTableFactors;
 
 import java.util.ArrayList;
 import java.util.List;

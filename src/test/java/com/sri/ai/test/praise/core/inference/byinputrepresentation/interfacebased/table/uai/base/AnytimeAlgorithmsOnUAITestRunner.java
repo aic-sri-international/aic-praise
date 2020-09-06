@@ -1,6 +1,6 @@
 package com.sri.ai.test.praise.core.inference.byinputrepresentation.interfacebased.table.uai.base;
 
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromuaitofactors.FromUAIModelToTableFactors.makeTableFactorNetwork;
+import static com.sri.ai.praise.core.representation.translation.fromuaitofactors.FromUAIModelToTableFactors.makeTableFactorNetwork;
 
 import java.util.Iterator;
 

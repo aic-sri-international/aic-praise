@@ -17,7 +17,7 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressi
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.sample.Sample;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.core.factor.ConditionedSamplingFactor;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
+import com.sri.ai.praise.core.representation.translation.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.SetOfVariables;
 
 /**

@@ -3,10 +3,10 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 import static com.sri.ai.grinder.library.indexexpression.IndexExpressions.getIndices;
 import static com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.querygrounding.VariableMaskingExpressionWithProbabilityFunction.mask;
 import static com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.VariableExpressionDiscretization.makeSetOfVariablesWithRanges;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryIndexExpressionsSet;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.makeRelationalExpressionFromGroundedVariable;
+import static com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getIndexExpressionsSet;
+import static com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryBody;
+import static com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.getQueryIndexExpressionsSet;
+import static com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.assertType;
 
 import java.util.Collection;
@@ -25,8 +25,8 @@ import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpr
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedProblem;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.VariableExpressionDiscretization;
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.expressionsampling.ExpressionWithProbabilityFunction;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.NonBooleanFactorError;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
+import com.sri.ai.praise.core.representation.translation.NonBooleanFactorError;
+import com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
 import com.sri.ai.util.Util;
 import com.sri.ai.util.distribution.DiscretizedConditionalProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.variables.SetOfVariables;

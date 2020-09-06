@@ -1,7 +1,7 @@
 package com.sri.ai.test.praise.core.representation.translation.fromrelationaltogroundhogm;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.makeRelationalExpressionFromGroundedVariable;
+import static com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder.makeRelationalExpressionFromGroundedVariable;
 import static com.sri.ai.util.Util.list;
 import static com.sri.ai.util.Util.println;
 import static org.junit.Assert.assertEquals;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
+import com.sri.ai.praise.core.representation.translation.fromrelationaltogroundhogm.RelationalHOGMExpressionBasedModelGrounder;
 
 class RelationalHOGMExpressionBasedModelGrounderTest {
 

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.sri.ai.praise.core.representation.interfacebased.factor.core.sampling.api.factor.SamplingFactor;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
+import com.sri.ai.praise.core.representation.translation.samplinggraph2d.DefaultSamplingFactorDiscretizedProbabilityDistributionFunction;
 import com.sri.ai.util.function.api.functions.Function;
 import com.sri.ai.util.function.api.functions.Functions;
 import com.sri.ai.util.function.api.variables.SetOfVariables;

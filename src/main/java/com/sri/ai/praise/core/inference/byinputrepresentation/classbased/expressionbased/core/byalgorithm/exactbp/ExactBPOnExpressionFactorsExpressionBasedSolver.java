@@ -39,7 +39,7 @@ package com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expres
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.expressionbased.core.byalgorithm.adaptinginterfacebasedsolver.SolverToExpressionBasedSolverAdapter;
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.SolverAdapterForExactBPThatReturnsUnnormalizedExpressionFactor;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion;
+import com.sri.ai.praise.core.representation.translation.ExpressionBasedProblemToExpressionFactorInterfaceBasedProblemConversion;
 
 public class ExactBPOnExpressionFactorsExpressionBasedSolver extends SolverToExpressionBasedSolverAdapter {
 
