@@ -3,8 +3,8 @@ package com.sri.ai.test.praise.core.representation.translation.expressionbasedmo
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToIntegerDownReduction;
-import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.fromcategoricaltointeger.FromIntegerToCategoricalUpReduction;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToInteger;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromIntegerToCategorical;
 import org.junit.jupiter.api.Test;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
@@ -52,8 +52,8 @@ class FromIntegerToCategoricalUpReductionTest {
 	}
 
 	private void runTest(String integerExpressionString, String expectedExpressionString, String expectedSimplifiedString, ExpressionBasedModel model) {
-		FromCategoricalToIntegerDownReduction translator = new FromCategoricalToIntegerDownReduction(model);
-		FromIntegerToCategoricalUpReduction translatorBack = new FromIntegerToCategoricalUpReduction(model, translator.getTranslation());
+		FromCategoricalToInteger translator = new FromCategoricalToInteger(model);
+		FromIntegerToCategorical translatorBack = new FromIntegerToCategorical(model, translator.getTranslation());
 
 		var actual = translatorBack.translateBack(parse(integerExpressionString));
 		println();
