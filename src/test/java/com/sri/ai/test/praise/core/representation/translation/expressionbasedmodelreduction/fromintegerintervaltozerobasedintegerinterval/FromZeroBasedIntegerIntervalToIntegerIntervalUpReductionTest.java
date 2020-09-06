@@ -23,13 +23,16 @@ class FromZeroBasedIntegerIntervalToIntegerIntervalUpReductionTest {
 
 		model = new HOGMExpressionBasedModel(
 				"random i: 10..20;" +
+						"random k: 10..20" +
 						"random j: 0..5;" +
 						"if i + j = 10 and i < 20 and j < 3 then 0.1 else 0.9;"
 		);
 		zeroBasedExpressionString =
-				"if ((i + 10) + j = 10) and i = 5 and (i + 10 < 20) and (j < 3) then 0.1 else 0.9";
+				"if ((i + 10) + j = 10) and i = 5 and i < 10 and 10 > i and i != 7 " +
+						"and i > j + 2 and i = k and i = j and (i + 10 < 20) and (j < 3) then 0.1 else 0.9";
 		expectedExpressionString =
-				"if (((i - 10) + 10) + j = 10) and i = 15 and ((i - 10) + 10 < 20) and (j < 3) then 0.1 else 0.9";
+				"if (((i - 10) + 10) + j = 10) and i = 15 and i < 20 and 20 > i and i != 17 " +
+						"and ((i - 10) > j + 2) and i = k and (i - 10) = j and ((i - 10) + 10 < 20) and (j < 3) then 0.1 else 0.9";
 		expectedSimplifiedString = null;
 		runTest(zeroBasedExpressionString, expectedExpressionString, expectedSimplifiedString, model);
 	}

@@ -32,8 +32,8 @@ class FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(
         ) : AbstractExpressionBasedModelUpReduction(upperExpressionBasedModel, lowerExpressionBasedModel) {
 
     override fun translateSubExpressionBack(expression: Expression?): Expression =
-            if (expression!!.hasFunctor(FunctorConstants.EQUALITY)) {
-                translateEqualityBack(expression)
+            if (isRelational(expression!!)) {
+                translateRelationalBack(expression)
             }
             else if (upperExpressionBasedModel.context.isVariable(expression)) {
                 val type = upperExpressionBasedModel.context.getTypeOfRegisteredSymbol(expression)
@@ -48,49 +48,70 @@ class FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(
                 expression
             }
 
-    private fun translateEqualityBack(equality: Expression): Expression {
+    private fun translateRelationalBack(relational: Expression): Expression {
         return when {
-            upperExpressionBasedModel.context.isVariable(equality.get(0)) -> {
-                translateEqualityOnVariableBack(equality, equality.get(0), 0)
+            isVariable(relational.get(0)) -> {
+                translateRelationalOnVariableBack(relational, relational.get(0), 0)
             }
-            upperExpressionBasedModel.context.isVariable(equality.get(1)) -> {
-                translateEqualityOnVariableBack(equality, equality.get(1), 1)
+            isVariable(relational.get(1)) -> {
+                translateRelationalOnVariableBack(relational, relational.get(1), 1)
             }
             else -> {
-                equality
+                relational
             }
         }
     }
 
-    private fun translateEqualityOnVariableBack(
-            equalityOnVariable: Expression,
+    private fun translateRelationalOnVariableBack(
+            relationalOnVariable: Expression,
             variable: Expression,
             variableIndex: Int): Expression {
 
-        val type = GrinderUtil.getTypeOfExpression(variable, upperExpressionBasedModel.context)
-        return if (type is IntegerInterval) {
-            translateIntegerEqualityBack(equalityOnVariable, variable, variableIndex, type)
+        val upperType = getUpperType(variable)
+        return if (upperType is IntegerInterval) {
+            translateIntegerRelationalBack(relationalOnVariable, variable, variableIndex, upperType)
         } else {
-            equalityOnVariable
+            relationalOnVariable
         }
     }
 
-    private fun translateIntegerEqualityBack(
-            equality: Expression,
+    private fun translateIntegerRelationalBack(
+            relational: Expression,
             variable: Expression,
             variableIndex: Int,
-            type: IntegerInterval): Expression {
+            upperType: IntegerInterval): Expression {
 
-        val constant = getConstant(equality, variableIndex)
-        return translateDecomposedIntegerEqualityBack(variable, constant, variableIndex, type)
+        val other = getOther(relational, variableIndex)
+        if (other.syntacticFormType == "Symbol") {
+            return if (isVariable(other)) {
+                if (getUpperType(other) == upperType) {
+                    // Both arguments are variables of the same type, so there is nothing to do.
+                    // We return a new instance to indicate that this is not
+                    // just a replacement failure, but the actual desired final form,
+                    // because returning the same function tells the replacement function to keep seeking replacements
+                    // of the sub-expressions.
+                    Expressions.apply(relational.functor, relational.get(0), relational.get(1))
+                } else {
+                    // We return the same expression so that other rewriters take care of it
+                    relational
+                }
+            } else { // other is a constant
+                translateDecomposedVariableConstantIntegerRelationalBack(
+                        relational.functor, variable, other, variableIndex, upperType)
+            }
+        }
+        else { // other is not a variable or a constant, give up
+            return relational
+        }
     }
 
-    private fun getConstant(equality: Expression, variableIndex: Int): Expression {
+    private fun getOther(relational: Expression, variableIndex: Int): Expression {
         val constantIndex = 1 - variableIndex
-        return equality.get(constantIndex)
+        return relational.get(constantIndex)
     }
 
-    private fun translateDecomposedIntegerEqualityBack(
+    private fun translateDecomposedVariableConstantIntegerRelationalBack(
+            relation: Expression,
             variable: Expression,
             constant: Expression,
             variableIndex: Int,
@@ -98,28 +119,31 @@ class FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(
 
         val nonZeroBasedConstant = makeSymbol(constant.intValue() + type.nonStrictLowerBound.intValue())
         return if (variableIndex == 0) {
-            Expressions.apply(FunctorConstants.EQUALITY, variable, nonZeroBasedConstant)
+            Expressions.apply(relation, variable, nonZeroBasedConstant)
         } else {
-            Expressions.apply(FunctorConstants.EQUALITY, nonZeroBasedConstant, variable)
+            Expressions.apply(relation, nonZeroBasedConstant, variable)
         }
     }
 
-//    companion object {
-//        val RELATIONAL = setOf(
-//                FunctorConstants.EQUALITY,
-//                FunctorConstants.DISEQUALITY,
-//                FunctorConstants.GREATER_THAN,
-//                FunctorConstants.GREATER_THAN_OR_EQUAL_TO,
-//                FunctorConstants.LESS_THAN,
-//                FunctorConstants.LESS_THAN_OR_EQUAL_TO
-//        )
-//    }
-//
-//    private fun isRelationOfVariableAndConstant(expression: Expression): Triple<Expression, Expression, Expression> {
-//        if (expression.syntacticFormType == "Function application" &&
-//                RELATIONAL.contains(expression.functor.toString())) {
-//
-//                }
-//    }
+    private fun getUpperType(expression: Expression) =
+            GrinderUtil.getTypeOfExpression(expression, upperExpressionBasedModel.context)
 
+    private fun isVariable(symbol: Expression) = upperExpressionBasedModel.context.isVariable(symbol)
+
+    companion object {
+        val RELATIONAL = setOf(
+                FunctorConstants.EQUALITY,
+                FunctorConstants.DISEQUALITY,
+                FunctorConstants.GREATER_THAN,
+                FunctorConstants.GREATER_THAN_OR_EQUAL_TO,
+                FunctorConstants.LESS_THAN,
+                FunctorConstants.LESS_THAN_OR_EQUAL_TO
+        )
+
+        private fun isRelational(expression: Expression): Boolean {
+            return expression.syntacticFormType == "Function application"
+                    &&
+                    RELATIONAL.contains(expression.functor.toString())
+        }
+    }
 }
