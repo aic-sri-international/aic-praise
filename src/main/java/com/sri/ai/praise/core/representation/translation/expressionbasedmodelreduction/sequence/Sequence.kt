@@ -1,11 +1,11 @@
-package com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.sequence
+package com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.sequence
 
 import com.sri.ai.expresso.api.Expression
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelDownReduction
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReducer
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReduction
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelUpReduction
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelDownReduction
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelReducer
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelReduction
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelUpReduction
 import java.util.*
 
 class SequenceExpressionBasedModelReducer(val reducers: List<out ExpressionBasedModelReducer>)

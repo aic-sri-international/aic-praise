@@ -3,15 +3,13 @@ package com.sri.ai.test.praise.core.representation.translation.expressionbasedmo
 import com.sri.ai.grinder.application.CommonTheory;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToInteger;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromIntegerToCategorical;
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToIntegerDownReduction;
+import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.fromcategoricaltointeger.FromIntegerToCategoricalUpReduction;
 import org.junit.jupiter.api.Test;
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
-import static com.sri.ai.util.Util.collectToList;
 import static com.sri.ai.util.Util.println;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FromIntegerToCategoricalUpReductionTest {
 
@@ -52,8 +50,8 @@ class FromIntegerToCategoricalUpReductionTest {
 	}
 
 	private void runTest(String integerExpressionString, String expectedExpressionString, String expectedSimplifiedString, ExpressionBasedModel model) {
-		FromCategoricalToInteger translator = new FromCategoricalToInteger(model);
-		FromIntegerToCategorical translatorBack = new FromIntegerToCategorical(model, translator.getTranslation());
+		FromCategoricalToIntegerDownReduction translator = new FromCategoricalToIntegerDownReduction(model);
+		FromIntegerToCategoricalUpReduction translatorBack = new FromIntegerToCategoricalUpReduction(model, translator.getTranslation());
 
 		var actual = translatorBack.translateBack(parse(integerExpressionString));
 		println();
