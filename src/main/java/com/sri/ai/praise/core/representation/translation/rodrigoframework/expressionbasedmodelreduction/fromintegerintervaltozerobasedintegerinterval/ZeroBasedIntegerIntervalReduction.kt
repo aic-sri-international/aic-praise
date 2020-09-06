@@ -5,7 +5,6 @@ import com.sri.ai.praise.core.representation.translation.rodrigoframework.expres
 
 class ZeroBasedIntegerIntervalReduction(override val expressionBasedModel: ExpressionBasedModel)
     : ExpressionBasedModelReduction {
-    override val down = FromIntegerIntervalToZeroBasedIntegerInterval(expressionBasedModel)
-    override val up = FromZeroBasedIntegerIntervalToIntegerInterval(expressionBasedModel, down.translation)
-    override val translation = down.translation
+    override val down = FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(expressionBasedModel)
+    override val up = FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(expressionBasedModel, down.translation)
 }

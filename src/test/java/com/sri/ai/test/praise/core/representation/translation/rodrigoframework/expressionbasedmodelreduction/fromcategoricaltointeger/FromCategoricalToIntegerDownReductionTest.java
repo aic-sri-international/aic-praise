@@ -7,7 +7,7 @@ import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.grinder.api.Context;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMExpressionBasedModel;
-import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToInteger;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.FromCategoricalToIntegerDownReduction;
 import org.junit.jupiter.api.Test;
 
 import static com.sri.ai.util.Util.collectToList;
@@ -15,7 +15,7 @@ import static com.sri.ai.util.Util.println;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FromCategoricalToIntegerTest {
+class FromCategoricalToIntegerDownReductionTest {
 
 	@Test
 	void test() {
@@ -35,7 +35,7 @@ class FromCategoricalToIntegerTest {
 				"if (p = 1) and ((p = 1) = false) and (boss = 1) and (3 = day) and " +
 				"false and true or not (p = 1) and true then 0.1 else 0.9";
 
-		FromCategoricalToInteger translator = new FromCategoricalToInteger(model);
+		FromCategoricalToIntegerDownReduction translator = new FromCategoricalToIntegerDownReduction(model);
 		String actual = translator.getTranslation().getFactors().get(0).toString();
 
 		println("           Original factor: " + model.getFactors().get(0));
@@ -56,7 +56,7 @@ class FromCategoricalToIntegerTest {
 		}
 	}
 
-	private void assertVariableIsDefinedAsIntegerTyped(Expression variable, FromCategoricalToInteger translator) {
+	private void assertVariableIsDefinedAsIntegerTyped(Expression variable, FromCategoricalToIntegerDownReduction translator) {
 		Context context = translator.getTranslation().getContext();
 		Type type = context.getTypeOfRegisteredSymbol(variable);
 		assertTrue(type instanceof IntegerInterval);

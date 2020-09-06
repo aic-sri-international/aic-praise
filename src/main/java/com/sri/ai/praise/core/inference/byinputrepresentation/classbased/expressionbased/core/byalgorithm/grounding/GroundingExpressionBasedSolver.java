@@ -17,6 +17,8 @@ import com.sri.ai.praise.core.representation.interfacebased.factor.core.table.co
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReducer;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.api.ExpressionBasedModelReduction;
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromcategoricaltointeger.CategoricalIntegerReducer;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.fromintegerintervaltozerobasedintegerinterval.ZeroBasedIntegerIntervalReducer;
+import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.sequence.SequenceExpressionBasedModelReducer;
 import com.sri.ai.util.Timer;
 import com.sri.ai.util.base.BinaryFunction;
 
@@ -25,8 +27,7 @@ import java.util.function.Function;
 
 import static com.sri.ai.expresso.helper.Expressions.makeSymbol;
 import static com.sri.ai.util.Timer.timed;
-import static com.sri.ai.util.Util.mapIntoList;
-import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.*;
 
 public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolver {
 
@@ -36,7 +37,10 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
     private static final BinaryFunction<Variable, FactorNetwork, Factor> solver =
             new VariableEliminationSolver();
 
-    private static final ExpressionBasedModelReducer normalizer = new CategoricalIntegerReducer();
+    private static final ExpressionBasedModelReducer normalizer =
+            new SequenceExpressionBasedModelReducer(
+                    new CategoricalIntegerReducer(),
+                    new ZeroBasedIntegerIntervalReducer());
 
     @Override
     public void interrupt() {

@@ -59,7 +59,6 @@ public class VariableElimination implements NullaryFunction<Factor> {
 	public Factor apply() {
 		in(eliminationOrder).forEach(this::eliminate);
 		Factor queryResult = Factor.multiply(factorNetwork.getFactors());
-		checkQueryResult(queryResult);
 		return queryResult;
 	}
 
@@ -81,11 +80,6 @@ public class VariableElimination implements NullaryFunction<Factor> {
 		Factor product = multiply(factorsOnV);
 		explain("Summation cost in product factor: ", product.summationCost());
 		return product;
-	}
-	
-	public void checkQueryResult(Factor queryResult) {
-		myAssert( ! queryResult.getVariables().isEmpty(), () -> "Query result contains no variables");
-		myAssert(getFirst(queryResult.getVariables()).equals(query), () -> "Query result should be defined on query variable " + query + " alone, but is defined on " + queryResult.getVariables());
 	}
 
 }

@@ -10,11 +10,23 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.base.AbstractExpressionBasedModelUpReduction
 
 /**
- * Given an {@link ExpressionBasedModel} containing categorical variables,
- * translates expressions with such variables converted to integers back to their categorical counterparts.
- * It assumes the sub-expression containing such variables to be in the simple form <code>variable = value</code>
+ * A class representing the up-reduction of expressions in
+ * {@link ExpressionBasedModel} <code>lowerExpressionBasedModel</code>
+ * which is down-reduced by {@link FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction}
+ * from {@link ExpressionBasedModel} <code>upperExpressionBasedModel</code>,
+ * to expressions in the latter.
+ * <p>
+ * The class accomplishes its task by translating each occurrence of a variable <code>X</code>
+ * of a shifted integer interval type <code>0..<u - l></code> to <code>X - l</code>.
+ * Additionally, it treats the following expressions in a special manner for greater readability:
+ * <ol>
+ * <li> <code>X rel c</code> where <code>rel</code> is a relational operator and <code>c</code> is a numeric constant
+ * by replacing the whole expression by <code>X rel <c + l></code> for greater readability.
+ * <li> <code>X rel V</code> where <code>rel</code> is a relational operator and <code>V</code> is a variable
+ * of the same type by leaving it alone.
+ * </ol>
  */
-class FromZeroBasedIntegerIntervalToIntegerInterval(
+class FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(
         upperExpressionBasedModel: ExpressionBasedModel,
         lowerExpressionBasedModel: ExpressionBasedModel
         ) : AbstractExpressionBasedModelUpReduction(upperExpressionBasedModel, lowerExpressionBasedModel) {
@@ -91,5 +103,23 @@ class FromZeroBasedIntegerIntervalToIntegerInterval(
             Expressions.apply(FunctorConstants.EQUALITY, nonZeroBasedConstant, variable)
         }
     }
+
+//    companion object {
+//        val RELATIONAL = setOf(
+//                FunctorConstants.EQUALITY,
+//                FunctorConstants.DISEQUALITY,
+//                FunctorConstants.GREATER_THAN,
+//                FunctorConstants.GREATER_THAN_OR_EQUAL_TO,
+//                FunctorConstants.LESS_THAN,
+//                FunctorConstants.LESS_THAN_OR_EQUAL_TO
+//        )
+//    }
+//
+//    private fun isRelationOfVariableAndConstant(expression: Expression): Triple<Expression, Expression, Expression> {
+//        if (expression.syntacticFormType == "Function application" &&
+//                RELATIONAL.contains(expression.functor.toString())) {
+//
+//                }
+//    }
 
 }

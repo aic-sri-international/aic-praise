@@ -21,21 +21,21 @@ abstract class AbstractExpressionBasedModelDownReduction(override val expression
         val mapFromUniquelyNamedConstantNameToTypeName =
                 processTypeNames(expressionBasedModel.mapFromUniquelyNamedConstantNameToTypeName)
 
-        val mapFromCategoricalTypeNameToSizeString = processMapFromCategoricalTypeNameToSizeString()
+        val emptyMapFromCategoricalTypeNameToSizeStringSinceAllCategoricalsAreTranslated =
+                mapOf<String, String>()
 
         DefaultExpressionBasedModel(
                 factors,
                 mapFromRandomVariableNameToTypeName,
                 mapFromNonUniquelyNamedConstantNameToTypeName,
                 mapFromUniquelyNamedConstantNameToTypeName,
-                mapFromCategoricalTypeNameToSizeString,
+                emptyMapFromCategoricalTypeNameToSizeStringSinceAllCategoricalsAreTranslated,
                 expressionBasedModel.additionalTypes,
                 expressionBasedModel.isKnownToBeBayesianNetwork,
                 expressionBasedModel.theory
         )
     }
 
-    private fun processMapFromCategoricalTypeNameToSizeString() = mapOf<String, String>()
     private fun processTypeNames(mapToTypeNames: MutableMap<String, String>) =
             mapToTypeNames.mapValues(::processTypeName)
 

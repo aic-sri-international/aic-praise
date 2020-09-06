@@ -15,7 +15,7 @@ import com.sri.ai.praise.core.representation.translation.rodrigoframework.expres
  * translates expressions with such variables converted to integers back to their categorical counterparts.
  * It assumes the sub-expression containing such variables to be in the simple form <code>variable = value</code>
  */
-class FromIntegerToCategorical(
+class FromIntegerToCategoricalUpReduction(
         private val categoricalExpressionBasedModel: ExpressionBasedModel,
         integerExpressionBasedModel: ExpressionBasedModel
         ) : AbstractExpressionBasedModelUpReduction(categoricalExpressionBasedModel, integerExpressionBasedModel) {

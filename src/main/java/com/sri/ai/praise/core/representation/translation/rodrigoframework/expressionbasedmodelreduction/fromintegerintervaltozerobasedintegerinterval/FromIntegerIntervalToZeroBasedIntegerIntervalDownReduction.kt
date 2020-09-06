@@ -11,7 +11,17 @@ import com.sri.ai.grinder.library.FunctorConstants.EQUALITY
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.base.AbstractExpressionBasedModelDownReduction
 
-class FromIntegerIntervalToZeroBasedIntegerInterval(expressionBasedModel: ExpressionBasedModel)
+/**
+ * A class representing the down-reduction from an {@link ExpressionBasedModel}
+ * possibly with non-zero-based integer interval types to another in which all such types are zero-based.
+ * <p>
+ * The class accomplishes its task by overriding {@link AbstractExpressionBasedModelDownReduction#processTypeName}
+ * to replace each non-zero based
+ * integer interval <code>l..u</code> to a shifted interval <code>0..<u - l></code>,
+ * and by replacing each occurrence <code>X</code> of variables of those types by
+ * <code>X + l</code>.
+*/
+class FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(expressionBasedModel: ExpressionBasedModel)
     : AbstractExpressionBasedModelDownReduction(expressionBasedModel) {
 
     override fun processTypeName(typeName: String) = replaceIntegerIntervalByZeroBasedIntegerIntervalTypeName(typeName)

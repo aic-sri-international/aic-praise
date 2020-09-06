@@ -9,7 +9,7 @@ import com.sri.ai.grinder.library.FunctorConstants.EQUALITY
 import com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel
 import com.sri.ai.praise.core.representation.translation.rodrigoframework.expressionbasedmodelreduction.base.AbstractExpressionBasedModelDownReduction
 
-class FromCategoricalToInteger(expressionBasedModel: ExpressionBasedModel)
+class FromCategoricalToIntegerDownReduction(expressionBasedModel: ExpressionBasedModel)
     : AbstractExpressionBasedModelDownReduction(expressionBasedModel) {
 
     override fun processTypeName(typeName: String) = replaceCategoricalTypeNameByIntegerIntervalTypeName(typeName)
