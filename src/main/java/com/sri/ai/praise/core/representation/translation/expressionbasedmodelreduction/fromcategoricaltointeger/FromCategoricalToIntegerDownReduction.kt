@@ -23,7 +23,7 @@ class FromCategoricalToIntegerDownReduction(expressionBasedModel: ExpressionBase
         }
     }
 
-    override fun processSubExpression(subExpression: Expression) = replaceCategoricalConstants(subExpression)
+    override fun translateRootOf(subExpression: Expression) = replaceCategoricalConstants(subExpression)
 
     private fun replaceCategoricalConstants(subExpression: Expression): Expression {
         return categoricalConstantTranslation.getOrElse(subExpression) {

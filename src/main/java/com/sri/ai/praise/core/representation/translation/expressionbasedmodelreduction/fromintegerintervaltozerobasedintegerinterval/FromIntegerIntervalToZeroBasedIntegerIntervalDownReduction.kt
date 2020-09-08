@@ -35,7 +35,7 @@ class FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(expressionBased
         }
     }
 
-    override fun processSubExpression(subExpression: Expression) = translateIntegerVariables(subExpression)
+    override fun translateRootOf(subExpression: Expression) = translateIntegerVariables(subExpression)
 
     private fun translateIntegerVariables(subExpression: Expression): Expression {
         return if (expressionBasedModel.context.isVariable(subExpression)) {

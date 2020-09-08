@@ -57,8 +57,8 @@ class GroundingExpressionBasedSolverTest {
 		String queryString;
 
 		modelString = ""
-				+ "random day: 0..299;"
-				+ "random temp: 0..129;"
+				+ "random day: 0..999;"
+				+ "random temp: 0..499;"
 				+ "if day < 50 "
 				+ "    then if temp < 20 then 0.01 else 0.04"
 				+ "    else if temp < 20 then 0.02 else 0.03;"
@@ -113,6 +113,9 @@ class GroundingExpressionBasedSolverTest {
 
 		queryString = "temp";
 		runTest(modelString, queryString);
+
+//		queryString = "temp >= 30";
+//		runTest(modelString, queryString);
 	}
 
 	private void runTest(String modelString, String queryString) {

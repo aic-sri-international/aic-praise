@@ -6,7 +6,6 @@ import com.sri.ai.praise.core.representation.translation.expressionbasedmodelred
 import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelReducer
 import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelReduction
 import com.sri.ai.praise.core.representation.translation.expressionbasedmodelreduction.api.ExpressionBasedModelUpReduction
-import java.util.*
 
 class SequenceExpressionBasedModelReducer(val reducers: List<out ExpressionBasedModelReducer>)
     : ExpressionBasedModelReducer {
@@ -27,19 +26,25 @@ class SequenceExpressionBasedModelReducer(val reducers: List<out ExpressionBased
 
 class SequenceExpressionBasedModelReduction(
         override val expressionBasedModel: ExpressionBasedModel,
-        reductions: List<out ExpressionBasedModelReduction>):
-        ExpressionBasedModelReduction {
-    override val down =
-            SimpleExpressionBasedModelDownReduction(
-                    reductions.first().expressionBasedModel,
-                    reductions.last().translation)
+        reductions: List<out ExpressionBasedModelReduction>)
+    : ExpressionBasedModelReduction {
+
+    override val down = SequenceExpressionBasedModelDownReduction(reductions.map { it.down })
     override val up = SequenceExpressionBasedModelUpReduction(reductions.map { it.up })
 }
 
-class SimpleExpressionBasedModelDownReduction(
-        override val expressionBasedModel: ExpressionBasedModel,
-        override val translation: ExpressionBasedModel)
-    : ExpressionBasedModelDownReduction
+class SequenceExpressionBasedModelDownReduction(
+        private val downReductions: List<out ExpressionBasedModelDownReduction>)
+    : ExpressionBasedModelDownReduction {
+
+    override val expressionBasedModel: ExpressionBasedModel = downReductions.first().expressionBasedModel
+    override val translation: ExpressionBasedModel = downReductions.last().translation
+
+    override fun translate(expression: Expression) =
+            downReductions.fold(expression) {
+                expression, elementDownReduction -> elementDownReduction.translate(expression)
+            }
+}
 
 class SequenceExpressionBasedModelUpReduction(
         private val upReductions: List<out ExpressionBasedModelUpReduction>)
@@ -49,6 +54,7 @@ class SequenceExpressionBasedModelUpReduction(
     override val lowerExpressionBasedModel = upReductions.last().lowerExpressionBasedModel
 
     override fun translateBack(expression: Expression) =
-            upReductions.foldRight(expression, ExpressionBasedModelUpReduction::translateBack)
-
+            upReductions.foldRight(expression) {
+                elementUpReduction, expression -> elementUpReduction.translateBack(expression)
+            }
 }

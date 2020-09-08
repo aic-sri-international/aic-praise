@@ -8,9 +8,11 @@ import com.sri.ai.praise.core.representation.translation.expressionbasedmodelred
 abstract class AbstractExpressionBasedModelDownReduction(override val expressionBasedModel: ExpressionBasedModel)
     : ExpressionBasedModelDownReduction {
 
+    protected abstract fun translateRootOf(subExpression: Expression): Expression
+
     override val translation: ExpressionBasedModel by lazy {
 
-        val factors = expressionBasedModel.factors.map(::processAllSubExpressions)
+        val factors = expressionBasedModel.factors.map(::translate)
 
         val mapFromRandomVariableNameToTypeName =
                 processTypeNames(expressionBasedModel.mapFromRandomVariableNameToTypeName)
@@ -46,9 +48,7 @@ abstract class AbstractExpressionBasedModelDownReduction(override val expression
 
     protected abstract fun processTypeName(typeName: String): String
 
-    private fun processAllSubExpressions(expression: Expression): Expression {
-        return expression.replaceAllOccurrences({processSubExpression(it!!)}, expressionBasedModel.context)
+    override fun translate(expression: Expression): Expression {
+        return expression.replaceAllOccurrences({translateRootOf(it!!)}, expressionBasedModel.context)
     }
-
-    protected abstract fun processSubExpression(subExpression: Expression): Expression
 }
