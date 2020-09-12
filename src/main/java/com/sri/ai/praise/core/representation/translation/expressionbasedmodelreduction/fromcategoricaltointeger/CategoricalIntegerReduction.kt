@@ -6,5 +6,5 @@ import com.sri.ai.praise.core.representation.translation.expressionbasedmodelred
 class CategoricalIntegerReduction(override val expressionBasedModel: ExpressionBasedModel)
     : ExpressionBasedModelReduction {
     override val down = FromCategoricalToIntegerDownReduction(expressionBasedModel)
-    override val up = FromIntegerToCategoricalUpReduction(expressionBasedModel, down.translation)
+    override val up = FromIntegerToCategoricalUpReduction(expressionBasedModel, down.translatedModel)
 }

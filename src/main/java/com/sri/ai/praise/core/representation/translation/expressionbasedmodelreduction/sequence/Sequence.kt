@@ -16,7 +16,7 @@ class SequenceExpressionBasedModelReducer(val reducers: List<out ExpressionBased
         var currentExpressionBasedModel = expressionBasedModel
         val reductions = reducers.map {
             val currentReduction = it(currentExpressionBasedModel)
-            currentExpressionBasedModel = currentReduction.down.translation
+            currentExpressionBasedModel = currentReduction.down.translatedModel
             currentReduction
         }
         return SequenceExpressionBasedModelReduction(expressionBasedModel, reductions)
@@ -38,7 +38,7 @@ class SequenceExpressionBasedModelDownReduction(
     : ExpressionBasedModelDownReduction {
 
     override val expressionBasedModel: ExpressionBasedModel = downReductions.first().expressionBasedModel
-    override val translation: ExpressionBasedModel = downReductions.last().translation
+    override val translatedModel: ExpressionBasedModel = downReductions.last().translatedModel
 
     override fun translate(expression: Expression) =
             downReductions.fold(expression) {

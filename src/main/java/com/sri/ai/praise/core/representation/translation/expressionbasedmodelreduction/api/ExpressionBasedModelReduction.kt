@@ -7,8 +7,8 @@ interface ExpressionBasedModelReduction {
     val expressionBasedModel: ExpressionBasedModel
     val down: ExpressionBasedModelDownReduction
     val up: ExpressionBasedModelUpReduction
-    val translation: ExpressionBasedModel
-        get() = down.translation
+    val translatedModel: ExpressionBasedModel
+        get() = down.translatedModel
     fun translate(expression: Expression) = down.translate(expression)
     fun translateBack(expression: Expression) = up.translateBack(expression)
 }

@@ -37,17 +37,75 @@
  */
 package com.sri.ai.praise.core.representation.translation.ciaranframework.core.uai;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.annotations.Beta;
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.expresso.api.Type;
+import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
+import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.components.HOGMSortDeclaration;
 import com.sri.ai.praise.core.representation.classbased.table.api.GraphicalNetwork;
 import com.sri.ai.praise.core.representation.classbased.table.core.uai.UAIUtil;
 
 @Beta
+/**
+ * A {@link DefaultExpressionBasedModel} built from a list of tables and a {@link GraphicalNetwork}.
+ * This should have been written as a normal function returning an {@link com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel}
+ * instead of a class extending {@link DefaultExpressionBasedModel}.
+ */
 public class UAI_to_ExpressionBased_Translator extends DefaultExpressionBasedModel {
+
+	/*
+	* TODO: This should have been written as a normal function returning an {@link com.sri.ai.praise.core.representation.classbased.expressionbased.api.ExpressionBasedModel}
+ 	* instead of a class extending {@link DefaultExpressionBasedModel}.
+ 	* Extending it increases dependencies and requires us to create the parameter-based constructor and copy method.
+	*/
+
+	public UAI_to_ExpressionBased_Translator(
+			List<? extends Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory
+	) {
+		super(factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				optionalTheory);
+	}
+
+	public UAI_to_ExpressionBased_Translator copy(
+			List<? extends Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory) {
+
+		return new UAI_to_ExpressionBased_Translator(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				optionalTheory
+		);
+	}
 
 	public UAI_to_ExpressionBased_Translator(List<Expression> tables, GraphicalNetwork network) {
 		super(makeParameters(tables, network));

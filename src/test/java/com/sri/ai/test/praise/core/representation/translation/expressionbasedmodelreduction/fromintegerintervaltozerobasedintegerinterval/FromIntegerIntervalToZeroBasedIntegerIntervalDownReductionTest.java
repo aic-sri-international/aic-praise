@@ -29,13 +29,13 @@ class FromIntegerIntervalToZeroBasedIntegerIntervalDownReductionTest {
 		String expected = "if ((i + 10) + j = 10) and (i + 10 < 20) and (j < 3) then 0.1 else 0.9";
 
 		FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction translator = new FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(model);
-		String actual = translator.getTranslation().getFactors().get(0).toString();
+		String actual = translator.getTranslatedModel().getFactors().get(0).toString();
 
 		println("           Original factor: " + model.getFactors().get(0));
 		println("Expected translated factor: " + expected);
 		println("  Actual translated factor: " + actual);
 		println();
-		println("Entire model:\n" + translator.getTranslation());
+		println("Entire model:\n" + translator.getTranslatedModel());
 
 		assertEquals(expected, actual);
 
@@ -53,7 +53,7 @@ class FromIntegerIntervalToZeroBasedIntegerIntervalDownReductionTest {
 			Expression variable,
 			FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction translator) {
 
-		Context context = translator.getTranslation().getContext();
+		Context context = translator.getTranslatedModel().getContext();
 		Type type = context.getTypeOfRegisteredSymbol(variable);
 		assertTrue(type instanceof IntegerInterval);
 		var integerInterval = (IntegerInterval) type;

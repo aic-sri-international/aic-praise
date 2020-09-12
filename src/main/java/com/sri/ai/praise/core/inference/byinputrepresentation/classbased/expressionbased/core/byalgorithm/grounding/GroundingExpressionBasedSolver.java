@@ -49,7 +49,7 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
 
     @Override
     protected Expression solveForQuerySymbolDefinedByExpressionBasedProblem(ExpressionBasedProblem problem) {
-        var reduction = normalizer.invoke(problem.getOriginalExpressionBasedModel());
+        var reduction = normalizer.invoke(problem.getExpressionBasedModel());
         var normalizedProblem = makeNormalizedProblem(reduction, problem);
         var normalizedSolution = solveForQuerySymbolDefinedByNormalizedExpressionBasedProblem(normalizedProblem);
         var solution = reduction.translateBack(normalizedSolution);
@@ -60,17 +60,17 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
             ExpressionBasedModelReduction reduction,
             ExpressionBasedProblem problem) {
 
-        var translatedExpressionBasedModel = reduction.getTranslation();
+        var translatedExpressionBasedModel = reduction.getTranslatedModel();
         var normalizedProblem =
                 new DefaultExpressionBasedProblem(
-                        problem.getQueryExpression(),
+                        problem.getQuerySymbol(),
                         translatedExpressionBasedModel);
         return normalizedProblem;
     }
 
     private Expression solveForQuerySymbolDefinedByNormalizedExpressionBasedProblem(ExpressionBasedProblem problem) {
         var factorGrounder = new ExpressionToArrayTableFactorGrounder(evaluatorMaker, problem.getContext());
-        var groundedFactorNetwork = timed(() -> makeGroundedFactorNetwork(e -> factorGrounder.ground(e), problem));
+        var groundedFactorNetwork = timed(() -> makeGroundedFactorNetwork(factorGrounder::ground, problem));
         var queryVariable = TableVariableMaker.makeTableVariable(problem.getQuerySymbol(), problem.getContext());
         var solutionFactor = timed(() -> solver.apply(queryVariable, groundedFactorNetwork.first));
         var normalizedSolutionExpression = timed(() -> makeSolutionExpression(solutionFactor.first, problem));

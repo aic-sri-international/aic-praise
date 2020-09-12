@@ -48,6 +48,7 @@ import com.sri.ai.expresso.api.Expression;
 import com.sri.ai.expresso.api.Type;
 import com.sri.ai.expresso.type.IntegerInterval;
 import com.sri.ai.expresso.type.RealInterval;
+import com.sri.ai.grinder.api.Theory;
 import com.sri.ai.praise.core.representation.classbased.expressionbased.core.DefaultExpressionBasedModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.HOGModel;
 import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserWrapper;
@@ -55,8 +56,33 @@ import com.sri.ai.praise.core.representation.classbased.hogm.parsing.HOGMParserW
 @Beta
 public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 
+	// TODO: this should probably have been a class containing a DefaultExpressionBasedModel
+	// instead of extending it, which increases dependencies unnecessarily.
+
 	private HOGModel hogmodel;
-	
+
+	public HOGMExpressionBasedModel(
+			HOGModel hogmodel,
+			List<? extends Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory
+	) {
+		super(factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				optionalTheory);
+		this.hogmodel = hogmodel;
+	}
+
 	public HOGMExpressionBasedModel(String hogmodelString) {
 		this(new HOGMParserWrapper().parseModel(hogmodelString));
 	}
@@ -65,7 +91,30 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 		super(makeParameters(hogmodel));
 		this.hogmodel = hogmodel;
 	}
-	
+
+	public HOGMExpressionBasedModel copy(
+			List<? extends Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory
+	) {
+		return new HOGMExpressionBasedModel(
+				this.hogmodel,
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				optionalTheory
+		);
+	}
+
 	public HOGModel getHOGModel() {
 		return hogmodel;
 	}
@@ -134,8 +183,8 @@ public class HOGMExpressionBasedModel extends DefaultExpressionBasedModel {
 				additionalTypes,
 				isKnownToBeBayesianNetwork
 				);
-	}	
-	
+	}
+
 	@Override
 	public HOGMExpressionBasedModel clone() {
 		return (HOGMExpressionBasedModel) super.clone();

@@ -48,7 +48,7 @@ class FromZeroBasedIntegerIntervalToIntegerIntervalUpReductionTest {
 		println("Expected  : " + expectedExpressionString);
 
 		var translator = new FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(model);
-		var translatorBack = new FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(model, translator.getTranslation());
+		var translatorBack = new FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(model, translator.getTranslatedModel());
 
 		var actual = translatorBack.translateBack(parse(zeroBasedExpressionString));
 		println("Actual    : " + actual);

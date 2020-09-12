@@ -10,7 +10,7 @@ abstract class AbstractExpressionBasedModelDownReduction(override val expression
 
     protected abstract fun translateRootOf(subExpression: Expression): Expression
 
-    override val translation: ExpressionBasedModel by lazy {
+    override val translatedModel: ExpressionBasedModel by lazy {
 
         val factors = expressionBasedModel.factors.map(::translate)
 

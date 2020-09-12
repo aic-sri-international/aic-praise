@@ -36,13 +36,13 @@ class FromCategoricalToIntegerDownReductionTest {
 				"false and true or not (p = 1) and true then 0.1 else 0.9";
 
 		FromCategoricalToIntegerDownReduction translator = new FromCategoricalToIntegerDownReduction(model);
-		String actual = translator.getTranslation().getFactors().get(0).toString();
+		String actual = translator.getTranslatedModel().getFactors().get(0).toString();
 
 		println("           Original factor: " + model.getFactors().get(0));
 		println("Expected translated factor: " + expected);
 		println("  Actual translated factor: " + actual);
 		println();
-		println("Entire model:\n" + translator.getTranslation());
+		println("Entire model:\n" + translator.getTranslatedModel());
 
 		assertEquals(expected, actual);
 
@@ -57,7 +57,7 @@ class FromCategoricalToIntegerDownReductionTest {
 	}
 
 	private void assertVariableIsDefinedAsIntegerTyped(Expression variable, FromCategoricalToIntegerDownReduction translator) {
-		Context context = translator.getTranslation().getContext();
+		Context context = translator.getTranslatedModel().getContext();
 		Type type = context.getTypeOfRegisteredSymbol(variable);
 		assertTrue(type instanceof IntegerInterval);
 	}

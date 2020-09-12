@@ -114,8 +114,14 @@ class GroundingExpressionBasedSolverTest {
 		queryString = "temp";
 		runTest(modelString, queryString);
 
-//		queryString = "temp >= 30";
-//		runTest(modelString, queryString);
+		queryString = "temp >= 30";
+		runTest(modelString, queryString);
+
+		queryString = "temp < 30 and temp >= 30";
+		runTest(modelString, queryString);
+
+		queryString = "temp < 30 or temp >= 30";
+		runTest(modelString, queryString);
 	}
 
 	private void runTest(String modelString, String queryString) {

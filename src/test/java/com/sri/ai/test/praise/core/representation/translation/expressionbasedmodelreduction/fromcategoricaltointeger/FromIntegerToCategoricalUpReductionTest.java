@@ -51,7 +51,7 @@ class FromIntegerToCategoricalUpReductionTest {
 
 	private void runTest(String integerExpressionString, String expectedExpressionString, String expectedSimplifiedString, ExpressionBasedModel model) {
 		FromCategoricalToIntegerDownReduction translator = new FromCategoricalToIntegerDownReduction(model);
-		FromIntegerToCategoricalUpReduction translatorBack = new FromIntegerToCategoricalUpReduction(model, translator.getTranslation());
+		FromIntegerToCategoricalUpReduction translatorBack = new FromIntegerToCategoricalUpReduction(model, translator.getTranslatedModel());
 
 		var actual = translatorBack.translateBack(parse(integerExpressionString));
 		println();

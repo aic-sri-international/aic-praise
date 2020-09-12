@@ -21,6 +21,8 @@ public interface ExpressionBasedModel extends Cloneable, Model {
 
 	ExpressionBasedModel getConditionedModel(Expression evidence);
 
+	ExpressionBasedModel copyWithNewVariableAndFactors(Expression variable, Type type, List<Expression> factors);
+
 	Map<String, String> getMapFromRandomVariableNameToTypeName();
 
 	Map<String, String> getMapFromNonUniquelyNamedConstantNameToTypeName();

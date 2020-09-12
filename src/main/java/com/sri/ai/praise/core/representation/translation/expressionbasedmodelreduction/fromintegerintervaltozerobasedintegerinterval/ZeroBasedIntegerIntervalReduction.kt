@@ -6,5 +6,5 @@ import com.sri.ai.praise.core.representation.translation.expressionbasedmodelred
 class ZeroBasedIntegerIntervalReduction(override val expressionBasedModel: ExpressionBasedModel)
     : ExpressionBasedModelReduction {
     override val down = FromIntegerIntervalToZeroBasedIntegerIntervalDownReduction(expressionBasedModel)
-    override val up = FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(expressionBasedModel, down.translation)
+    override val up = FromZeroBasedIntegerIntervalToIntegerIntervalUpReduction(expressionBasedModel, down.translatedModel)
 }

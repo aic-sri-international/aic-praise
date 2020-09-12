@@ -69,8 +69,11 @@ public class HardCodedDiscreteExpressionEvaluator
 		this.context = context;
 		functorOperations = map();
 		functorOperations.put("+", this::evaluateAddition);
+		functorOperations.put("not", this::evaluateNot);
 		functorOperations.put("and", this::evaluateAnd);
 		functorOperations.put("or", this::evaluateOr);
+		functorOperations.put("=>", this::evaluateImplication);
+		functorOperations.put("<=>", this::evaluateEquivalence);
 		functorOperations.put(IF_THEN_ELSE, this::evaluateIfThenElse);
 		functorOperations.put("<", this::evaluateLessThan);
 		functorOperations.put(">", this::evaluateGreaterThan);
@@ -147,19 +150,37 @@ public class HardCodedDiscreteExpressionEvaluator
 		var result = Util.sum(numericValues);
 		return result;
 	}
-	
+
+	private Boolean evaluateNot(ArrayList<Object> evaluatedArguments) {
+		var booleanValues = mapIntoList(evaluatedArguments, a -> (Boolean) a);
+		var result = Util.not(booleanValues);
+		return result;
+	}
+
 	private Boolean evaluateAnd(ArrayList<Object> evaluatedArguments) {
 		var booleanValues = mapIntoList(evaluatedArguments, a -> (Boolean) a);
 		var result = Util.and(booleanValues);
 		return result;
 	}
-	
+
 	private Boolean evaluateOr(ArrayList<Object> evaluatedArguments) {
 		var booleanValues = mapIntoList(evaluatedArguments, a -> (Boolean) a);
 		var result = Util.or(booleanValues);
 		return result;
 	}
-	
+
+	private Boolean evaluateImplication(ArrayList<Object> evaluatedArguments) {
+		var booleanValues = mapIntoList(evaluatedArguments, a -> (Boolean) a);
+		var result = Util.implication(booleanValues);
+		return result;
+	}
+
+	private Boolean evaluateEquivalence(ArrayList<Object> evaluatedArguments) {
+		var booleanValues = mapIntoList(evaluatedArguments, a -> (Boolean) a);
+		var result = Util.equivalence(booleanValues);
+		return result;
+	}
+
 	private Object evaluateIfThenElse(ArrayList<Object> evaluatedArguments) {
 		myAssert(evaluatedArguments.size() == 3, () -> "if then else requires exactly three arguments but got: " + evaluatedArguments);
 		var branchIndex = ((Boolean) evaluatedArguments.get(0))? 1 : 2;

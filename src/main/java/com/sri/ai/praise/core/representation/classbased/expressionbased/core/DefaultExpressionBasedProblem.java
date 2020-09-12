@@ -73,10 +73,13 @@ import com.sri.ai.praise.other.integration.proceduralattachment.api.ProceduralAt
 public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 
 	private static final Expression QUERY_SYMBOL = parse("query");
-	
+
 	/** The original {@link ExpressionBasedModel}. */
 	private ExpressionBasedModel originalExpressionBasedModel;
-	
+
+	/** The final {@link ExpressionBasedModel}, with possibly insertion of query variable symbol. */
+	private ExpressionBasedModel expressionBasedModel;
+
 	/** The variable query to be used ("query" if original query was compound). */
 	private Expression querySymbol;
 	
@@ -147,13 +150,21 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	private void processVariableQuery() {
 		querySymbol = queryExpression;
 		factorExpressionsIncludingQueryDefinitionIfAny = originalExpressionBasedModel.getFactors();
+		expressionBasedModel = this.originalExpressionBasedModel;
 		context = originalExpressionBasedModel.getContext();
 	}
 
 	private void processCompoundQuery() {
 		querySymbol = QUERY_SYMBOL;
 		factorExpressionsIncludingQueryDefinitionIfAny = getListOfFactorsAndQueryFactor();
+		Type querySymbolType = getTypeOfExpression(queryExpression, originalExpressionBasedModel.getContext());
+		expressionBasedModel =
+				originalExpressionBasedModel.copyWithNewVariableAndFactors(
+						querySymbol,
+						querySymbolType,
+						factorExpressionsIncludingQueryDefinitionIfAny);
 		context = extendContextWithQuerySymbol(queryExpression);
+		// TODO: replace by context = this.expressionBasedModel.getContext() or simply abolish getContext().
 	}
 
 	private List<Expression> getListOfFactorsAndQueryFactor() {
@@ -198,6 +209,11 @@ public class DefaultExpressionBasedProblem implements ExpressionBasedProblem {
 	@Override
 	public ExpressionBasedModel getOriginalExpressionBasedModel() {
 		return originalExpressionBasedModel;
+	}
+
+	@Override
+	public ExpressionBasedModel getExpressionBasedModel() {
+		return expressionBasedModel;
 	}
 
 	@Override

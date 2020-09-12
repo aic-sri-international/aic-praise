@@ -4,15 +4,7 @@ import static com.sri.ai.expresso.helper.Expressions.ONE;
 import static com.sri.ai.expresso.helper.Expressions.ZERO;
 import static com.sri.ai.util.Util.mapIntoSet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 
 import com.google.common.base.Predicate;
 import com.sri.ai.expresso.api.Expression;
@@ -116,7 +108,30 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 		
 		this.randomVariables = Util.mapIntoList(getMapFromRandomVariableNameToTypeName().keySet(), Expressions::parse);
 		this.theory = getTheoryToBeUsed(optionalTheory);
-	}	
+	}
+
+	public DefaultExpressionBasedModel copy(
+			List<? extends Expression> factors,
+			Map<String, String> mapFromRandomVariableNameToTypeName,
+			Map<String, String> mapFromNonUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromUniquelyNamedConstantNameToTypeName,
+			Map<String, String> mapFromCategoricalTypeNameToSizeString,
+			Collection<Type> additionalTypes,
+			boolean isKnownToBeBayesianNetwork,
+			Theory optionalTheory
+	) {
+
+		return new DefaultExpressionBasedModel(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				optionalTheory
+		);
+	}
 
 	private Theory getTheoryToBeUsed(Theory optionalTheory) {
 		Theory theory;
@@ -192,7 +207,30 @@ public class DefaultExpressionBasedModel implements ExpressionBasedModel {
 		}
 		return result;
 	}
-	
+
+	@Override
+	public ExpressionBasedModel copyWithNewVariableAndFactors(Expression variable, Type type, List<Expression> factors) {
+		var mapFromRandomVariableNameToTypeName =
+				Util.copyAndPut(
+						this.mapFromRandomVariableNameToTypeName,
+						variable.toString(),
+						type.toString());
+
+		// because a new variable was introduced, the partition function will not necessarily sum up to 1.
+		var isKnownToBeBayesianNetwork = false;
+
+		return copy(
+				factors,
+				mapFromRandomVariableNameToTypeName,
+				mapFromNonUniquelyNamedConstantNameToTypeName,
+				mapFromUniquelyNamedConstantNameToTypeName,
+				mapFromCategoricalTypeNameToSizeString,
+				additionalTypes,
+				isKnownToBeBayesianNetwork,
+				theory
+		);
+	}
+
 	@Override
 	public Map<String, String> getMapFromRandomVariableNameToTypeName() {
 		return Collections.unmodifiableMap(mapFromRandomVariableNameToTypeName);

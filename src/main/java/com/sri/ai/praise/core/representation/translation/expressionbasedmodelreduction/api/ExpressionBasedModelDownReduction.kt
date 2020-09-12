@@ -5,6 +5,6 @@ import com.sri.ai.praise.core.representation.classbased.expressionbased.api.Expr
 
 interface ExpressionBasedModelDownReduction {
     val expressionBasedModel: ExpressionBasedModel
-    val translation: ExpressionBasedModel
+    val translatedModel: ExpressionBasedModel
     fun translate(expression: Expression): Expression
 }
