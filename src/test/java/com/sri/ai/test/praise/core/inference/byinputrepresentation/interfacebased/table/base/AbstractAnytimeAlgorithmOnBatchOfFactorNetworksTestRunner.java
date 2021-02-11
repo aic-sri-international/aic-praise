@@ -64,10 +64,18 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			Variable query,
 			FactorNetwork factorNetwork,
 			Pair<Iterator<Approximation<Factor>>, Long> resultAndTime) {
-		
+
+		// TODO: here we do the odd thing of exhausting the iterator and then wrapping the final result in a
+		// singleton iterator just because the return type of the algorithms is Iterator and
+		// afterExecution is constrained to return a pair whose first component is of the same type as the
+		// algorithm's return type.
+		// However, that returned singleton iterator is not even being used later (Feb 2021).
+		// Instead, we should have created wrappers for anytime algorithms making them look like full-time algorithms,
+		// which simply exhaust them, and then use the usual algorithm test runner.
+
 		var realResultAndTime =
 				Timer.timed(
-						() -> iterate(resultAndTime.first, algorithmName, algorithm, query, factorNetwork));
+						() -> iterateToLastValue(resultAndTime.first, algorithmName, algorithm, query, factorNetwork));
 		resultAndTime.first = iterator(realResultAndTime.first);
 		resultAndTime.second = realResultAndTime.second;
 		println("Done running  " + algorithmName + " to completion. Time: " + resultAndTime.second + " ms.");
@@ -75,7 +83,7 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 		return resultAndTime;
 	}
 
-	private Approximation<Factor> iterate(
+	private Approximation<Factor> iterateToLastValue(
 			Iterator<Approximation<Factor>> anytimeIterator,
 			String algorithmName,
 			BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>> algorithm,
@@ -87,7 +95,6 @@ extends AbstractBatchOfFactorNetworksTestRunner<Iterator<Approximation<Factor>>,
 			latestPolytopeApproximation = (Polytope) anytimeIterator.next();
 			checkForNonQueryVariables(latestPolytopeApproximation, query);
 			println(makeStatusDescription(latestPolytopeApproximation, anytimeIterator));
-			
 		}
 		return latestPolytopeApproximation;
 	}

@@ -1,9 +1,7 @@
 package com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination;
 
 import static com.sri.ai.praise.core.representation.interfacebased.factor.api.Factor.multiply;
-import static com.sri.ai.util.Util.getFirst;
-import static com.sri.ai.util.Util.in;
-import static com.sri.ai.util.Util.myAssert;
+import static com.sri.ai.util.Util.*;
 import static com.sri.ai.util.explanation.logging.api.ThreadExplanationLogger.explain;
 
 import java.util.List;
@@ -69,7 +67,7 @@ public class VariableElimination implements NullaryFunction<Factor> {
 	}
 
 	public void eliminate(Variable v, List<? extends Factor> factorsOnV) {
-		explain("Eliminating ", v);
+		explain("Eliminating ", v, ", free memory: ", actualFreeMemory()/1000000, " MB");
 		factorNetwork.removeAll(factorsOnV);
 		Factor product = getProduct(factorsOnV);
 		Factor newFactor = product.sumOut(v);

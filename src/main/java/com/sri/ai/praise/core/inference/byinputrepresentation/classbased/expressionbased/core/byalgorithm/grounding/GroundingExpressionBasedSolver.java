@@ -123,7 +123,7 @@ public class GroundingExpressionBasedSolver extends AbstractExpressionBasedSolve
         var context = problem.getContext();
         var querySymbol = problem.getQuerySymbol();
         var queryCardinality = context.getCardinalityOfIntegerIntervalTypedRegisteredSymbol(querySymbol);
-        return makeSymbol(1 / queryCardinality);
+        return makeSymbol(1.0 / queryCardinality);
     }
 
     private Expression equality(Expression query, int index) {

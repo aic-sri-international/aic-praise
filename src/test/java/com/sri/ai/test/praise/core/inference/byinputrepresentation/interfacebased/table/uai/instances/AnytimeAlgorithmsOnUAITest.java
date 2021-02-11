@@ -25,7 +25,7 @@ public class AnytimeAlgorithmsOnUAITest {
 
 	static List<Pair<String, BinaryFunction<Variable, FactorNetwork, Iterator<Approximation<Factor>>>>> algorithms =
 			arrayList( 
-					pair("VE", new FromExactToAnytimeSolver(new VariableEliminationSolver())),
+//					pair("VE", new FromExactToAnytimeSolver(new VariableEliminationSolver())),
 					pair("Anytime EBP", new AnytimeExactBP())
 					);
 
@@ -36,8 +36,8 @@ public class AnytimeAlgorithmsOnUAITest {
 						algorithms,
 						/* numberOfRuns = */ 1,
 						/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
-						"/UAITests/1akg.uai")
-						// "/UAITests/BN_0.uai") // TODO: not memory-efficient enough yet
+						 "/UAITests/1akg.uai")
+						//"/UAITests/BN_0.uai") // TODO: not memory-efficient enough yet
 				        // "/UAITests/grid10x10.f10.uai") // TODO: not time- and memory-efficient enough yet
 				).run();
 	}

@@ -5,6 +5,7 @@ import static com.sri.ai.util.base.Pair.pair;
 
 import java.util.List;
 
+import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.variableelimination.ordering.DontCareEliminationOrdering;
 import org.junit.jupiter.api.Test;
 
 import com.sri.ai.praise.core.inference.byinputrepresentation.interfacebased.exactbp.fulltime.core.ExactBP;
@@ -31,11 +32,11 @@ public class FulltimeAlgorithmsOnUAITest {
 					//				,
 					//pair("VE_MI_ND", new VariableEliminationSolver(new MinFillEliminationOrdering()))
 					//,
-					//pair("VE_DC", new VariableEliminationSolver(new DontCareEliminationOrdering()))
-					//,
+//					pair("VE_DC_AL", new VariableEliminationSolver(new DontCareEliminationOrdering()))
+//					,
 					pair("  EBP_AL", new ArrayListSolver(new ExactBP()))
-					,
-					pair("  EBP_ND", new NDArraySolver(new ExactBP()))
+//					,
+//					pair("  EBP_ND", new NDArraySolver(new ExactBP()))
 					);
 
 	@Test
@@ -45,6 +46,7 @@ public class FulltimeAlgorithmsOnUAITest {
 						algorithms,
 						/* numberOfRuns = */ 1, 
 						/* maximumComponentwiseError = */ Defaults.MAXIMUM_COMPONENTWISE_ERROR,
+//						"/UAITests/BN_0.uai")
 						"/UAITests/grid10x10.f10.uai")
 				).run();
 	}

@@ -136,6 +136,6 @@ public class HOGModelError extends Error {
 	
 	@Override
 	public String toString() {
-		return errorType.name()+":["+message+"] - "+inStatement;
+		return errorType.name() + ": [" + message + "] - " + inStatement;
 	}
 }

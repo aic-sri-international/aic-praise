@@ -116,7 +116,7 @@ public class ArrayTableFactor extends AbstractTableFactor {
 		} catch (OutOfMemoryError e) {
 			throw 
 			new OutOfMemoryError(
-					"Out of memory allocating table factor with " + numberOfEntries + " entries on variables "
+					"Out of memory allocating table factor with " + String.format("%,d", numberOfEntries) + " entries on variables "
 							+ join(variables) + ". " + e.getMessage());
 		}
 		return result;

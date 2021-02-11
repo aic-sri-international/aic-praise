@@ -2,11 +2,12 @@ package com.sri.ai.test.praise.core.inference.byinputrepresentation.classbased.e
 
 import static com.sri.ai.expresso.helper.Expressions.parse;
 import static com.sri.ai.util.Timer.timeStringInSeconds;
-import static com.sri.ai.util.Util.join;
-import static com.sri.ai.util.Util.println;
+import static com.sri.ai.util.Util.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import com.sri.ai.expresso.api.Expression;
+import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMProblemResult;
 import com.sri.ai.util.Util;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,27 @@ import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.express
 import com.sri.ai.praise.core.inference.byinputrepresentation.classbased.hogm.solver.HOGMMultiQueryProblemSolver;
 import com.sri.ai.util.Timer;
 
+import java.util.List;
+
 class GroundingExpressionBasedSolverTest {
+
+//	@Test
+//	void testRelations() {  // not working yet; test written to identify problems.
+//		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(2);
+//
+//		String modelString;
+//		String queryString;
+//		String expectedString;
+//
+//		modelString = ""
+//				+ "random foo: 0..4 -> Boolean;"
+//				+ "random temp: 0..3;"
+//				+ "for all i in 0..4: foo(i) or temp = 3;"
+//				+ "";
+//		queryString = "temp";
+//		expectedString = "if temp = 0 then 0.4 else if temp = 1 then 0.2 else if temp = 2 then 0.2 else 0.2";
+//		runTest(modelString, queryString, expectedString);
+//	}
 
 	@Test
 	void test() {
@@ -143,20 +164,77 @@ class GroundingExpressionBasedSolverTest {
 		runTest(modelString, queryString, expectedString);
 	}
 
+	@Test
+	void testUnrelatedQuery() {
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(2);
+
+		String modelString;
+		String queryString;
+		String expectedString;
+
+		modelString = ""
+				+ "sort Strength: 3, weak, medium, strong;"
+				+ "random earthquake: Strength;"
+				+ "random burglary: Boolean;"
+				+ "random temp: 20..35;"
+				+ "random alarm: Boolean;"
+				+ "random unrelatedBoolean: Boolean;"
+				+ "random unrelatedInteger: 5..10;"
+				+ "earthquake = strong or earthquake = medium;"
+				+ "if burglary then alarm 0.9 else alarm 0.1;"
+				+ "if burglary then alarm 0.9 else if earthquake = strong then alarm 0.7 else if temp > 30 then alarm 0.2 else alarm 0.1;"
+				+ "";
+
+		queryString = "unrelatedBoolean";
+		expectedString = "0.5";
+		runTest(modelString, queryString, expectedString);
+
+		queryString = "unrelatedInteger";
+		expectedString = "0.17";
+		runTest(modelString, queryString, expectedString);
+	}
+
+	@Test
+	void testSets() {
+		ExpressoConfiguration.setDisplayNumericsMostDecimalPlacesInExactRepresentationOfNumericalSymbols(2);
+
+		String modelString;
+		String queryString;
+		String expectedString;
+
+		modelString = ""
+				+ "random i: 0..4;"
+				+ "random j: 0..3;"
+				+ "i = choose(1, 2, j);"
+				+ "";
+		queryString = "i";
+		expectedString = "if i = 0 then 1 else 0";
+		runTest(modelString, queryString, expectedString);
+	}
+
 	private void runTest(String modelString, String queryString, String expectedString) {
 		println();
-		var resultsAndTime = 
+		var resultsAndTime =
 				Timer.timed(
-						() -> 
+						() ->
 						new HOGMMultiQueryProblemSolver(modelString, queryString, new GroundingExpressionBasedSolver())
 						.getResults());
 		
 		println("Time: " + timeStringInSeconds(resultsAndTime, 4));
-		assertEquals(resultsAndTime.first.size(), 1);
-		Expression actual = Util.getFirst(resultsAndTime.first).getResult();
-		println("Actual  : " + actual);
-		println("Expected: " + expectedString);
-		assertEquals(expectedString, actual.toString());
+		List<? extends HOGMProblemResult> results = resultsAndTime.first;
+		assertEquals(results.size(), 1);
+		HOGMProblemResult result = getFirst(results);
+		if (result.hasErrors()) {
+			println("\nErrors:\n");
+			println(Util.join(result.getErrors(), "\n"));
+			fail();
+		}
+		else {
+			Expression actual = result.getResult();
+			println("Actual  : " + actual);
+			println("Expected: " + expectedString);
+			assertEquals(expectedString, actual.toString());
+		}
 	}
 
 }
